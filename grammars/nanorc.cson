@@ -119,12 +119,20 @@ repository:
 			begin: """(?x) ^ \\s*
 				(set) \\s+
 				(backupdir|brackets|matchbrackets|operatingdir
-				|punct|speller|whitespace|include) (?=\\s|$)"""
+				|punct|speller|whitespace) (?=\\s|$)"""
 			end: "$"
 			patterns: [include: "#string"]
 			beginCaptures:
 				1: name: "keyword.operator.$1.nanorc"
 				2: name: "entity.option.name.nanorc"
+		},{
+			# Include directives
+			name: "meta.preprocessor.include.nanorc"
+			begin: "^\\s*(include)(?=\\s|$)\\s*"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.control.directive.include.nanorc"
+			contentName: "storage.modifier.import.file-name.nanorc"
 		},{
 			# RegExp-type options
 			name:  "meta.option.$2.nanorc"
