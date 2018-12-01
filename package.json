@@ -5,5 +5,6 @@
 	"repository": "https://github.com/Alhadis/language-etc",
 	"author": "John Gardner <gardnerjohng@gmail.com>",
 	"license": "ISC",
-	"keywords": ["config", "nanorc", "curlrc", "rc", "settings", "gitignore", "gitattributes", "dotfiles"]
+	"keywords": ["config", "nanorc", "curlrc", "rc", "settings", "gitignore", "gitattributes", "dotfiles"],
+	"package-deps": ["language-regexp"]
 }

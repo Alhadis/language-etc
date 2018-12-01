@@ -1,0 +1,209 @@
+name: ".nanorc"
+scopeName: "source.nanorc"
+fileTypes: [
+	"nanorc"
+	"nanorc.sample"
+]
+limitLineLength: no
+maxTokensPerLine: 2048
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		nanorc
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		nanorc
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#colours"}
+			{include: "#syntax"}
+			{include: "#options"}
+		]
+	
+	# Syntax highlighting colours
+	colours:
+		patterns: [{
+			name:  "meta.colour.nanorc"
+			begin: "^\\s*(i?color)(?=\\s|$)"
+			end:   "$"
+			beginCaptures:
+				1: name: "storage.type.var.colour.name.nanorc"
+			patterns: [{
+				# ,bgColour
+				match: "\\G\\s*(,)(\\S+)"
+				captures:
+					1: name: "punctuation.separator.delimiter.meta.comma.nanorc"
+					2: name: "entity.background.colour.name.nanorc"
+			},{
+				# fgColour,bgColour
+				match: "\\G\\s*((?!,)\\S+)(,)(\\S+)"
+				captures:
+					1: name: "entity.foreground.colour.name.nanorc"
+					2: name: "punctuation.separator.delimiter.meta.comma.nanorc"
+					3: name: "entity.background.colour.name.nanorc"
+			},{
+				# fgColour
+				match: "\\G\\s*([^\\s,]+)(,?)(?=\\s|$)"
+				captures:
+					1: name: "entity.foreground.colour.name.nanorc"
+					2: name: "punctuation.separator.delimiter.meta.comma.nanorc"
+			},{
+				# Start/end patterns (incomplete)
+				name:  "meta.$1-pattern.nanorc"
+				match: '(?<=\\s|\\G)(start|end)(=)(?=\\s|$)'
+				captures:
+					1: name: "variable.parameter.attribute.nanorc"
+					2: name: "punctuation.definition.assignment.equals-sign.nanorc"
+			},{
+				# Start/end patterns
+				name:  "meta.$1-pattern.nanorc"
+				begin: '(?<=\\s|\\G)(start|end)(=)(?=")'
+				end:   '(?<=")'
+				captures:
+					1: name: "variable.parameter.attribute.nanorc"
+					2: name: "punctuation.definition.assignment.equals-sign.nanorc"
+				patterns: [include: "#regexp"]
+			}, include: "#regexp"]
+		}]
+	
+	# Comment line
+	comment:
+		name:  "comment.line.number-sign.nanorc"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.nanorc"
+	
+	# Setting lines
+	options:
+		patterns: [{
+			# Options with numeric arguments
+			name:  "meta.option.$2.nanorc"
+			begin: "^\\s*(set)\\s+(fill|tabsize)(?=\\s|$)"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.$1.nanorc"
+				2: name: "entity.option.name.nanorc"
+			patterns: [{
+				name: "constant.numeric.integer.int.decimal.nanorc"
+				match: "[0-9]+"
+			}]
+		},{
+			# Niladic (boolean-type) options
+			name:  "meta.option.$2.nanorc"
+			begin: """(?x) ^ \\s*
+				(set|unset) \\s+
+				(autoindent|backup|backwards|boldtext|casesensitive|const|cut
+				|historylog|morespace|mouse|multibuffer|noconvert|nofollow|nohelp
+				|nonewlines|nowrap|preserve|quickblank|rebinddelete|rebindkeypad
+				|regexp|smarthome|smooth|suspend|tabstospaces|tempfile|view
+				|wordbounds) (?=\\s|$)"""
+			end: "$"
+			beginCaptures:
+				1: name: "keyword.operator.$1.nanorc"
+				2: name: "entity.option.name.nanorc"
+		},{
+			# String-type options
+			name:  "meta.option.$2.nanorc"
+			begin: """(?x) ^ \\s*
+				(set) \\s+
+				(backupdir|brackets|matchbrackets|operatingdir
+				|punct|speller|whitespace|include) (?=\\s|$)"""
+			end: "$"
+			patterns: [include: "#string"]
+			beginCaptures:
+				1: name: "keyword.operator.$1.nanorc"
+				2: name: "entity.option.name.nanorc"
+		},{
+			# RegExp-type options
+			name:  "meta.option.$2.nanorc"
+			begin: "^\\s*(set)\\s+(quotestr)(?=\\s|$)"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.$1.nanorc"
+				2: name: "entity.option.name.nanorc"
+			patterns: [include: "#regexp"]
+		},{
+			# Unrecognised (user-defined?) fields
+			name:  "meta.option.custom.nanorc"
+			begin: "^\\s*(?:(set|unset)\\s+)?(\\S+)"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.$1.nanorc"
+				2: name: "entity.option.name.nanorc"
+			patterns: [{
+				# Boolean-ish keywords
+				name: "constant.logical.boolean.$1.nanorc"
+				match: "\\b(true|false|on|off|yes|no)\\b"
+			},{
+				# Numbers
+				name: "constant.numeric.decimal.nanorc"
+				match: "[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?=\\s|$)"
+			}, include: "#regexp"]
+		}]
+
+	# Strings
+	string:
+		patterns: [
+			{include: "#quotedString"}
+			{include: "#unquotedString"}
+		]
+
+	# "Double-quoted" string
+	quotedString:
+		name:  "string.quoted.double.nanorc"
+		begin: '"'
+		end:   '"(?=[^"]*$)|(?=$)'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.nanorc"
+		endCaptures:   0: name: "punctuation.definition.string.end.nanorc"
+	
+	# Bareword/unquoted string
+	unquotedString:
+		name:  "string.unquoted.bareword.nanorc"
+		match: "\\S+"
+	
+	# Regular expression
+	regexp:
+		name:  "string.regexp.embedded.nanorc"
+		begin: '(")"?+'
+		end:   '"(?=\\s|$)|(?=$)'
+		beginCaptures: 1: name: "punctuation.definition.string.begin.nanorc"
+		endCaptures:   0: name: "punctuation.definition.string.end.nanorc"
+		patterns: [
+			{match: '(?:"(?!\\s|$))+'}
+			{include: "source.regexp"}
+		]
+	
+	# Syntax highlighting definitions
+	syntax:
+		patterns: [{
+			# Preset/reserved syntax names
+			name: "meta.syntax.nanorc"
+			match: "^\\s*(syntax)\\s+(none|default)(?=\\s|$)"
+			captures:
+				1: name: "storage.type.var.syntax.name.nanorc"
+				2: name: "support.constant.language.$2.nanorc"
+		},{
+			# User-defined syntax
+			name:  "meta.syntax.nanorc"
+			begin: '^\\s*(syntax)(?:\\s+((")[^"]+(")|\\S+)(?:\\s+(.*))?)?\\s*$\\s*'
+			end:   "^(?=\\s*syntax)"
+			beginCaptures:
+				1: name: "storage.type.var.syntax.name.nanorc"
+				2: name: "entity.syntax.name.nanorc"
+				3: name: "punctuation.definition.name.begin.nanorc"
+				4: name: "punctuation.definition.name.end.nanorc"
+				5: patterns: [include: "#regexp"]
+			patterns: [include: "#main"]
+		}]

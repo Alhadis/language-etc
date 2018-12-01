@@ -1,0 +1,12 @@
+
+set punct )>]}
+set punct ""')>]}"
+
+set quotestr "^([ \t]*[#:>\|}])+"
+
+syntax default "^*.none"
+
+syntax none
+
+syntax name "^[-A-Za-z0-9.]+"
+syntax pattern "/^/aa[[:name:]]"
