@@ -52,6 +52,10 @@ repository:
 		name:  "meta.pattern.gitignore"
 		begin: "(?=[^#\\s])"
 		end:   "$|(?=#)"
+		patterns: [include: "#patternInnards"]
+
+	# Stuff matched inside file patterns
+	patternInnards:
 		patterns: [
 			{include: "#escape"}
 			{include: "#range"}

@@ -1,0 +1,26 @@
+*         text=auto
+*.txt     text
+*.vcproj  text eol=crlf
+*.sh      text eol=lf
+*.jpg     -text
+*.ps1     text working-tree-encoding=UTF-16LE eol=CRLF
+*.ai      diff=exif
+*.docx    diff=docx
+*.doc     diff=docx
+*.odt     diff=odt
+
+*.kicad_pcb linguist-detectable=true
+*.sch linguist-detectable=true
+tools/export_bom.py linguist-detectable=false
+*.jpg -text -diff
+
+
+a*      foo !bar -baz
+
+# (in .gitattributes)
+abc     foo bar baz
+
+# (in t/.gitattributes)
+ab*     merge=filfre
+abc     -foo -bar
+*.c     frotz

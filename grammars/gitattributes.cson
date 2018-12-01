@@ -1,0 +1,80 @@
+name: ".gitattributes"
+scopeName: "source.gitattributes"
+fileTypes: [
+	"gitattributes"
+	"git/info/attributes"
+]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		git-?ignore
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		git-?ignore
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#pattern"}
+			{include: "source.gitignore#escape"}
+		]
+	
+	# Comment line
+	comment:
+		name:  "comment.line.number-sign.gitattributes"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.gitattributes"
+	
+	# File pattern
+	pattern:
+		name:  "meta.pattern.gitattributes"
+		begin: "(?=[^#\\s])"
+		end:   "$|(?=#)"
+		patterns: [{
+			include: "source.gitignore#patternInnards"
+		},{
+			# Whitespace: begin matching attributes
+			name:  "meta.attribute-list.gitattributes"
+			begin: "\\s"
+			end:   "(?=$)"
+			patterns: [include: "#attribute"]
+		}]
+
+	# Individual attribute
+	attribute:
+		patterns: [{
+			# Invalid attribute name (source: git/attr.c:212)
+			name: "meta.attribute.gitattributes"
+			match: "([-!](?!\\s))?([^-A-Za-z0-9_.\\s]\\S*)|([-!])(?=\\s|$)"
+			captures:
+				1: patterns: [include: "#attributePrefix"]
+				2: name: "invalid.illegal.syntax.bad-name.gitattributes"
+				3: name: "invalid.illegal.syntax.bad-name.gitattributes"
+		},{
+			# Valid attribute
+			name: "meta.attribute.gitattributes"
+			match: "(-|!)?([^\\s=]+)(?:(=)([^\\s]*))?"
+			captures:
+				1: patterns: [include: "#attributePrefix"]
+				2: name: "variable.parameter.attribute.gitattributes"
+				3: name: "punctuation.definition.assignment.equals-sign.gitattributes"
+				4: name: "constant.language.other.gitattributes"
+		}]
+	
+	# Remove or reset attribute
+	attributePrefix:
+		patterns: [
+			{match: "-", name: "keyword.operator.logical.not.negation.gitattributes"}
+			{match: "!", name: "keyword.operator.unset.delete.gitattributes"}
+		]
