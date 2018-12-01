@@ -3,7 +3,7 @@ Highlighting for dot-files, `/etc/*` configs, and program-specific manifests
 
 Syntax highlighting for various configs and file-formats too specific to warrant
 their own repositories. Basically, a junk-drawer for any language grammar I felt
-an itch to write, or those I written for [Linguist](/github/linguist).
+an itch to write, or those I've written for [Linguist](/github/linguist).
 
 Feel free to install this in Atom, but don't complain about the mess it'll make
 of your [`grammar-selector`](https://github.com/atom/grammar-selector)'s menu…
