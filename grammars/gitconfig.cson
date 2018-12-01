@@ -110,10 +110,41 @@ repository:
 				0: name: "punctuation.definition.comment.gitconfig"
 		}]
 
+	# Bare/unquoted escape sequences
+	escapes:
+		patterns: [{
+			# Include \\ and \"
+			include: "#stringEscapes"
+		},{
+			# \n — Newline
+			name:  "constant.character.escape.newline.gitconfig"
+			match: "(\\\\)n"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		},{
+			# \t — Horizontal tab
+			name:  "constant.character.escape.tab.gitconfig"
+			match: "(\\\\)t"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		},{
+			# \b — Backspace
+			name:  "constant.character.escape.backspace.gitconfig"
+			match: "(\\\\)b"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		},{
+			# Other escape sequences are invalid
+			name:  "invalid.illegal.syntax.escape.gitconfig"
+			match: "\\\\."
+		}]
+
 	# Line continuation
 	escapedNewline:
 		name:  "constant.character.escape.newline.gitconfig"
-		match: "\\\\$\\s*"
+		match: "(\\\\)$\\s*"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.gitconfig"
 
 	# [section] block
 	section:
