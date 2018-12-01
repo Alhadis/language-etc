@@ -1,0 +1,9 @@
+{
+	"name": "language-etc",
+	"version": "0.0.0",
+	"description": "Syntax highlighting for various configs and file-formats too specific to warrant their own grammars.",
+	"repository": "https://github.com/Alhadis/language-etc",
+	"author": "John Gardner <gardnerjohng@gmail.com>",
+	"license": "ISC",
+	"keywords": ["config", "nanorc", "curlrc", "rc", "settings", "gitignore", "gitattributes", "dotfiles"]
+}

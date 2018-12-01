@@ -1,0 +1,82 @@
+name: ".gitignore"
+scopeName: "source.gitignore"
+fileTypes: [
+	"gitignore"
+	"git/ignore"
+	"git/info/exclude"
+	"gitignore-global"
+	"gitignore_global"
+	"gitignore.global"
+]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		git-?ignore
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		git-?ignore
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#pattern"}
+			{include: "#escape"}
+		]
+
+	# Comment line
+	comment:
+		name:  "comment.line.number-sign.gitignore"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.gitignore"
+	
+	# Escaped character
+	escape:
+		name: "constant.character.escape.backslash.gitignore"
+		match: "(\\\\)."
+		captures:
+			1: name: "punctuation.definition.escape.backslash.gitignore"
+		
+	# File pattern
+	pattern:
+		name:  "meta.pattern.gitignore"
+		begin: "(?=[^#\\s])"
+		end:   "$|(?=#)"
+		patterns: [
+			{include: "#escape"}
+			{include: "#range"}
+			{match: "\\G!",   name: "keyword.operator.logical.not.negation.gitignore"}
+			{match: "\\*\\*", name: "keyword.operator.glob.wildcard.globstar.gitignore"}
+			{match: "[*?]",   name: "keyword.operator.glob.wildcard.gitignore"}
+			{match: "/",      name: "punctuation.directory.separator.meta.gitignore"}
+			
+			# Literal characters
+			name: "entity.other.file.name.gitignore"
+			match: "[^\\[\\]\\\\*?#/\\s]+"
+		]
+
+	# Character range: [a-z]
+	range:
+		name:  "meta.character-range.gitignore"
+		begin: "\\["
+		end:   "\\]|(?=$)"
+		beginCaptures: 0: name: "punctuation.definition.square.bracket.begin.gitignore"
+		endCaptures:   0: name: "punctuation.definition.square.bracket.end.gitignore"
+		contentName: "constant.character.class.gitignore"
+		patterns: [
+			{include: "#escape"}
+			
+			# Range separators
+			name: "punctuation.delimiter.range.character-set.gitignore"
+			match: "-"
+		]
