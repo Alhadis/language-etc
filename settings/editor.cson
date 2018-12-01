@@ -1,0 +1,3 @@
+".source.gitignore, .source.gitattributes":
+	editor:
+		commentStart: "# "
