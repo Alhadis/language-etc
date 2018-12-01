@@ -56,7 +56,7 @@ repository:
 		patterns: [{
 			# Invalid attribute name (source: git/attr.c:212)
 			name: "meta.attribute.gitattributes"
-			match: "([-!](?!\\s))?([^-A-Za-z0-9_.\\s]\\S*)|([-!])(?=\\s|$)"
+			match: "([-!](?=\\S))?+([^-A-Za-z0-9_.\\s]\\S*)|([-!])(?=\\s|$)"
 			captures:
 				1: patterns: [include: "#attributePrefix"]
 				2: name: "invalid.illegal.syntax.bad-name.gitattributes"
