@@ -10,18 +10,22 @@ fileTypes: [
 	
 	# Mutually-compatible formats
 	"alexignore"
+	"atomignore"
 	"babelignore"
 	"coffeelintignore"
+	"dockerignore"
 	"eslintignore"
 	"nodemonignore"
 	"npmignore"
 	"prettierignore"
 	"stylelintignore"
+	"vscodeignore"
 	
 	# Almost-compatible formats (syntax doesn't conflict with Git)
 	".bazaar/ignore"
 	"bzrignore"
 	"cvsignore"
+	"slugignore"
 ]
 patterns: [include: "#main"]
 firstLineMatch: """(?ix)
