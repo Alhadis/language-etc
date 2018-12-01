@@ -7,6 +7,21 @@ fileTypes: [
 	"gitignore-global"
 	"gitignore_global"
 	"gitignore.global"
+	
+	# Mutually-compatible formats
+	"alexignore"
+	"babelignore"
+	"coffeelintignore"
+	"eslintignore"
+	"nodemonignore"
+	"npmignore"
+	"prettierignore"
+	"stylelintignore"
+	
+	# Almost-compatible formats (syntax doesn't conflict with Git)
+	".bazaar/ignore"
+	"bzrignore"
+	"cvsignore"
 ]
 patterns: [include: "#main"]
 firstLineMatch: """(?ix)
@@ -28,9 +43,24 @@ repository:
 	main:
 		patterns: [
 			{include: "#comment"}
+			{include: "#cvsSyntax"}
 			{include: "#pattern"}
 			{include: "#escape"}
 		]
+
+	# GNU Bazaar-specific syntax (not used by Git)
+	# - # http://doc.bazaar.canonical.com/beta/en/user-reference/ignore-help.html
+	bazaarPrefixes:
+		patterns: [{
+			# — “To ignore patterns that begin with [#], use the “RE:” prefix”
+			name:  "storage.modifier.bazaar.re-prefix.gitignore"
+			match: "^RE(:)(?=\\S)"
+		},{
+			# — “Patterns prefixed with ‘!!’ act as regular ignore patterns,
+			#    but have precedence over the ‘!’ exception patterns.”
+			name: "keyword.operator.logical.not.negation.elevated.bazaar.gitignore"
+			match: "^!!(?=\\S)"
+		}]
 
 	# Comment line
 	comment:
@@ -39,6 +69,14 @@ repository:
 		end:   "$"
 		beginCaptures:
 			0: name: "punctuation.definition.comment.gitignore"
+	
+	# CVS-specific syntax header
+	cvsSyntax:
+		match: "\\A(syntax)(:)\\s+(glob)$"
+		captures:
+			1: name: "variable.parameter.assignment.glob-syntax.cvs.gitignore"
+			2: name: "keyword.operator.assignment.separator.key-value.cvs.gitignore"
+			3: name: "support.constant.language.syntax-type.cvs.gitignore"
 	
 	# Escaped character
 	escape:
@@ -52,7 +90,10 @@ repository:
 		name:  "meta.pattern.gitignore"
 		begin: "(?=[^#\\s])"
 		end:   "$|(?=#)"
-		patterns: [include: "#patternInnards"]
+		patterns: [
+			{include: "#bazaarPrefixes"}
+			{include: "#patternInnards"}
+		]
 
 	# Stuff matched inside file patterns
 	patternInnards:

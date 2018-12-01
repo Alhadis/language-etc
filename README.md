@@ -14,6 +14,7 @@ Supported formats
 * [x] [`.gitignore`](https://git-scm.com/docs/gitignore)
 * [x] [`.gitattributes`](https://git-scm.com/docs/gitattributes)
 * [ ] [`.gitmodules`](https://git-scm.com/docs/gitmodules)
+* [x] [`.hgignore`](https://www.mercurial-scm.org/wiki/.hgignore)
 * [x] [`.nanorc`](https://www.nano-editor.org/dist/v2.1/nanorc.5.html)
 * [ ] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
 * [ ] [`.npmrc`](https://docs.npmjs.com/files/npmrc)

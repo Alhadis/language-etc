@@ -1,0 +1,11 @@
+!code
+code
+code/something
+code/targets
+code/targets/platform
+target
+target/executable
+^target$
+/target$
+/target/
+/target/.*\.o$
