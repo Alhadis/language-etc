@@ -1,0 +1,158 @@
+name: ".gitconfig"
+scopeName: "source.gitconfig"
+fileTypes: [
+	".git/config"
+	".config/git/config"
+	"gitconfig"
+	"gitmodules"
+]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		git-?(?:config|modules)
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		git-?(?:config|modules)
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comments"}
+			{include: "#section"}
+		]
+	
+	# Commented lines beginning with `#` or `;`
+	comments:
+		patterns: [{
+			# Hash/pound
+			name:  "comment.line.number-sign.gitconfig"
+			begin: "#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.gitconfig"
+		},{
+			# Semicolon
+			name:  "comment.line.semicolon.gitconfig"
+			begin: ";"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.gitconfig"
+		}]
+
+	# Escape sequences matched in strings
+	escapes:
+		patterns: [{
+			# Escaped backslash or double-quote
+			name:  "constant.character.escape.backslash.gitconfig"
+			match: '(\\\\)[\\\\"]'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		},{
+			# Superfluous backslash: \t -> t
+			name:  "punctuation.definition.escape.backslash.ignored.gitconfig"
+			match: '\\\\(?=[^\\\\"])'
+		}]
+
+	# Line continuation
+	escapedNewline:
+		name:  "constant.character.escape.newline.gitconfig"
+		match: "\\\\$\\s*"
+
+	# [section] block
+	section:
+		name:  "meta.section.gitconfig"
+		begin: """(?x)
+			^ (\\\[) #1
+			\\s*
+			(?:
+				([-.A-Za-z0-9]+?) #2
+				(?:
+					(\\.)           #3
+					([-A-Za-z0-9]+) #4
+				)?
+			)
+			(?:
+				\\s*
+				(") #5
+				(   #6
+					(?: \\\\[\\\\"]
+					|   \\\\[^\\\\"]
+					|       [^\\\\"]+
+					)*
+				)
+				(") #7
+			)?+
+			\\s* (\\]) #8
+		"""
+		end: "^(?=\\[)"
+		beginCaptures:
+			0: name: "meta.section.header.gitconfig"
+			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
+			2: name: "entity.section.name.gitconfig"
+			3: name: "punctuation.delimiter.separator.meta.dot.period.gitconfig"
+			4: name: "entity.subsection.name.deprecated-syntax.gitconfig"
+			5: name: "punctuation.definition.subsection.begin.gitconfig"
+			6: name: "entity.subsection.name.gitconfig", patterns: [include: "#subsection"]
+			7: name: "punctuation.definition.subsection.end.gitconfig"
+			8: name: "punctuation.definition.bracket.square.end.gitconfig"
+		patterns: [
+			{include: "#comments"}
+			{include: "#variables"}
+		]
+
+	variables:
+		patterns: [{
+			# Signing key
+			name:  "meta.variable-field.gitconfig"
+			begin: "\\b(signingkey)(?=\\s|$)"
+			end:   "$|(?=#|;)"
+			captures:
+				1: name: "variable.parameter.assignment.gitconfig"
+				2: name: "keyword.operator.assignment.key-value.gitconfig"
+			patterns: [{
+				# Hexadecimal sigining-key
+				name: "constant.other.signing-key.hex.gitconfig"
+				match: "\\w+"
+			}, include: "#variableInnards"]
+		},{
+			# Everything else
+			name:  "meta.variable-field.gitconfig"
+			begin: "[A-Za-z][-A-Za-z]*"
+			beginCaptures:
+				0: name: "variable.parameter.assignment.gitconfig"
+			end: "$|(?=#|;)"
+			patterns: [include: "#variableInnards"]
+		}]
+
+	# Stuff matched after a variable name
+	variableInnards:
+		patterns: [{
+			match: "\\G\\s*(=)"
+			captures:
+				1: name: "keyword.operator.assignment.key-value.gitconfig"
+		},{
+			# Boolean-ish keyword
+			name:  "constant.logical.boolean.$1.gitconfig"
+			match: "\\b(true|false|on|off|1|0|yes|no)\\b"
+		},{
+			# Integers
+			name:  "constant.numeric.decimal.integer.int.gitconfig"
+			match: "[-+]?[0-9]+(?=$|[\\s#;])"
+		},{
+			# Float
+			name:  "constant.numeric.decimal.float.gitconfig"
+			match: "[-+]?(?:[0-9]+\\.[0-9]*|\\.[0-9]+)(?=$|\\s#;)"
+		},{
+			# Anything else
+			name: "string.unquoted.argument.gitconfig"
+			match: "(?:[^\\\\\\s]|\\\\(?!$))+"
+		
+		}, include: "#escapedNewline"]
