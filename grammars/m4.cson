@@ -1,0 +1,109 @@
+name: "M4"
+scopeName: "source.m4"
+fileTypes: ["m4", "configure.ac", "configure.in"]
+patterns: [
+	{include: "#comment"}
+	{include: "#dnl"}
+	{include: "#define"}
+	{include: "#builtins"}
+]
+
+repository:
+	arithmetic:
+		patterns: [
+			{match: "[-+/*]", name: "keyword.operator.arithmetic.m4"}
+			{match: "=",      name: "keyword.operator.assignment.m4"}
+		]
+	
+	builtins:
+		name: "meta.builtin.$1.m4"
+		begin: """(?x) (?<!`|\\w)
+			(changequote|divert|divnum|dumpdef|errprint|eval|ifdef|ifelse
+			|include|incr|index|len|maketemp|sinclude|substr|syscmd|translit
+			|undefine|undivert)
+			(\\()
+		"""
+		end: "\\)"
+		patterns: [include: "#macro-innards"]
+		beginCaptures:
+			1: name: "entity.name.function.m4"
+			2: name: "punctuation.definition.parameters.begin.bracket.round.m4"
+		endCaptures:
+			0: name: "punctuation.definition.parameters.end.bracket.round.m4"
+	
+	comment:
+		patterns: [{
+			name: "comment.line.number-sign.m4"
+			begin: "#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.m4"
+		}]
+	
+	# Macro definition
+	define:
+		name: "meta.macro-definition.m4"
+		begin: "(?<!`|\\w)(define)(\\()\\s*"
+		end:   "\\)"
+		beginCaptures:
+			1: name: "storage.type.function.m4"
+			2: name: "punctuation.definition.parameters.begin.bracket.round.m4"
+		endCaptures:
+			0: name: "punctuation.definition.parameters.end.bracket.round.m4"
+		patterns: [{
+			name: "entity.name.function.quoted.m4"
+			match: "\\G(`)(?![0-9])\\w+(')"
+			captures:
+				1: name: "punctuation.definition.string.begin.m4"
+				2: name: "punctuation.definition.string.end.m4"
+		},{
+			name: "entity.name.function.m4"
+			match: "\\G(?![0-9])\\w+"
+		},{
+			include: "#macro-innards"
+		}]
+	
+	# Discard until next line
+	dnl:
+		name: "comment.line.dnl.m4"
+		begin: "dnl"
+		end:   "$\\n?"
+		beginCaptures:
+			0: name: "keyword.operator.builtin.dnl.m4"
+
+
+	"macro-innards":
+		patterns: [{
+			begin: "\\("
+			end:   "\\)"
+			beginCaptures: 0: name: "punctuation.definition.parameters.begin.bracket.round.m4"
+			endCaptures:   0: name: "punctuation.definition.parameters.end.bracket.round.m4"
+			patterns: [include: "$self"]
+		},{
+			name: "punctuation.delimiter.separator.comma.m4"
+			match: ","
+		},{
+			name: "constant.numeric.decimal.m4"
+			match: "(?<!\\w)[-+]?\\d+"
+		},{
+			name: "variable.other.positional.m4"
+			match: "(\\$)[0-9]+"
+			captures:
+				1: name: "punctuation.definition.variable.m4"
+		},{
+			include: "#arithmetic"
+		},{
+			include: "#string"
+		},{
+			include: "$self"
+		}]
+
+
+	string:
+		name: "string.quoted.double.other.m4"
+		begin: "`"
+		end:   "'"
+		beginCaptures: 0: name: "punctuation.definition.string.begin.m4"
+		endCaptures:   0: name: "punctuation.definition.string.end.m4"
+		patterns: [include: "#string"]
+		
