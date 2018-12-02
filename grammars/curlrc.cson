@@ -1,0 +1,115 @@
+name: ".curlrc"
+scopeName: "source.curlrc"
+fileTypes: [
+	"curlrc"
+	"_curlrc"
+]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		curlrc
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		curlrc
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#shortOptions"}
+		]
+	
+	# Unquoted string-like argument
+	bareword:
+		name: "string.unquoted.bareword.curlrc"
+		match: '[^"\\s][\\S]*'
+	
+	# Comment line
+	comment:
+		name:  "comment.line.number-sign.curlrc"
+		begin: "^#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.curlrc"
+
+	# NAME=VALUE;
+	cookieField:
+		name:  "meta.cookie.curlrc"
+		match: "([^\\s=;]+)(=)([^\\s=;]*)(;)?"
+		captures:
+			1: name: "variable.assignment.cookie.name.curlrc"
+			2: patterns: [include: "#separators"]
+			3: name: "constant.other.cookie.value.curlrc"
+
+	# -s -h -o -r -t
+	shortOptions:
+		patterns: [{
+			# Boolean-type options (no arguments)
+			match: "^(-)?([:#012346aBfgGhiIjJklLMnNOpqQRsSvV])(?=\\s|$)"
+			captures:
+				1: name: "punctuation.definition.dash.short.option.curlrc"
+				2: name: "entity.short.option.name.curlrc"
+		},{
+			# String-type argument
+			name:  "meta.option.$2.curlrc"
+			begin: "^(-)?([cDdKoT])(\\s*=|\\s*:|\\s+)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.dash.short.option.curlrc"
+				2: name: "entity.short.option.name.curlrc"
+				3: patterns: [include: "#separators"]
+			patterns: [
+				{include: "#string"}
+				{include: "#bareword"}
+			]
+		},{
+			# Cookie-data
+			name:  "meta.option.$2.curlrc"
+			begin: "^(-)?(b)(\\s*=|\\s*:|\\s+)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.dash.short.option.curlrc"
+				2: name: "entity.short.option.name.curlrc"
+				3: patterns: [include: "#separators"]
+			patterns: [{
+				name:  "string.quoted.double.cookie-data.curlrc"
+				begin: '"(?=[^"=]*=)'
+				end:   '"|(?=$)'
+				beginCaptures: 0: name: "punctuation.definition.string.begin.curlrc"
+				endCaptures:   0: name: "punctuation.definition.string.end.curlrc"
+				patterns: [
+					{include: "#cookieField"}
+					{include: "#bareword"}
+				]
+			},{ include: "#cookieField"
+			},{ include: "#bareword" }]
+		}]
+	
+	# Symbols separating options from their parameters
+	separators:
+		patterns: [
+			{match: "=", name: "keyword.operator.assignment.key-value.equals-sign.curlrc"}
+			{match: ":", name: "keyword.operator.assignment.key-value.colon.curlrc"}
+		]
+
+	# "Double-quoted" string
+	string:
+		name:  "string.quoted.double.curlrc"
+		begin: '"'
+		end:   '"|(?=$)'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.curlrc"
+		endCaptures:   0: name: "punctuation.definition.string.end.curlrc"
+		patterns: [{
+			name:  "constant.character.escape.backslash.curlrc"
+			match: '(\\\\)[\\\\"tnrv]'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		}]
