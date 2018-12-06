@@ -3,7 +3,7 @@ Highlighting for dot-files, `/etc/*` configs, and program-specific manifests
 
 Syntax highlighting for various configs and file-formats too specific to warrant
 their own repositories. Basically, a junk-drawer for any language grammar I felt
-an itch to write, or those I've written for [Linguist](/github/linguist).
+an itch to write, or those I've written for [GitHub Linguist][1].
 
 Feel free to install this in Atom, but don't complain about the mess it'll make
 of your [`grammar-selector`](https://github.com/atom/grammar-selector)'s menu…
@@ -26,3 +26,24 @@ Supported formats
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [ ] [SSH configs](https://www.ssh.com/ssh/config/)
 * [ ] [Tags index](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
+
+
+Installing in Atom
+------------------
+You'll need [Git][2], because I don't plan on ever publishing this to `atom.io`:
+
+~~~shell
+# On Unix-like platforms
+cd ~/.atom/packages && git clone https://github.com/Alhadis/language-etc.git
+~~~
+
+~~~batchfile
+:: For Windows users
+cd %HOMEPATH%\.atom\packages
+git clone "https://github.com/Alhadis/language-etc.git"
+~~~
+
+
+[Referenced Links]:_____________________________________________________________
+[1]: https://github.com/github/linguist
+[2]: https://git-scm.com/downloads
