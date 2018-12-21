@@ -2,10 +2,10 @@
 scopeName: "etc"
 patterns: [
 	{include: "#comment"}
-	{include: "#escape"}
+	{include: "#esc"}
 	{include: "#float"}
 	{include: "#int"}
-	{include: "#strings"}
+	{include: "#str"}
 	{include: "#colon"}
 	{include: "#eql"}
 	{include: "#bareword"}
@@ -31,8 +31,8 @@ repository:
 		name: "keyword.operator.assignment.key-value.colon"
 		match: ":"
 
-	# Backslash-prefixed anything
-	escape:
+	# Escape (Backslash-prefixed anything)
+	esc:
 		name: "constant.character.escape.backslash"
 		match: "(\\\\)."
 		captures:
@@ -81,21 +81,26 @@ repository:
 	
 	
 	# Strings
-	string:
-		patterns: [{
-			# Double-quoted string
-			name:  "string.quoted.double"
-			begin: '"'
-			end:   '"|(?=$)'
-			beginCaptures: 0: name: "punctuation.definition.string.begin"
-			endCaptures:   0: name: "punctuation.definition.string.end"
-			patterns: [include: "#escape"]
-		},{
-			# Single-quoted string
-			name:  "string.quoted.single"
-			begin: "'"
-			end:   "'|(?=$)"
-			beginCaptures: 0: name: "punctuation.definition.string.begin"
-			endCaptures:   0: name: "punctuation.definition.string.end"
-			patterns: [include: "#escape"]
-		}]
+	str:
+		patterns: [
+			{include: "#strDouble"}
+			{include: "#strSingle"}
+		]
+	
+	# Double-quoted string
+	strDouble:
+		name:  "string.quoted.double"
+		begin: '"'
+		end:   '"|(?=$)'
+		beginCaptures: 0: name: "punctuation.definition.string.begin"
+		endCaptures:   0: name: "punctuation.definition.string.end"
+		patterns: [include: "#esc"]
+	
+	# Single-quoted string
+	strSingle:
+		name:  "string.quoted.single"
+		begin: "'"
+		end:   "'|(?=$)"
+		beginCaptures: 0: name: "punctuation.definition.string.begin"
+		endCaptures:   0: name: "punctuation.definition.string.end"
+		patterns: [include: "#esc"]

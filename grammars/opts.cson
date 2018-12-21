@@ -15,7 +15,7 @@ repository:
 	# Escape sequences of some form or another
 	escape:
 		patterns: [
-			{include: "etc#escape"}
+			{include: "etc#esc"}
 			
 			# URI-encoded character
 			name: "constant.character.percent.url-encoded.opts"

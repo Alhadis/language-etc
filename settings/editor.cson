@@ -1,3 +1,8 @@
-".source.gitignore, .source.gitattributes, .source.nanorc":
+".source.gitignore, .source.gitattributes, .source.nanorc, .source.opts":
 	editor:
 		commentStart: "# "
+
+".source.man-conf":
+	editor:
+		commentStart: "# "
+		tabLength: 8

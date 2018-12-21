@@ -1,0 +1,91 @@
+name: "man.conf"
+scopeName: "source.man-conf"
+fileTypes: ["man.conf"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#bin"}
+			{include: "#fhs"}
+			{include: "#programs"}
+			{include: "#sections"}
+			{include: "#decompressor"}
+		]
+	
+	# Unquoted bareword
+	arg:
+		name: "constant.language.other.man-conf"
+		match: "[^\\s:]+"
+
+
+	# MAN* field
+	bin:
+		name:  "meta.field.${1:/downcase}.man-conf"
+		begin: "^\\s*(MANBIN|MANPATH_MAP|MANPATH|manpath|output|_whatdb)(?=\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [
+			{include: "etc#str"}
+			{include: "etc#colon"}
+			{include: "#arg"}
+		]
+
+
+	# "Logical" keyword affecting man.conf interpretation
+	fhs:
+		match: "^\\s*(FSSTND|FHS|NOAUTOPATH|NOCACHE)(?=\\s|$)"
+		captures:
+			1: name: "keyword.control.${1:/downcase}.man-conf"
+
+
+	# Program name/arguments
+	programs:
+		name: "meta.field.${1:/downcase}-path.man-conf"
+		begin: """(?x) ^ \\s*
+			(BROWSER|CAT|COL|COMPRESS_EXT|COMPRESS|CMP|EQN|GRAP|HTMLPAGER
+			|JNEQN|JNROFF|NEQN|NROFF|PAGER|PIC|REFER|TBL|TROFF|VGRIND)
+			(?=\\s|$)"""
+		end: "$"
+		beginCaptures:
+			1: name: "keyword.control.${1:/downcase}.man-conf"
+		patterns: [include: "#programArgs"]
+	
+	programArgs:
+		patterns: [
+			{include: "etc#str"}
+			{include: "source.opts"}
+			{include: "#arg"}
+		]
+
+
+	# List of section numbers: 1:8:7:3:3p…
+	sections:
+		name:  "meta.field.mansect.man-conf"
+		begin: "^\\s*(MANSECT)(?=\\s|$)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.control.${1:/downcase}.man-conf"
+		patterns: [
+			{include: "etc#colon"}
+			{match: "[^:\\s]+", name: "constant.numeric.section.man-conf"}
+		]
+
+
+	defaultOpts:
+		name:  "meta.field.default-options.man-conf"
+		begin: "^\\s*(MANDEFOPTIONS)(?=\\s|$)"
+		end:   "$"
+		patterns: [include: "source.opts"]
+
+
+	decompressor:
+		name:  "meta.field.decompressor.man-conf"
+		begin: "^\\s*((\\.)[a-zA-Z0-9]+)"
+		end:   "$"
+		beginCaptures:
+			1: name: "variable.parameter.decompressor.suffix.man-conf"
+			2: name: "punctuation.definition.field.dot.period.full-stop.man-conf"
+		patterns: [include: "#programArgs"]
