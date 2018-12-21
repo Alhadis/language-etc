@@ -1,0 +1,101 @@
+# Reusable, generic patterns for matching recurring language elements
+scopeName: "etc"
+patterns: [
+	{include: "#comment"}
+	{include: "#escape"}
+	{include: "#float"}
+	{include: "#int"}
+	{include: "#strings"}
+	{include: "#colon"}
+	{include: "#eql"}
+	{include: "#bareword"}
+]
+
+repository:
+
+	# Comments
+	comment:
+		name:  "comment.line.number-sign"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment"
+
+	# Unquoted string-like argument
+	bareword:
+		name: "string.unquoted.bareword"
+		match: '[^"\\s][\\S]*'
+
+	# ...↓
+	colon:
+		name: "keyword.operator.assignment.key-value.colon"
+		match: ":"
+
+	# Backslash-prefixed anything
+	escape:
+		name: "constant.character.escape.backslash"
+		match: "(\\\\)."
+		captures:
+			1: name: "punctuation.definition.escape.backslash"
+
+	# Equals sign delimiting key-value pairs
+	eql:
+		name: "keyword.operator.assignment.key-value.equals-sign"
+		match: "="
+
+
+	# Floating point
+	float:
+		patterns: [
+			{include: "#floatExp"}
+			{include: "#floatNoExp"}
+		]
+	
+	# Float, exponential notation
+	floatExp:
+		name:  "constant.numeric.float.real.decimal.dec.exponential.scientific"
+		match: "[-+]?(?:[0-9]*\\.[0-9]+|[0-9]+\\.)(?:[eE][-+]?[0-9]+)++"
+	
+	# Float, basic
+	floatNoExp:
+		name: "constant.numeric.float.real.decimal.dec"
+		match: "[-+]?(?:[0-9]*\\.[0-9]+|[0-9]+\\.)++"
+
+
+	# Integer
+	int:
+		patterns: [
+			{include: "#intExp"}
+			{include: "#intNoExp"}
+		]
+	
+	# Integer, exponential notation
+	intExp:
+		name:  "constant.numeric.integer.int.decimal.dec.exponential.scientific"
+		match: "[-+]?[0-9]+[eE][-+]?[0-9]+"
+	
+	# Integer, basic
+	intNoExp:
+		name:  "constant.numeric.integer.int.decimal.dec"
+		match: "[-+]?[0-9]+"
+	
+	
+	# Strings
+	string:
+		patterns: [{
+			# Double-quoted string
+			name:  "string.quoted.double"
+			begin: '"'
+			end:   '"|(?=$)'
+			beginCaptures: 0: name: "punctuation.definition.string.begin"
+			endCaptures:   0: name: "punctuation.definition.string.end"
+			patterns: [include: "#escape"]
+		},{
+			# Single-quoted string
+			name:  "string.quoted.single"
+			begin: "'"
+			end:   "'|(?=$)"
+			beginCaptures: 0: name: "punctuation.definition.string.begin"
+			endCaptures:   0: name: "punctuation.definition.string.end"
+			patterns: [include: "#escape"]
+		}]

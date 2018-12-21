@@ -27,11 +27,6 @@ repository:
 			{include: "#shortOptions"}
 		]
 	
-	# Unquoted string-like argument
-	bareword:
-		name: "string.unquoted.bareword.curlrc"
-		match: '[^"\\s][\\S]*'
-	
 	# Comment line
 	comment:
 		name:  "comment.line.number-sign.curlrc"
@@ -46,7 +41,7 @@ repository:
 		match: "([^\\s=;]+)(=)([^\\s=;]*)(;)?"
 		captures:
 			1: name: "variable.assignment.cookie.name.curlrc"
-			2: patterns: [include: "#separators"]
+			2: patterns: [include: "etc#eql"]
 			3: name: "constant.other.cookie.value.curlrc"
 
 	# -s -h -o -r -t
@@ -68,7 +63,7 @@ repository:
 				3: patterns: [include: "#separators"]
 			patterns: [
 				{include: "#string"}
-				{include: "#bareword"}
+				{include: "etc#bareword"}
 			]
 		},{
 			# Cookie-data
@@ -87,17 +82,17 @@ repository:
 				endCaptures:   0: name: "punctuation.definition.string.end.curlrc"
 				patterns: [
 					{include: "#cookieField"}
-					{include: "#bareword"}
+					{include: "etc#bareword"}
 				]
 			},{ include: "#cookieField"
-			},{ include: "#bareword" }]
+			},{ include: "etc#bareword" }]
 		}]
 	
 	# Symbols separating options from their parameters
 	separators:
 		patterns: [
-			{match: "=", name: "keyword.operator.assignment.key-value.equals-sign.curlrc"}
-			{match: ":", name: "keyword.operator.assignment.key-value.colon.curlrc"}
+			{include: "etc#eql"}
+			{include: "etc#colon"}
 		]
 
 	# "Double-quoted" string

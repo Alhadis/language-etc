@@ -21,7 +21,7 @@ Supported formats
 * [ ] [`.inputrc`](https://goo.gl/cCvKes)
 * [ ] [`.wgetrc`](https://goo.gl/KRoNsn)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
-* [ ] [`mocha.opts`](https://mochajs.org/#mochaopts)
+* [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [ ] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [ ] [SSH configs](https://www.ssh.com/ssh/config/)
