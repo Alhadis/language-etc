@@ -55,7 +55,7 @@ repository:
 					2: patterns: [include: "etc"]
 			},{
 				# Any other argument
-				match: "\\G\\s+(\\S+)"
+				match: "\\G\\s+(?!#|-)(\\S+)"
 				captures:
 					1: patterns: [include: "etc"]
 			}]
