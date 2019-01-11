@@ -6,7 +6,7 @@ patterns: [include: "#main"]
 repository:
 	main:
 		patterns: [
-			{include: "#comment"}
+			{include: "etc#comment"}
 			{include: "#option"}
 			{include: "#escape"}
 		]
