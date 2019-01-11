@@ -30,7 +30,7 @@ repository:
 		patterns: [{
 			name:  "meta.option.opts"
 			begin: "(--|-)([^-\\s=][^\\s=]*)"
-			end:   "(?!\\G)(?=\\s)|(?=$)"
+			end:   "(?!\\G)(?=\\$|\\S)"
 			beginCaptures:
 				1: name: "punctuation.definition.dash.option.name.opts"
 				2: name: "entity.option.name.opts"
@@ -53,5 +53,10 @@ repository:
 				captures:
 					1: name: "etc#eql"
 					2: patterns: [include: "etc"]
-			}, include: "etc"]
+			},{
+				# Any other argument
+				match: "\\G\\s+(\\S+)"
+				captures:
+					1: patterns: [include: "etc"]
+			}]
 		}]
