@@ -1,0 +1,13 @@
+scopeName: "injections.etc"
+injectionSelector: "source.ruby"
+patterns: [{
+	# Add diff highlighting to embedded patches in Homebrew formulae
+	name:  "meta.embedded.source.diff"
+	begin: "(?<=__END__)(?=\\s|$)"
+	end:   "(?=^(?!diff ))"
+	patterns: [{
+		begin: "^(?=diff )"
+		end:   "(?=A)B"
+		patterns: [include: "source.diff"]
+	}]
+}]
