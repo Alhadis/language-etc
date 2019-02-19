@@ -1,4 +1,4 @@
-".source.gitignore, .source.gitattributes, .source.nanorc, .source.opts":
+".source.gitignore, .source.gitattributes, .source.nanorc, .source.opts, .source.ssh-config":
 	editor:
 		commentStart: "# "
 
