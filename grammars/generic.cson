@@ -8,6 +8,7 @@ patterns: [
 	{include: "#str"}
 	{include: "#colon"}
 	{include: "#eql"}
+	{include: "#dot"}
 	{include: "#bareword"}
 ]
 
@@ -30,6 +31,11 @@ repository:
 	colon:
 		name: "keyword.operator.assignment.key-value.colon"
 		match: ":"
+
+	# Dots
+	dot:
+		name: "punctuation.delimiter.separator.property.period.dot"
+		match: "\\."
 
 	# Escape (Backslash-prefixed anything)
 	esc:

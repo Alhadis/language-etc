@@ -1,0 +1,87 @@
+# Language reference:
+# - https://www.ssh.com/ssh/config/#sec-Format-of-SSH-client-config-file-code-ssh_config-code
+name: "SSH Config"
+scopeName: "source.ssh-config"
+fileTypes: [
+	"ssh_config"
+	"ssh-config"
+	"sshd_config"
+	"sshd-config"
+	".ssh/config"
+]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		ssh-config
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		sshconfig
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#option"}
+		]
+
+
+	# Logical boolean keywords
+	boolean:
+		name:  "constant.language.logical.boolean.${1:/downcase}.ssh-config"
+		match: "(?i)(?<=\\s|=)(yes|no|true|false|on|off)(?=\\s|$)"
+
+
+	# Individual option lines
+	option:
+		name:  "meta.option.ssh-config"
+		begin: "^\\s*([^\\s=]+)"
+		end:   "$"
+		beginCaptures:
+			1: name: "entity.option.name.ssh-config"
+		contentName: "meta.arguments.ssh-option"
+		patterns: [
+			{include: "#equals"}
+			{include: "#string"}
+			{include: "#boolean"}
+			{include: "#ip-address"}
+			{include: "etc#int"}
+			{include: "#unquoted"}
+		]
+
+
+	# Equals-sign separating an option's name and value
+	equals:
+		match: "\\G\\s*(=)"
+		captures:
+			1: patterns: [include: "etc#eql"]
+
+
+	# Dot-separated numbers which quack like an IP address
+	"ip-address":
+		name:  "constant.numeric.other.ip-address.ssh-config"
+		match: "(?:\\d+\\.){3,}\\d+(?=\\s|$)"
+		captures:
+			0: patterns: [include: "etc#dot"]
+
+
+	# Double-quoted arguments potentially containing whitespace
+	string:
+		name:  "string.quoted.double.parameter.ssh-config"
+		begin: '"'
+		end:   '"|(?=$)'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.ssh-config"
+		endCaptures:   0: name: "punctuation.definition.string.end.ssh-config"
+
+	
+	# Some unquoted/bareword argument; apply generic highlighting
+	unquoted:
+		name:  "variable.parameter.argument.ssh-config"
+		match: '(?!")\\S+'
