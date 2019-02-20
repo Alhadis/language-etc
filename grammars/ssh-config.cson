@@ -3,6 +3,8 @@
 name: "SSH Config"
 scopeName: "source.ssh-config"
 fileTypes: [
+	"sshconfig"
+	"sshdconfig"
 	"ssh_config"
 	"ssh-config"
 	"sshd_config"
