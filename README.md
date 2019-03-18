@@ -21,6 +21,7 @@ Supported formats
 * [ ] [`.inputrc`](https://goo.gl/cCvKes)
 * [ ] [`.wgetrc`](https://goo.gl/KRoNsn)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
+* [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)

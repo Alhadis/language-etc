@@ -1,0 +1,71 @@
+name: "DOSBox Configuration"
+scopeName: "source.dosbox-conf"
+fileTypes: ["dosbox.conf"]
+firstLineMatch: """(?ix)
+
+	# Header comment in default config file
+	This\\s+is\\s+the\\s+configuration\\s+file\\s+for\\s+DOSBox
+	
+	|
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		dosbox(?:-?conf(?:ig)?)?
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		dosbox(?:-?conf(?:ig)?)?
+	(?=\\s|:|$)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#autoexec"}
+			{include: "#section"}
+			{include: "#setting"}
+		]
+
+	# Commands to run at startup
+	autoexec:
+		begin: "^\\s*((\\[)autoexec(\\]))\\s*$"
+		end:   "(?=^\\[.*\\])"
+		beginCaptures:
+			1: name: "entity.name.section.group-title.dosbox-conf"
+			2: name: "punctuation.definition.entity.begin.dosbox-conf"
+			3: name: "punctuation.definition.entity.end.dosbox-conf"
+		contentName: "meta.embedded.source.batchfile"
+		patterns: [include: "source.batchfile"]
+
+
+	# [Section]
+	section:
+		match: "^\\s*((\\[).*(\\]))\\s*$"
+		captures:
+			1: name: "entity.name.section.group-title.dosbox-conf"
+			2: name: "punctuation.definition.entity.begin.dosbox-conf"
+			3: name: "punctuation.definition.entity.end.dosbox-conf"
+
+	# setting=value
+	setting:
+		name:  "meta.setting.dosbox-conf"
+		begin: "^\\s*([^#=\\s]+)\\s*(=)"
+		end:   "$|(?=#)"
+		beginCaptures:
+			1: name: "keyword.other.setting.dosbox-conf"
+			2: name: "punctuation.separator.key-value.dosbox-conf"
+		patterns: [include: "#values"]
+
+	# Various setting values
+	values:
+		patterns: [
+			{match: "\\bauto\\b", name: "support.constant.language.auto.dosbox-conf"}
+			{include: "etc#num"}
+			{include: "etc#bool"}
+			{include: "etc#bareword"}
+		]

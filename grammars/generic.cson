@@ -27,6 +27,11 @@ repository:
 		name: "string.unquoted.bareword"
 		match: '[^"\\s][\\S]*'
 
+	# True/false
+	bool:
+		name:  "constant.logical.bool.boolean.${1:/downcase}"
+		match: "\\b(true|false|TRUE|FALSE)\\b"
+
 	# ...↓
 	colon:
 		name: "keyword.operator.assignment.key-value.colon"
@@ -84,6 +89,14 @@ repository:
 	intNoExp:
 		name:  "constant.numeric.integer.int.decimal.dec"
 		match: "[-+]?[0-9]+"
+	
+	
+	# Both floats and integers
+	num:
+		patterns: [
+			{include: "#float"}
+			{include: "#int"}
+		]
 	
 	
 	# Strings
