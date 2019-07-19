@@ -1,0 +1,246 @@
+name: "SVG"
+scopeName: "text.xml.svg"
+fileTypes: ["svg"]
+firstLineMatch: """(?xi)
+
+	# Comment inserted by Illustrator when saving SVG files
+	<!--\\s+Generator:\\s+Adobe\\s+Illustrator.*?SVG\\s+Export\\s+Plug-In.*?-->
+	|
+	
+	# Opening <svg> tag
+	\\A(<?xml[^>]*\\?>(?:$|[\\r\\n]*))?\\s*<svg(?=\\s|$)
+	|
+	
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		svg
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s*set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		svg
+	(?=\\s|:|$)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#preprocessor"}
+			{include: "#scriptTag"}
+			{include: "#styleTag"}
+			{include: "#tag"}
+			{include: "#unmatchedTag"}
+		]
+
+
+	# <!-- HTML/SGML-style comments -->
+	comment:
+		name:  "comment.block.xml.svg"
+		begin: "<!--"
+		end:   "-->"
+		beginCaptures: 0: name: "punctuation.definition.comment.begin.xml.svg"
+		endCaptures:   0: name: "punctuation.definition.comment.end.xml.svg"
+		patterns: [
+			match: "--(?!>)"
+			name: "invalid.illegal.bad-comment.xml.svg"
+		]
+
+
+	# Generic XML attribute
+	attr:
+		name:  "meta.attribute.${0:/downcase}.xml.svg"
+		begin: "[A-Za-z_:][-\\w.:]*"
+		end:   "(?=\\s*(?:/?>|[^\\s=]))|(?<=[\"'])"
+		beginCaptures:
+			0: patterns: [include: "#attrName"]
+		patterns: [{
+			begin: "\\s*(=)"
+			end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
+			beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
+			endCaptures:   1: name: "string.unquoted.xml.svg"
+			patterns: [{
+				# Keep leading whitespace out of tokenised strings (below)
+				match: "(?:\\G|^)\\s+(?!/?>)"
+			},{
+				# "Double-quoted" attribute value
+				name:  "string.quoted.double.xml.svg"
+				begin: '"'
+				end:   '"'
+				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+			},{
+				# 'Single-quoted' attribute value
+				name:  "string.quoted.single.xml.svg"
+				begin: "'"
+				end:   "'"
+				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+			}]
+		}]
+
+	attrName:
+		patterns: [{
+			# Namespace
+			match: "(?:^|\\G)([-\\w.]+)(:)(?=[-\\w.:])"
+			captures:
+				1: name: "entity.other.attribute-name.namespace.xml.svg"
+				2: name: "punctuation.separator.namespace.xml.svg"
+		},{
+			# Local-name
+			name: "entity.other.attribute-name.localname.xml.svg"
+			match: "[A-Za-z_:][-\\w.:]*"
+		}]
+
+
+	# `<?xml …?>` and friends
+	preprocessor:
+		name:  "meta.tag.preprocessor.xml.svg"
+		begin: "(<\\?)\\s*"
+		end:   "\\?>"
+		beginCaptures: 1: name: "punctuation.definition.tag.begin.xml.svg"
+		endCaptures:   0: name: "punctuation.definition.tag.end.xml.svg"
+		patterns: [{
+			begin: "\\G"
+			end:   "([-\\w]+)|(?=\\s*\\?>)"
+			endCaptures:
+				1: name: "entity.name.tag.xml.svg"
+		}, include: "#attr"]
+
+
+	# <script> tags
+	scriptTag:
+		patterns: [
+			{include: "#scriptTagPlain"}
+			{include: "#scriptTagJS"}
+		]
+
+
+	# JavaScript
+	scriptTagJS:
+		name:  "meta.tag.script.xml.svg"
+		begin: "(?i)(<)(script)(?=$|\\s|/?>)"
+		end:   "(?i)(</)(script)\\s*(>)|(/>)"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.opening.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+		endCaptures:
+			1: name: "punctuation.definition.tag.closing.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+			3: name: "punctuation.definition.tag.closing.end.xml.svg"
+			4: name: "punctuation.definition.tag.self-closing.end.xml.svg"
+		patterns: [include: "#tagAttr", {
+			begin: "(?<=>)"
+			end:   "(?i)(?=\\s*</script\\s*>)"
+			contentName: "source.js.embedded.xml.svg"
+			patterns: [include: "source.js"]
+		}]
+
+
+	# Anything that's not JavaScript, as identified by its type="…" attribute
+	scriptTagPlain:
+		name:  "meta.tag.script.xml.svg"
+		begin: """(?x)
+			(<)((?i)script)
+			(
+				\\s+[^>]*?
+				(?<=\\s)(?i:type)\\s*=\\s*
+				(["'])?
+				(?! module
+				|   application/(?:x-)?(?:ecma|java)script
+				|   text/
+					(?: javascript(?:1\.[0-5])?
+					|   (?:j|ecma|live)script
+					|   x-(?:ecma|java)script
+					)
+				)
+				(?: (?<=")(?:[^">]+)"
+				|   (?<=')(?:[^'>]+)'
+				|   [^\\s"'>]+
+				)
+				(?=\\s|/?>)
+			)
+		"""
+		end: "(?i)(</)(script)\\s*(>)|(/>)"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.opening.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+			3: patterns: [include: "#attr"]
+		endCaptures:
+			1: name: "punctuation.definition.tag.closing.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+			3: name: "punctuation.definition.tag.closing.end.xml.svg"
+			4: name: "punctuation.definition.tag.self-closing.end.xml.svg"
+		patterns: [
+			{include: "#tagAttr"}
+			{include: "#main"}
+		]
+
+
+	# Embedded stylesheet
+	styleTag:
+		name:  "meta.tag.style.xml.svg"
+		begin: "(?i)(<)(style)(?=$|\\s|/?>)"
+		end:   "(?i)(</)(style)\\s*(>)|(/>)"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.opening.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+		endCaptures:
+			1: name: "punctuation.definition.tag.closing.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+			3: name: "punctuation.definition.tag.closing.end.xml.svg"
+			4: name: "punctuation.definition.tag.self-closing.end.xml.svg"
+		patterns: [include: "#tagAttr", {
+			begin: "(?<=>)"
+			end:   "(?i)(?=\\s*</style\\s*>)"
+			contentName: "source.css.embedded.xml.svg"
+			patterns: [include: "source.css"]
+		}]
+
+
+	# Generic XML tag
+	tag:
+		name:  "meta.tag.${2:/downcase}.xml.svg"
+		begin: "(?i)(<)([A-Za-z_:][-\\w.:]*)(?=$|\\s|/?>)"
+		end:   "(?i)(</)(\\2)\\s*(>)|(/>)"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.opening.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+		endCaptures:
+			1: name: "punctuation.definition.tag.closing.begin.xml.svg"
+			2: patterns: [include: "#tagName"]
+			3: name: "punctuation.definition.tag.closing.end.xml.svg"
+			4: name: "punctuation.definition.tag.self-closing.end.xml.svg"
+		patterns: [
+			{include: "#tagAttr"}
+			{include: "#main"}
+		]
+	
+	tagAttr:
+		begin: "\\G"
+		end: ">|(?=\\s*/>)"
+		endCaptures:
+			0: name: "punctuation.definition.tag.opening.end.xml.svg"
+		patterns: [include: "#attr"]
+	
+	tagName:
+		patterns: [{
+			# Namespace
+			match: "(?:^|\\G)([A-Za-z_][-\\w.]*)(:)(?=[-\\w.:])"
+			captures:
+				1: name: "entity.name.tag.namespace.xml.svg"
+				2: name: "punctuation.separator.namespace.xml.svg"
+		},{
+			# Local-name
+			name: "entity.name.tag.localname.xml.svg"
+			match: "[A-Za-z_:][-\\w.:]*"
+		}]
+
+
+	# Closing tag found where one wasn't expected
+	unmatchedTag:
+		match: "(</)([A-Za-z_:][-\\w.:]*)\\s*(>)"
+		name: "invalid.illegal.unmatched-tag.xml.svg"

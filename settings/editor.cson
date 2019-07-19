@@ -6,3 +6,8 @@
 	editor:
 		commentStart: "# "
 		tabLength: 8
+
+".text.xml.svg":
+	editor:
+		commentStart: "<!--"
+		commentEnd:   "-->"
