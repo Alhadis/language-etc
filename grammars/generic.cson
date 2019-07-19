@@ -1,6 +1,7 @@
 # Reusable, generic patterns for matching recurring language elements
 scopeName: "etc"
 patterns: [
+	{include: "#comma"}
 	{include: "#comment"}
 	{include: "#esc"}
 	{include: "#float"}
@@ -13,6 +14,11 @@ patterns: [
 ]
 
 repository:
+
+	# Commas
+	comma:
+		name: "punctuation.separator.delimiter.comma"
+		match: ","
 
 	# Comments
 	comment:

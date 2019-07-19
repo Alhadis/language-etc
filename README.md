@@ -24,6 +24,7 @@ Supported formats
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
+* [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)

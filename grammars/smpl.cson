@@ -1,0 +1,194 @@
+# Language reference:
+# - http://coccinelle.lip6.fr/docs/index.html
+name: "SmPL"
+scopeName: "source.smpl"
+fileTypes: ["cocci"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#include"}
+			{include: "#virtual"}
+			{include: "#control"}
+			{include: "#scripts"}
+			{include: "#metavariables"}
+			{include: "#variables"}
+			{include: "#lineAdded"}
+			{include: "#lineDeleted"}
+			{include: "#lineMatched"}
+			{include: "#when"}
+		]
+	
+	
+	# Comments
+	comment:
+		patterns: [{
+			name:  "comment.line.triple-slash.smpl"
+			begin: "///"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.smpl"
+		},{
+			name:  "comment.line.double-slash.smpl"
+			begin: "//"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.smpl"
+		}]
+	
+	
+	# Dots and stuff
+	control:
+		patterns: [{
+			# <+ … +>
+			name: "storage.modifier.required.dots.smpl"
+			match: "<\\+(?=\\.{3})|(?<=\\.{3})\\+>"
+		},{
+			# < … >
+			name: "storage.modifier.optional.dots.smpl"
+			match: "<(?=\\.{3})|(?<=\\.{3})>"
+		},{
+			name: "keyword.control.flow.dots.smpl"
+			match: "\\.{3}"
+		}]
+		
+	
+	# Include statement
+	include:
+		name:  "meta.preprocessor.$1.smpl"
+		match: '^\\s*(include|using)\\s+(?:("[^"]*")|(<.*>))'
+		captures:
+			1: name: "keyword.control.directive.$1.smpl"
+			2: patterns: [include: "etc#str"]
+			3: patterns: [include: "#isoPath"]
+	
+	
+	# Stuff like `<stdio.h>`
+	isoPath:
+		name:  "string.quoted.other.lt-gt.include.smpl"
+		begin: "<"
+		end:   ">"
+		beginCaptures: 0: name: "punctuation.definition.string.begin.smpl"
+		endCaptures:   0: name: "punctuation.definition.string.end.smpl"
+
+
+	# Added line
+	lineAdded:
+		name: "markup.inserted.diff.smpl"
+		match: "^(\\+).*"
+		captures:
+			1: name: "punctuation.definition.inserted.diff.smpl"
+	
+	
+	# Deleted line
+	lineDeleted:
+		name: "markup.deleted.diff.smpl"
+		match: "^(-).*"
+		captures:
+			1: name: "punctuation.definition.deleted.diff.smpl"
+	
+	
+	# Semantic match thingie
+	lineMatched:
+		match: "^(\\*)\\s*(\\S.*)"
+		captures:
+			1: name: "keyword.operator.semantic-match.diff.smpl"
+			2: name: "markup.changed.diff.smpl"
+
+
+	# Metavariables for transformations
+	metavariables:
+		name:  "meta.diff.header.metavariables.smpl"
+		begin: "^(@).*(@)\\s*$"
+		end:   "^(@@)"
+		beginCaptures:
+			0: name: "meta.diff.range.smpl"
+			1: name: "punctuation.definition.range.diff.begin.smpl"
+			2: name: "punctuation.definition.range.diff.end.smpl"
+		endCaptures:
+			0: name: "meta.diff.range.smpl"
+			1: name: "punctuation.definition.range.diff.smpl"
+	
+	
+	# Embedded scripts
+	scripts:
+		patterns: [{
+			# Python
+			begin: "(^(@).*?(?<=\\s|@)script:python(?=\\s|@).*?(@)\\s*$)"
+			end:   "^(?=@(?!@\\s*$))"
+			beginCaptures:
+				0: name: "meta.diff.header.metavariables.smpl"
+				1: name: "meta.diff.range.smpl"
+				2: name: "punctuation.definition.range.diff.begin.smpl"
+				3: name: "punctuation.definition.range.diff.end.smpl"
+			patterns: [{
+				name:  "meta.diff.header.metavariables.smpl"
+				begin: "^"
+				end:   "^(@@)"
+				endCaptures:
+					0: name: "meta.diff.range.smpl"
+					1: name: "punctuation.definition.range.diff.smpl"
+			},{
+				begin: "(?<=@@)\\s*$\\n?"
+				end:   "^(?=@)"
+				contentName: "source.embedded.python"
+				patterns: [
+					{include: "#comment"}
+					{include: "source.python"}
+				]
+			}]
+		},{
+			# OCaml
+			begin: "(^(@).*?(?<=\\s|@)script:ocaml(?=\\s|@).*?(@)\\s*$)"
+			end:   "^(?=@(?!@\\s*$))"
+			beginCaptures:
+				0: name: "meta.diff.header.metavariables.smpl"
+				1: name: "meta.diff.range.smpl"
+				2: name: "punctuation.definition.range.diff.begin.smpl"
+				3: name: "punctuation.definition.range.diff.end.smpl"
+			patterns: [{
+				name:  "meta.diff.header.metavariables.smpl"
+				begin: "^"
+				end:   "^(@@)"
+				endCaptures:
+					0: name: "meta.diff.range.smpl"
+					1: name: "punctuation.definition.range.diff.smpl"
+			},{
+				begin: "(?<=@@)\\s*$\\n?"
+				end:   "^(?=@)"
+				contentName: "source.embedded.ocaml"
+				patterns: [
+					{include: "#comment"}
+					{include: "source.ocaml"}
+				]
+			}]
+		}]
+
+
+	# @p1, etc
+	variables:
+		name: "variable.at-prefix.smpl"
+		match: "(?<!^)(@)[\\w]+"
+		captures:
+			1: name: "keyword.operator.variable.smpl"
+
+
+	# Bogus rule
+	virtual:
+		match: "^\\s*(virtual)\\s+(.*)"
+		captures:
+			1: name: "storage.modifier.virtual.smpl"
+			2: patterns: [{
+				match: "[^\\s,]+"
+				name: "entity.name.rule.smpl"
+			}, include: "etc#comma"]
+
+
+	# `when` clauses
+	when:
+		match: "(?<=\\s|\\.{3})(when)\\s*(any(?:\\s|$)|!=)"
+		captures:
+			1: name: "keyword.control.flow.when.smpl"
+			2: name: "keyword.operator.comparison.smpl"
