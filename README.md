@@ -26,6 +26,7 @@ Supported formats
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
+* [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [ ] [Tags index](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
 * [ ] [Terminfo](http://invisible-island.net/ncurses/ncurses.faq.html#which_terminfo)
 
