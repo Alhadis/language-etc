@@ -78,31 +78,81 @@ repository:
 		end:   "(?=\\s*(?:/?>|[^\\s=]))|(?<=[\"'])"
 		beginCaptures:
 			0: patterns: [include: "#attrName"]
+		patterns: [
+			{include: "#attrValueCSS"}
+			{include: "#attrValuePlain"}
+		]
+	
+	
+	# Embedded CSS highlighting for `style="…"` attributes
+	attrValueCSS:
+		begin: "(?i)(?<=style)\\G\\s*(=)"
+		end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
+		beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
+		endCaptures: 1:
+			name: "string.unquoted.xml.svg"
+			patterns: [include: "source.css#rule-list-innards"]
 		patterns: [{
-			begin: "\\s*(=)"
-			end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
-			beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
-			endCaptures:   1: name: "string.unquoted.xml.svg"
+			# Keep leading whitespace out of tokenised strings (below)
+			match: "(?:\\G|^)\\s+(?!/?>)"
+		},{
+			# "Double-quoted" attribute value
+			name:  "string.quoted.double.xml.svg"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+			endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
 			patterns: [{
-				# Keep leading whitespace out of tokenised strings (below)
-				match: "(?:\\G|^)\\s+(?!/?>)"
-			},{
-				# "Double-quoted" attribute value
-				name:  "string.quoted.double.xml.svg"
-				begin: '"'
-				end:   '"'
-				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
-				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
-				patterns: [include: "#entity"]
-			},{
-				# 'Single-quoted' attribute value
-				name:  "string.quoted.single.xml.svg"
-				begin: "'"
-				end:   "'"
-				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
-				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
-				patterns: [include: "#entity"]
+				name: "source.css.style.xml.svg"
+				match: '[^"]+'
+				captures: 0: patterns: [
+					{include: "#entity"}
+					{include: "source.css#rule-list-innards"}
+				]
 			}]
+		},{
+			# 'Single-quoted' attribute value
+			name:  "string.quoted.single.xml.svg"
+			begin: "'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+			endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+			patterns: [{
+				name: "source.css.style.xml.svg"
+				match: "[^']+"
+				captures: 0: patterns: [
+					{include: "#entity"}
+					{include: "source.css#rule-list-innards"}
+				]
+			}]
+		}]
+
+
+	# Usual string highlighting
+	attrValuePlain:
+		begin: "\\s*(=)"
+		end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
+		beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
+		endCaptures:   1: name: "string.unquoted.xml.svg"
+		patterns: [{
+			# Keep leading whitespace out of tokenised strings (below)
+			match: "(?:\\G|^)\\s+(?!/?>)"
+		},{
+			# "Double-quoted" attribute value
+			name:  "string.quoted.double.xml.svg"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+			endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+			patterns: [include: "#entity"]
+		},{
+			# 'Single-quoted' attribute value
+			name:  "string.quoted.single.xml.svg"
+			begin: "'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+			endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+			patterns: [include: "#entity"]
 		}]
 
 	attrName:
