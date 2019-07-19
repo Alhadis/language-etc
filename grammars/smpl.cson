@@ -116,7 +116,7 @@ repository:
 	scripts:
 		patterns: [{
 			# Python
-			begin: "(^(@).*?(?<=\\s|@)script:python(?=\\s|@).*?(@)\\s*$)"
+			begin: "(^(@).*?(?<=\\s|@)(script|initialize|finalize):python(?=\\s|@).*?(@)\\s*$)"
 			end:   "^(?=@(?!@\\s*$))"
 			beginCaptures:
 				0: name: "meta.diff.header.metavariables.smpl"
@@ -141,7 +141,7 @@ repository:
 			}]
 		},{
 			# OCaml
-			begin: "(^(@).*?(?<=\\s|@)script:ocaml(?=\\s|@).*?(@)\\s*$)"
+			begin: "(^(@).*?(?<=\\s|@)(script|initialize|finalize):ocaml(?=\\s|@).*?(@)\\s*$)"
 			end:   "^(?=@(?!@\\s*$))"
 			beginCaptures:
 				0: name: "meta.diff.header.metavariables.smpl"
