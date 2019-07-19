@@ -29,12 +29,25 @@ repository:
 	main:
 		patterns: [
 			{include: "#comment"}
+			{include: "#cdata"}
+			{include: "text.xml#EntityDecl"}
+			{include: "text.xml#parameterEntity"}
+			{include: "#entity"}
 			{include: "#preprocessor"}
 			{include: "#scriptTag"}
 			{include: "#styleTag"}
 			{include: "#tag"}
 			{include: "#unmatchedTag"}
 		]
+
+
+	# <![CDATA[ … ]]>
+	cdata:
+		name:  "string.unquoted.cdata.xml.svg"
+		begin: "<!\\[CDATA\\["
+		end:   "\\]\\]>"
+		beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
+		endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
 
 
 	# <!-- HTML/SGML-style comments -->
@@ -47,6 +60,14 @@ repository:
 		patterns: [
 			match: "--(?!>)"
 			name: "invalid.illegal.bad-comment.xml.svg"
+		]
+
+
+	# Character entities, imported from XML grammar
+	entity:
+		patterns: [
+			{include: "text.xml#entity"}
+			{include: "text.xml#bare-ampersand"}
 		]
 
 
@@ -72,6 +93,7 @@ repository:
 				end:   '"'
 				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
 				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+				patterns: [include: "#entity"]
 			},{
 				# 'Single-quoted' attribute value
 				name:  "string.quoted.single.xml.svg"
@@ -79,6 +101,7 @@ repository:
 				end:   "'"
 				beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
 				endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+				patterns: [include: "#entity"]
 			}]
 		}]
 
@@ -136,7 +159,10 @@ repository:
 			begin: "(?<=>)"
 			end:   "(?i)(?=\\s*</script\\s*>)"
 			contentName: "source.js.embedded.xml.svg"
-			patterns: [include: "source.js"]
+			patterns: [
+				{include: "source.js"}
+				{include: "#entity"}
+			]
 		}]
 
 
@@ -197,7 +223,10 @@ repository:
 			begin: "(?<=>)"
 			end:   "(?i)(?=\\s*</style\\s*>)"
 			contentName: "source.css.embedded.xml.svg"
-			patterns: [include: "source.css"]
+			patterns: [
+				{include: "source.css"}
+				{include: "#entity"}
+			]
 		}]
 
 
