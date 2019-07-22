@@ -6,7 +6,10 @@ fileTypes: [
 ]
 limitLineLength: no
 maxTokensPerLine: 2048
-patterns: [include: "#main"]
+patterns: [
+	{include: "injections.etc#scopeHack"}
+	{include: "#main"}
+]
 firstLineMatch: """(?ix)
 
 	# Emacs modeline

@@ -5,3 +5,33 @@ patterns: [{
 	name:  "storage.type.class.${1:/downcase}"
 	match: "(?<!\\w)@?(PINHACK)\\b"
 }]
+
+repository:
+	scopeHack:
+		begin: "\\A(?:\\xC2\\xAD|\\xAD){50}"
+		end: "(?=A)B"
+		patterns: [{
+			name: "markup.bold"
+			match: "^ {5}(PRIMER PREVIEW - How grammar scopes look on GitHub):"
+			captures:
+				1: name: "constant.other.reference.link"
+		},{
+			name: "comment.line"
+			match: "^\\s*Last updated:\\s*(\\d{4}-\\d{2}-\\d{2})$"
+		},{
+			name: "constant.other.reference.link"
+			match: "^│ +(TEXTMATE.*) +│$"
+			captures:
+				1: name: "markup.heading"
+		},{
+			match: "^│ +│$"
+			captures:
+				0: name: "constant.other.reference.link"
+		},{
+			match: "^│\\s+(([a-z][-a-z.]+)\\t\\S+\\s+░▒▓█+)\\s+│$"
+			captures:
+				1: name: "$2"
+		},{
+			name:  "comment.line"
+			match: "^#.*$"
+		}]
