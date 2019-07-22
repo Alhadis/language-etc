@@ -1,13 +1,7 @@
 scopeName: "injections.etc"
-injectionSelector: "source.ruby"
+injectionSelector: "comment, text.plain"
 patterns: [{
-	# Add diff highlighting to embedded patches in Homebrew formulae
-	name:  "meta.embedded.source.diff"
-	begin: "(?<=__END__)(?=\\s|$)"
-	end:   "(?=^(?!diff ))"
-	patterns: [{
-		begin: "^(?=diff )"
-		end:   "(?=A)B"
-		patterns: [include: "source.diff"]
-	}]
+	# Flag “pin-hacks” used in TextMate grammars
+	name:  "storage.type.class.${1:/downcase}"
+	match: "(?<!\\w)@?(PINHACK)\\b"
 }]
