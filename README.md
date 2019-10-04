@@ -17,7 +17,7 @@ Supported formats
 * [x] [`.hgignore`](https://www.mercurial-scm.org/wiki/.hgignore)
 * [x] [`.nanorc`](https://www.nano-editor.org/dist/v2.1/nanorc.5.html)
 * [ ] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
-* [ ] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
+* [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
 * [ ] [`.inputrc`](https://goo.gl/cCvKes)
 * [ ] [`.wgetrc`](https://goo.gl/KRoNsn)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)

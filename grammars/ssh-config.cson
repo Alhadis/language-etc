@@ -62,7 +62,7 @@ repository:
 			{include: "#equals"}
 			{include: "#string"}
 			{include: "#boolean"}
-			{include: "#ip-address"}
+			{include: "etc#ip"}
 			{include: "etc#int"}
 			{include: "#unquoted"}
 		]
@@ -73,14 +73,6 @@ repository:
 		match: "\\G\\s*(=)"
 		captures:
 			1: patterns: [include: "etc#eql"]
-
-
-	# Dot-separated numbers which quack like an IP address
-	"ip-address":
-		name:  "constant.numeric.other.ip-address.ssh-config"
-		match: "(?:\\d+\\.){3,}\\d+(?=\\s|$)"
-		captures:
-			0: patterns: [include: "etc#dot"]
 
 
 	# Double-quoted arguments potentially containing whitespace

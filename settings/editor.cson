@@ -7,6 +7,10 @@
 		commentStart: "# "
 		tabLength: 8
 
+".source.ini.npmrc":
+	editor:
+		commentStart: "; "
+
 ".source.smpl":
 	editor:
 		commentStart: "// "

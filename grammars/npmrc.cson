@@ -1,0 +1,191 @@
+name: ".npmrc"
+scopeName: "source.ini.npmrc"
+fileTypes: ["npmrc"]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		(?:npmrc|npm-?conf(?:ig)?)
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		(?:npmrc|npm-?conf(?:ig)?)
+	(?=\\s|:|$)
+"""
+
+injections:
+	"source.ini.npmrc":
+		patterns: [{
+			name:  "source.shell.embedded.ini.npmrc"
+			match: "(\\${)(.*?)(})"
+			captures:
+				1: name: "punctuation.section.embedded.begin.ini.npmrc"
+				2: name: "constant.language.environment.variable.ini.npmrc"
+				3: name: "punctuation.section.embedded.end.ini.npmrc"
+		}]
+
+	"source.ini.npmrc meta.field.message string.quoted":
+		patterns: [{
+			name: "constant.other.placeholder.format.ini.npmrc"
+			match: "%s"
+		}]
+
+	"source.ini.npmrc string.quoted":
+		patterns: [{
+			name: "string.interpolated.ini.npmrc"
+			match: "({)\\s*([^{}\\s]+)\\s*(})"
+			captures:
+				1: name: "punctuation.definition.bracket.curly.begin.ini.npmrc"
+				2: name: "entity.name.variable.begin.ini.npmrc"
+				3: name: "punctuation.definition.bracket.curly.end.ini.npmrc"
+		}]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#pathField"}
+			{include: "#urlField"}
+			{include: "#versionField"}
+			{include: "#ipAddrField"}
+			{include: "#logstreamField"}
+			{include: "#messageField"}
+			{include: "#field"}
+		]
+	
+	
+	# Comment lines, using either semicolons or hashes
+	comment:
+		patterns: [{
+			# Semicolon
+			name:  "comment.line.semicolon.ini.npmrc"
+			begin: ";"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.ini.npmrc"
+		},{
+			# Number-sign
+			name:  "comment.line.number-sign.ini.npmrc"
+			begin: "#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.ini.npmrc"
+		}]
+
+
+	# A field which isn't one of those below
+	field:
+		name:  "meta.field.$1-field.ini.npmrc"
+		begin: "(?:^|\\G)\\s*([^\\s=]+)\\s*(=)"
+		end:   "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [include: "#fieldValues"]
+	
+	fieldValues:
+		patterns: [
+			{include: "etc#str"}
+			{include: "etc#bool"}
+			{include: "etc#esc"}
+			{include: "etc#num"}
+			{match: "NaN",           name: "constant.language.numeric.nan.ini.npmrc"}
+			{match: "null",          name: "constant.language.null.ini.npmrc"}
+			{match: "undefined",     name: "constant.language.undefined.ini.npmrc"}
+			{match: "[-+]?Infinity", name: "constant.language.numeric.infinity.ini.npmrc"}
+		]
+
+
+	# IP address fields
+	ipAddrField:
+		name:  "meta.field.$1.ini.npmrc"
+		begin: "(?:^|\\G)\\s*(local-address)\\s*(=)"
+		end:   "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [
+			{include: "etc#ip"}
+			{include: "#fieldValues"}
+		]
+
+
+	# process.stdout, process.stderr, etc
+	logstreamField:
+		name:  "meta.field.$1.ini.npmrc"
+		begin: "(?:^|\\G)\\s*(logstream)\\s*(=)"
+		end:   "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			name: "constant.language.other.logstream.ini.npmrc"
+			match: "(?=[\\w$])[^\\s#;]+"
+		}, include: "#fieldValues"]
+
+
+	# Fields which accept printf(3)-style formatting placeholders
+	# NB: `%s` highlights are handled using injections
+	messageField:
+		name:  "meta.field.message.ini.npmrc"
+		begin: "(?:^|\\G)\\s*(message)\\s*(=)"
+		end:   "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [include: "#fieldValues"]
+
+
+	# Fields which accept a filesystem path
+	pathField:
+		name: "meta.field.$1-path.ini.npmrc"
+		begin: """(?x)
+			(?:^|\\G) \\s*
+			(cache|cafile|editor|global(?:config|ignore)(?:file)?
+			|init-module|onload-script|prefix|script-shell|shell
+			|tmp|userconfig|viewer)
+			\\s* (=)
+		"""
+		end: "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [
+			{include: "#fieldValues"}
+			{match: "[^\\s#;]+", name: "string.unquoted.pathname.ini.npmrc"}
+		]
+
+
+	# Fields expecting a version string
+	versionField:
+		name:  "meta.field.$1.ini.npmrc"
+		begin: "(?:^|\\G)\\s*((?:init|node)-version)\\s*(=)"
+		end:   "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [
+			{include: "etc#version"}
+			{include: "#fieldValues"}
+		]
+
+
+	# URL-type fields
+	urlField:
+		name: "meta.field.$1-url.ini.npmrc"
+		begin: """(?x)
+			(?:^|\\G) \\s*
+			((?:https-)?proxy|(?:metrics-)?registry)
+			\\s* (=)
+		"""
+		end: "$|(?=\\s*[#;])"
+		beginCaptures:
+			1: name: "variable.assignment.field-name.ini.npmrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [
+			{include: "etc#url"}
+		]

@@ -97,6 +97,14 @@ repository:
 		match: "[-+]?[0-9]+"
 	
 	
+	# Dot-separated numbers which quack like an IP address
+	ip:
+		name:  "constant.numeric.other.ip-address"
+		match: "(?:\\d+\\.){3,}\\d+(?=\\s|$)"
+		captures:
+			0: patterns: [include: "#dot"]
+	
+	
 	# Both floats and integers
 	num:
 		patterns: [
@@ -129,3 +137,116 @@ repository:
 		beginCaptures: 0: name: "punctuation.definition.string.begin"
 		endCaptures:   0: name: "punctuation.definition.string.end"
 		patterns: [include: "#esc"]
+
+
+	# URL/e-mail address
+	url:
+		patterns: [{
+			# https://etc, git://github.com/
+			match: """(?x)
+				("|'|\\b)
+				(
+					# Protocol
+					( https?
+					| s?ftp
+					| ftps
+					| file
+					| wss?
+					| smb
+					| git (?:\\+https?)?
+					| ssh
+					| rsync
+					| afp
+					| nfs
+					| (?:x-)?man(?:-page)?
+					| gopher
+					| txmt
+					| issue
+					| atom
+					) ://
+					
+					# Path specifier
+					(?:
+						(?! \\#\\w*\\#)
+						(?: [-:\\@\\w.,~%+_/?=&\\#;|!])
+					)+
+					
+					# Don't include trailing punctuation
+					(?<![-.,?:\\#;])
+				)
+				(\\1)
+			"""
+			captures:
+				1: name: "punctuation.definition.link.begin.url"
+				2: name: "constant.other.reference.link.underline.$3.url"
+				4: name: "punctuation.definition.link.end.url"
+		},{
+			# mailto:this@guy
+			match: """(?x)
+				("|'|\\b)
+				(
+					mailto (:)
+					(?:
+						(?! \\#\\w*\\#)
+						(?: [-:@\\w.,~%+_/?=&\\#;|!])
+					)+
+					(?<![-.,?:\\#;])
+				)
+				(\\1)
+			"""
+			captures:
+				1: name: "punctuation.definition.link.begin.url"
+				2: name: "constant.other.reference.link.underline.mailto.url"
+				3: name: "punctuation.separator.delimiter.scheme.url"
+				4: name: "punctuation.definition.link.end.url"
+		}]
+
+
+	# Semantic version string
+	version:
+		name: "constant.other.version-string"
+		match: """(?x)
+			("|'|\\b)
+			([vV]?)
+			(0 | [1-9]\\d*) (\\.)
+			(0 | [1-9]\\d*) (\\.)
+			(0 | [1-9]\\d*)
+			(?:
+				(-)
+				(
+					(?: 0
+					| [1-9]\\d*
+					| \\d*[a-zA-Z-][0-9a-zA-Z-]*
+					)
+					
+					(?:
+						\\.
+						(?: 0
+						| [1-9]\\d*
+						| \\d*[a-zA-Z-][0-9a-zA-Z-]*
+						)
+					)*
+				)
+			)?
+			(?:
+				(\\+)
+				(
+					[0-9a-zA-Z-]+
+					(?:\\.[0-9a-zA-Z-]+)*
+				)
+			)?
+			(\\1)
+		"""
+		captures:
+			1:  name: "punctuation.definition.version-string.begin"
+			2:  name: "punctuation.definition.version-prefix"
+			3:  name: "meta.major.release-number"
+			4:  patterns: [include: "#dot"]
+			5:  name: "meta.minor.release-number"
+			6:  patterns: [include: "#dot"]
+			7:  name: "meta.patch.release-number"
+			8:  name: "punctuation.delimiter.separator.dash.hyphen"
+			9:  name: "meta.prerelease.release-number", patterns: [include: "#dot"]
+			10: name: "punctuation.delimiter.separator.plus"
+			11: name: "meta.build-metadata", patterns: [include: "#dot"]
+			12: name: "punctuation.definition.version-string.end"
