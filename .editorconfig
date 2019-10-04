@@ -11,4 +11,10 @@ trim_trailing_whitespace = false
 
 [scope-previews.nanorc]
 indent_style = tab
-indent_size = 40
+indent_size  = 40
+tab_width    = 40
+
+[curlrc-options.tsv]
+indent_style = tab
+indent_size  = 32
+tab_width    = 32
