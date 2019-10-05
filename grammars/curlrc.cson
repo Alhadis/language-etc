@@ -25,8 +25,42 @@ repository:
 		patterns: [
 			{include: "#comment"}
 			{include: "#shortOptions"}
+			{include: "#longOptions"}
 		]
 	
+	
+	# Authority spec (in the RFC 3986 sense); stuff like “user:pass” or “host:port”
+	auth:
+		patterns: [{
+			match: "([^\\s:;]+)(:)([^\\s=:;]*)"
+			captures:
+				1: name: "constant.other.auth-info.curlrc"
+				2: patterns: [include: "etc#colon"]
+				3: name: "constant.other.auth-info.curlrc"
+		},{
+			match: "(:)([^\\s:;]*)"
+			captures:
+				1: patterns: [include: "etc#colon"]
+				2: name: "constant.other.auth-info.curlrc"
+		}]
+
+
+	# Automatic redirection shorthand for “--referer” option
+	autoRefer:
+		match: "(;)(auto)\\b"
+		captures:
+			1: name: "punctuation.separator.key-value.semicolon.curlrc"
+			2: name: "variable.assignment.parameter.name.curlrc"
+
+
+	# The “scheme://” or “://” part belonging to the above
+	authProtocol:
+		match: "(?:\\G|^)([^\\\\:\\s/]*)(://|:)"
+		captures:
+			1: name: "entity.other.protocol.curlrc"
+			2: name: "keyword.operator.protocol.separator.curlrc"
+
+
 	# Comment line
 	comment:
 		name:  "comment.line.number-sign.curlrc"
@@ -35,65 +69,438 @@ repository:
 		beginCaptures:
 			0: name: "punctuation.definition.comment.curlrc"
 
-	# NAME=VALUE;
-	cookieField:
-		name:  "meta.cookie.curlrc"
-		match: "([^\\s=;]+)(=)([^\\s=;]*)(;)?"
-		captures:
-			1: name: "variable.assignment.cookie.name.curlrc"
-			2: patterns: [include: "etc#eql"]
-			3: name: "constant.other.cookie.value.curlrc"
 
-	# -s -h -o -r -t
-	shortOptions:
+	# HTTP header
+	header:
+		match: "(?:\\G|^)\\s*([-A-Za-z0-9]+)\\s*(?:(:)\\s*(.*)|(;))"
+		captures:
+			1: name: "entity.name.header.curlrc"
+			2: patterns: [include: "etc#colon"]
+			3: name: "string.unquoted.header-value.curlrc"
+			4: name: "punctuation.terminator.statement.semicolon.curlrc"
+
+
+	# --long-options
+	longOptions:
 		patterns: [{
-			# Boolean-type options (no arguments)
-			match: "^(-)?([:#012346aBfgGhiIjJklLMnNOpqQRsSvV])(?=\\s|$)"
+			# No parameter
+			name:  "meta.option.long.curlrc"
+			match: """(?x)
+				(?:\\G|^) \\s*
+				(
+					(--)?
+					(?:anyauth|append|basic|cert-status|compressed-ssh|compressed|create-dirs|crlf|digest
+					|disable-eprt|disable-epsv|disable|disallow-username-in-url|fail-early|fail|false-start
+					|ftp-create-dirs|ftp-pasv|ftp-pret|ftp-skip-pasv-ip|ftp-ssl-ccc|ftp-ssl-control|get
+					|globoff|haproxy-protocol|head|help|http1\\.[01]|http2(?:-prior-knowledge)?
+					|ignore-content-length|include|insecure|ipv[46]|junk-session-cookies|list-only
+					|location-trusted|location|manual|metalink|negotiate|netrc-optional|netrc|next
+					|no-alpn|no-buffer|no-keepalive|no-npn|no-sessionid|ntlm-wb|ntlm|path-as-is|post30[1-3]
+					|progress-bar|proxy-anyauth|proxy-basic|proxy-digest|proxy-insecure|proxy-negotiate
+					|proxy-ntlm|proxy-ssl-allow-beast|proxy-tlsv1|proxytunnel|quote|raw|remote-header-name
+					|remote-name-all|remote-name|remote-time|request-target|retry-connrefused|sasl-ir
+					|show-error|silent|socks5-(?:basic|gssapi-nec|gssapi)|ssl-allow-beast|ssl-no-revoke
+					|ssl-reqd|sslv[23]|ssl|stderr|styled-output|suppress-connect-headers
+					|tcp-fastopen|tcp-nodelay|tftp-no-options|tlspassword|tlsv1\\.[0-3]
+					|tlsv1|tr-encoding|trace-time|use-ascii|verbose|version|xattr)
+				)
+				(?=\\s|$)
+			"""
 			captures:
-				1: name: "punctuation.definition.dash.short.option.curlrc"
-				2: name: "entity.short.option.name.curlrc"
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
 		},{
-			# String-type argument
-			name:  "meta.option.$2.curlrc"
-			begin: "^(-)?([cDdKoT])(\\s*=|\\s*:|\\s+)"
-			end:   "$"
+			# URLs
+			name:  "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				((--)?(?:doh-url|mail-auth|mail-from|mail-rcpt|noproxy|referer|url))
+				(?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
 			beginCaptures:
-				1: name: "punctuation.definition.dash.short.option.curlrc"
-				2: name: "entity.short.option.name.curlrc"
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
 				3: patterns: [include: "#separators"]
-			patterns: [
-				{include: "#string"}
-				{include: "etc#bareword"}
-			]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				3: patterns: [include: "#url"]
+				4: name: "punctuation.definition.string.end.curlrc"
+				5: name: "string.unquoted.curlrc", patterns: [include: "#url"]
 		},{
-			# Cookie-data
-			name:  "meta.option.$2.curlrc"
-			begin: "^(-)?(b)(\\s*=|\\s*:|\\s+)"
-			end:   "$"
+			# Headers
+			name:  "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				((--)?(?:header|proxy-header))
+				(?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
 			beginCaptures:
-				1: name: "punctuation.definition.dash.short.option.curlrc"
-				2: name: "entity.short.option.name.curlrc"
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
 				3: patterns: [include: "#separators"]
-			patterns: [{
-				name:  "string.quoted.double.cookie-data.curlrc"
-				begin: '"(?=[^"=]*=)'
-				end:   '"|(?=$)'
-				beginCaptures: 0: name: "punctuation.definition.string.begin.curlrc"
-				endCaptures:   0: name: "punctuation.definition.string.end.curlrc"
-				patterns: [
-					{include: "#cookieField"}
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [{include: "#header"}, {include: "etc#bareword"}]
+				5: patterns: [{include: "#header"}, {include: "etc#bareword"}]
+		},{
+			# Form-data
+			name:  "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				((--)?(?:cookie|form-string|form|telnet-option))
+				(?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [include: "#params"]
+				5: patterns: [include: "#params"]
+		},{
+			# Protocol(s)
+			name:  "meta.option.long.curlrc"
+			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:proto-default|proto-redir|proto))(?:\\s*(=|:)|(?=\\s|$))"
+			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [include: "#protocols"]
+				5: patterns: [include: "#protocols"]
+		},{
+			# Port address
+			name:  "meta.option.long.curlrc"
+			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?ftp-port)(?:\\s*(=|:)|(?=\\s|$))"
+			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: name: "constant.other.port-address.curlrc", patterns: [include: "etc#esc"]
+				5: name: "constant.other.port-address.curlrc"
+		},{
+			# MD5
+			name:  "meta.option.long.curlrc"
+			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?hostpubmd5)(?:\\s*(=|:)|(?=\\s|$))"
+			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: name: "constant.other.md5.checksum.curlrc", patterns: [include: "etc#esc"]
+				5: name: "constant.other.md5.checksum.curlrc"
+		},{
+			# Byte-range
+			name:  "meta.option.long.curlrc"
+			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:local-port|range))(?:\\s*(=|:)|(?=\\s|$))"
+			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				3: patterns: [
+					{include: "#range"}
+					{include: "etc#esc"}
 					{include: "etc#bareword"}
 				]
-			},{ include: "#cookieField"
-			},{ include: "etc#bareword" }]
+				4: name: "punctuation.definition.string.end.curlrc"
+				5: patterns: [
+					{include: "#range"}
+					{include: "etc#bareword"}
+				]
+		},{
+			# “foo:bar” values
+			name: "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
+				(
+					(--)?
+					(?:cert|connect-to|preproxy|proxy-cert|proxy-user|proxy1\\.0
+					|proxy|resolve|socks4a?|socks5-hostname|socks5|user)
+				)
+				(?:\\s*(=|:)|(?=\\s|$))
+			"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [{include: "#auth"}, {include: "etc#bareword"}]
+				5: patterns: [{include: "#auth"}, {include: "etc#bareword"}]
+		},{
+			# Filename, or generic/untyped
+			name: "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
+				(
+					(--)?
+					(?:abstract-unix-socket|cacert|capath|cert-type|ciphers|config|cookie-jar|crlfile|data-ascii
+					|data-binary|data-raw|data-urlencode|data|delegation|dns-interface|dns-ipv[46]-addr|dns-servers
+					|dump-header|egd-file|engine|ftp-(?:account|alternative-to-user|ssl-ccc-mode|method)|interface
+					|key-type|key|krb|libcurl|login-options|netrc-file|oauth2-bearer|output|pass|proxy-(?:cacert
+					|capath|cert-type|crlfile|key-type|key|pass|service-name|tlsauthtype|tlspassword|tlsuser)
+					|pinnedpubkey|proxy-ciphers|proxy-pinnedpubkey|pubkey|random-file|proxy-tls13-ciphers|request
+					|service-name|socks5-gssapi-service|tls13-ciphers|tlsauthtype|tls-max|tlsuser|trace-ascii
+					|trace|unix-socket|upload-file|user-agent|write-out)
+				)
+				(?:\\s*(=|:)|(?=\\s|$))
+			"""
+			end: '$|(?:(=)?|(?:([-A-Za-z0-9%_]+)(=)?)?([@<]))?(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				# “=<@” stuff prefixing string
+				1: name: "keyword.operator.encoding-modifier.curlrc"
+				2: name: "entity.name.form-field.curlrc"
+				3: patterns: [include: "etc#eql"]
+				4: name: "keyword.operator.source-modifier.curlrc"
+				
+				# The actual string
+				5: name: "string.quoted.double.curlrc"
+				6: name: "punctuation.definition.string.begin.curlrc"
+				7: patterns: [include: "etc#esc"]
+				8: name: "punctuation.definition.string.end.curlrc"
+				9: name: "string.unquoted.curlrc"
+		},{
+			# Numeric
+			name: "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^)
+				(?!\\s*--\\w[-\\w]*\\s*[=:])
+				\\s*
+				(
+					(--)?
+					(?:connect-timeout|continue-at|expect100-timeout|happy-eyeballs-timeout-ms|keepalive-time
+					|limit-rate|max-filesize|max-redirs|max-time|retry-delay|retry-max-time|retry|speed-limit
+					|speed-time|tftp-blksize|time-cond)
+				) (?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				3: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [{include: "etc#num"}, {include: "etc#bareword"}]
+				5: patterns: [{include: "etc#num"}, {include: "etc#bareword"}]
+		}]
+
+
+	# NAME=VALUE;
+	params:
+		patterns: [{
+			include: "#autoRefer"
+		},{
+			name: "keyword.operator.encoding-modifier.curlrc"
+			match: '(?:\\G|^|(?<=\\G"|^"))='
+		},{
+			match: '(?:\\G|^|(?<=\\G"|^"))(;)([^\\s=;"]+(?="?(?:\\s|$)))?'
+			captures:
+				1: name: "punctuation.separator.key-value.semicolon.curlrc"
+				2: name: "variable.assignment.parameter.name.curlrc"
+		},{
+			match: '(?:\\G|^|(?<=\\G"|^"))(?:([-A-Za-z0-9%_]+)(=)?)?([@<])'
+			captures:
+				1: name: "entity.name.form-field.curlrc"
+				2: patterns: [include: "etc#eql"]
+				3: name: "keyword.operator.source-modifier.curlrc"
+		},{
+			name:  "meta.parameter.curlrc"
+			match: "([^\\s=;]+)(=)([^\\s=;]*)(;)?"
+			captures:
+				1: name: "variable.assignment.parameter.name.curlrc"
+				2: patterns: [include: "etc#eql"]
+				3: name: "constant.other.parameter.value.curlrc"
+				4: name: "punctuation.separator.key-value.semicolon.curlrc"
+		},{
+			match: '(?<=@)("(?:[^\\\\"]|\\\\.)++"|(?:[^"\\s;\\\\]|\\\\.)++)(?:(;)|(?=$|\\s))'
+			captures:
+				1: name: "variable.assignment.parameter.name.curlrc", patterns: [include: "etc#esc"]
+				2: name: "punctuation.separator.key-value.semicolon.curlrc"
+		},{ include: "etc#esc"
+		},{ include: "etc#bareword"
 		}]
 	
-	# Symbols separating options from their parameters
+	
+	# Protocol list
+	protocols:
+		patterns: [
+			{match: "[^\\s,+=-]+", name: "constant.other.protocol-name.curlrc"}
+			{match: "\\+",         name: "keyword.control.permit-protocol.curlrc"}
+			{match: "-",           name: "keyword.control.deny-protocol.curlrc"}
+			{match: "=",           name: "keyword.control.permit-protocol.only.curlrc"}
+			{include: "esc#comma"}
+		]
+	
+	
+	# Stuff separating an unprefixed long-option from its value
 	separators:
 		patterns: [
 			{include: "etc#eql"}
 			{include: "etc#colon"}
 		]
+
+
+	# -s -h -o -r -t
+	shortOptions:
+		patterns: [{
+			# Options which take an argument
+			name:  "meta.option.short.curlrc"
+			begin: "^\\s*((-)[:#012346BGIJLMNOQRSVafghijklnpqsv]*[ACDEFHKPTUXYbcdemortuwxyz])"
+			end:   """(?x)
+				$
+				|
+				
+				# Numbers
+				(?<=[CYmyz])\\G\\s*
+				([-+]?[0-9.]+)
+				
+				|
+				
+				# Byte range
+				(?<=r)\\G\\s*
+				([-0-9,]+)
+				
+				|
+				
+				# “key=value” pairs
+				(?<=[Fbt])\\G\\s*
+				(?:
+					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					|
+					([^\\s]+)
+				)
+				
+				|
+				
+				# “key:value” pairs
+				(?<=[EUux])\\G\\s*
+				([^\\\\:\\s/]*://)?
+				(
+					(?:[^\\\\:\\s]|\\\\.)+
+					(?::(?:[^\\\\:\\s]|\\\\.)+)*
+					:?
+				)
+				
+				|
+				
+				# Headers
+				(?<=H)\\G\\s*
+				(?:
+					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					|
+					([^\\s]+)
+				)
+				
+				|
+				
+				# URLs
+				(?<=e)\\G\\s*
+				(?:
+					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					|
+					([^\\s]+)
+				)
+				
+				|
+				
+				# Anything else
+				(?:
+					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					|
+					([^\\s]+)
+				)
+			"""
+			beginCaptures:
+				1: name: "entity.short.option.name.curlrc"
+				2: name: "punctuation.definition.dash.short.option.curlrc"
+			endCaptures:
+				1: patterns: [include: "etc#num"]
+				2: patterns: [include: "#range"]
+				
+				# “key=value” pairs
+				3: name: "meta.parameter-string.curlrc"
+				4: name: "punctuation.definition.string.begin.curlrc"
+				5: patterns: [include: "#params"]
+				6: name: "punctuation.definition.string.end.curlrc"
+				7: patterns: [include: "#params"]
+				
+				# “key:value” pairs
+				8: patterns: [include: "#authProtocol"]
+				9: patterns: [include: "#auth"]
+				
+				# Headers
+				10: name: "meta.http-headers.curlrc"
+				11: name: "punctuation.definition.string.begin.curlrc"
+				12: patterns: [include: "#header"]
+				13: name: "punctuation.definition.string.end.curlrc"
+				14: patterns: [include: "#header"]
+				
+				# URLs
+				15: name: "meta.url-string.curlrc"
+				16: name: "punctuation.definition.string.begin.curlrc"
+				17: patterns: [include: "#url"]
+				18: name: "punctuation.definition.string.end.curlrc"
+				19: patterns: [include: "#url"]
+				
+				# Anything else
+				20: name: "string.quoted.double.curlrc"
+				21: name: "punctuation.definition.string.begin.curlrc"
+				22: patterns: [include: "etc#esc"]
+				23: name: "punctuation.definition.string.end.curlrc"
+				24: name: "string.unquoted.curlrc"
+		},{
+			# Options which take no arguments
+			name:  "meta.option.short.curlrc"
+			match: "^\\s*((-)[:#012346BGIJLMNOQRSVafghijklnpqsv]+)"
+			captures:
+				1: name: "entity.short.option.name.curlrc"
+				2: name: "punctuation.definition.dash.short.option.curlrc"
+		}]
+
+	
+	# Byte-range(s)
+	range:
+		patterns: [{
+			name: "meta.byte-range.curlrc"
+			match: "([0-9]+)(-)([0-9]+)?|(-)([0-9]+)"
+			captures:
+				1: name: "constant.numeric.integer.int.decimal.dec.range.start.curlrc"
+				2: name: "punctuation.separator.range.dash.curlrc"
+				3: name: "constant.numeric.integer.int.decimal.dec.range.end.curlrc"
+				4: name: "punctuation.separator.range.dash.curlrc"
+				5: name: "constant.numeric.integer.int.decimal.dec.range.end.curlrc"
+		}, {include: "etc#comma"}, {include: "etc#int"}]
+
 
 	# "Double-quoted" string
 	string:
@@ -106,5 +513,28 @@ repository:
 			name:  "constant.character.escape.backslash.curlrc"
 			match: '(\\\\)[\\\\"tnrv]'
 			captures:
-				1: name: "punctuation.definition.escape.backslash.gitconfig"
+				1: name: "punctuation.definition.escape.backslash.curlrc"
 		}]
+
+
+	# Web addresses
+	url:
+		patterns: [
+			{include: "#autoRefer"}
+			{include: "etc#comma"}
+			
+			match: '(?<=\\G"|^")((?:[^"\\\\]|\\\\.)*)(?=$|"|;)|(?:\\G(?<!")|^)([^\\s,]+?)(?=$|\\s|;|,)'
+			captures:
+				1: patterns: [{include: "etc#url"}, include: "#urlNoSchema"]
+				2: patterns: [{include: "etc#url"}, include: "#urlNoSchema"]
+			
+			{include: "#params"}
+			{include: "etc#bareword"}
+		]
+
+
+	# URL with missing schema (e.g., “google.com”)
+	urlNoSchema:
+		match: "(?:\\G|^)\\s*([-a-zA-Z0-9]+(?:\\.|@)[-a-zA-Z0-9]+.*)\\s*"
+		captures:
+			1: name: "constant.other.reference.link.underline.url.curlrc"
