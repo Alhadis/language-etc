@@ -1,0 +1,25 @@
+name: "Hosts file"
+scopeName: "source.hosts"
+fileTypes: ["hosts"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "etc#ip"}
+			{include: "#loopback"}
+			{include: "#host"}
+		]
+	
+	# Compressed form of IPv6's loopback address
+	loopback:
+		name: "constant.numeric.other.ip-address"
+		match: "(?<=\\s|^)(::)1"
+		captures:
+			1: name: "punctuation.definition.ip-address.loopback"
+
+	# Human-friendly hostname
+	host:
+		name: "string.unquoted.hostname"
+		match: "[^:\\s#][^\\s#]*"

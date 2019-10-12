@@ -13,6 +13,12 @@
 		commentStart: "# "
 		tabLength: 8
 
+".source.hosts":
+	editor:
+		commentStart: "# "
+		tabLength: 8
+		tabType: "hard"
+
 ".source.ini.npmrc":
 	editor:
 		commentStart: "; "
