@@ -19,7 +19,7 @@ Supported formats
 * [x] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
 * [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
 * [x] [`.inputrc`](https://goo.gl/cCvKes)
-* [ ] [`.wgetrc`](https://goo.gl/KRoNsn)
+* [x] [`.wgetrc`](https://goo.gl/KRoNsn)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)

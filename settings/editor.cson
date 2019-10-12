@@ -4,7 +4,8 @@
  .source.inputrc,
  .source.nanorc,
  .source.opts,
- .source.ssh-config":
+ .source.ssh-config,
+ .source.wgetrc":
 	editor:
 		commentStart: "# "
 
