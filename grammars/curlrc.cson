@@ -358,7 +358,7 @@ repository:
 			{match: "\\+",         name: "keyword.control.permit-protocol.curlrc"}
 			{match: "-",           name: "keyword.control.deny-protocol.curlrc"}
 			{match: "=",           name: "keyword.control.permit-protocol.only.curlrc"}
-			{include: "esc#comma"}
+			{include: "etc#comma"}
 		]
 	
 	
