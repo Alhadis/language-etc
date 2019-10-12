@@ -1,0 +1,263 @@
+name: "Readline Init File"
+scopeName: "source.inputrc"
+fileTypes: ["inputrc"]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		(readline|inputrc)
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		readline
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#include"}
+			{include: "#conditional"}
+			{include: "#variable"}
+			{include: "#keyBinding"}
+		]
+
+
+	# Comment lines
+	comment:
+		name:  "comment.line.number-sign.ini.inputrc"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.ini.inputrc"
+	
+	
+	# $if … [$else] … $endif
+	conditional:
+		patterns: [{
+			name:  "meta.conditional.inputrc"
+			begin: "(?i)^\\s*((\\$)if)(?=\\s|$)(.*)"
+			end:   "(?i)^\\s*((\\$)endif)(?=\\s|$)"
+			beginCaptures:
+				1: name: "keyword.control.flow.if.inputrc"
+				2: name: "punctuation.definition.directive.inputrc"
+				3: patterns: [include: "#conditions"]
+			endCaptures:
+				1: name: "keyword.control.flow.endif.inputrc"
+				2: name: "punctuation.definition.directive.inputrc"
+			patterns: [include: "#main"]
+		},{
+			match: "(?i)^\\s*((\\$)(else|endif))(?=\\s|$)"
+			beginCaptures:
+				1: name: "keyword.control.flow.$3.inputrc"
+				2: name: "punctuation.definition.directive.inputrc"
+		}]
+
+
+	# Stuff following a leading `$if …`
+	conditions:
+		patterns: [{
+			# $if mode = [emacs|vi]
+			match: "(?i)(?:^|\\G)\\s*(mode)\\s*(==|=|!=)\\s*(?:(emacs|vi)(?=\\s|$))?"
+			captures:
+				1: name: "variable.parameter.condition.mode.inputrc"
+				2: name: "keyword.operator.comparison.inputrc"
+				3: name: "constant.language.editing-mode.inputrc"
+		},{
+			# $if term = [terminal-name]
+			match: "(?i)(?:^|\\G)\\s*(term)\\s*(==|=|!=)\\s*(\\S.*?)\\s*$"
+			captures:
+				1: name: "variable.parameter.condition.term.inputrc"
+				2: name: "keyword.operator.comparison.inputrc"
+				3: name: "constant.language.terminal-type.inputrc"
+		},{
+			# $if version = [number]
+			match: "(?i)(?:^|\\G)\\s*(version)\\s*(==|=|!=|<=|>=|<|>)\\s*(?:([-+]?[.\\d]+))?"
+			captures:
+				1: name: "variable.parameter.condition.version.inputrc"
+				2: name: "keyword.operator.comparison.inputrc"
+				3: patterns: [include: "etc#num"]
+		},{
+			# $if [variable] = [value]
+			match: "(?i)(?:^|\\G)\\s*([^\\s!=#]+)\\s*(==|=|!=)\\s*(?:(on|off)(?=\\s|$)|(\\S.*))?"
+			captures:
+				1: name: "variable.parameter.condition.named.inputrc"
+				2: name: "keyword.operator.comparison.inputrc"
+				3: name: "constant.logical.bool.boolean.${3:/downcase}.inputrc"
+				4: name: "string.unquoted.inputrc"
+		},{
+			# $if [application]
+			match: "(?i)(?:^|\\G)\\s*([^\\s!=#]+)\\s*$"
+			captures:
+				1: name: "variable.parameter.condition.application.inputrc"
+		}]
+	
+
+
+	# $include /path/to/file
+	include:
+		name:  "meta.include.inputrc"
+		begin: "^\\s*((\\$)include)(?=\\s|$)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.control.directive.include.inputrc"
+			2: name: "punctuation.definition.directive.inputrc"
+		contentName: "string.unquoted.file.path.inputrc"
+		patterns: [include: "#escapes"]
+	
+	
+	# Escape sequences
+	escapes:
+		patterns: [
+			{match: "\\\\a",   name: "constant.character.escape.alert.inputrc"}
+			{match: "\\\\b",   name: "constant.character.escape.backspace.inputrc"}
+			{match: "\\\\d",   name: "constant.character.escape.delete.inputrc"}
+			{match: "\\\\f",   name: "constant.character.escape.form-feed.inputrc"}
+			{match: "\\\\n",   name: "constant.character.escape.newline.inputrc"}
+			{match: "\\\\r",   name: "constant.character.escape.carriage-return.inputrc"}
+			{match: "\\\\t",   name: "constant.character.escape.horizontal-tab.inputrc"}
+			{match: "\\\\v",   name: "constant.character.escape.vertical-tab.inputrc"}
+			{match: "\\\\C",   name: "constant.character.escape.control-prefix.inputrc"}
+			{match: "\\\\M",   name: "constant.character.escape.meta-prefix.inputrc"}
+			{match: "\\\\e",   name: "constant.character.escape.literal.inputrc"}
+			{match: "\x5C{2}", name: "constant.character.escape.backslash.inputrc"}
+			{match: "\\\\\"",  name: "constant.character.escape.quote.double.inputrc"}
+			{match: "\\\\'",   name: "constant.character.escape.quote.single.inputrc"}
+			
+			{match: "\\\\[0-7]{1,3}", name: "constant.character.escape.codepoint.octal.inputrc"}
+			{match: "\\\\x[a-fA-F0-9]{1,2}", name: "constant.character.escape.codepoint.hex.inputrc"}
+		]
+	
+	
+	# Key bindings
+	keyBinding:
+		name: "meta.key-binding.inputrc"
+		begin: "(?i)^\\s*(?!set(?:\\s|$)|\\$)(?=[^\\s#])"
+		end:   "$"
+		patterns: [{
+			include: "#keyName"
+		},{
+			begin: ":[ \\t]*"
+			end:   "(?=$)"
+			beginCaptures:
+				0: patterns: [include: "etc#colon"]
+			patterns: [{
+				# Quoted strings are interpreted by readline(3) as macros
+				name:  "string.quoted.double.macro.inputrc"
+				begin: '\\G"'
+				end:   '"|(?=$)'
+				beginCaptures: 0: name: "punctuation.definition.string.begin.inputrc"
+				endCaptures:   0: name: "punctuation.definition.string.end.inputrc"
+				patterns: [include: "#escapes"]
+			},{
+				name:  "string.quoted.single.macro.inputrc"
+				begin: "\\G'"
+				end:   "'|(?=$)"
+				beginCaptures: 0: name: "punctuation.definition.string.begin.inputrc"
+				endCaptures:   0: name: "punctuation.definition.string.end.inputrc"
+				patterns: [include: "#escapes"]
+			},{
+				# Unquoted values interpreted as the name of a command/function
+				name:  "entity.name.function.inputrc"
+				match: "\\G([-\\w]+)"
+			},{
+				# Ignore trailing text
+				name:  "comment.line.ignored.inputrc"
+				begin: "(?<=['\"\\s])\\s*(?=\\S)"
+				end:   "$"
+			}]
+		}]
+	
+	keyName:
+		patterns: [{
+			# "Double-quoted" key
+			name: "meta.key-name.quoted.inputrc"
+			begin: '\\G(")'
+			end:   '(")|(?=$)'
+			beginCaptures:
+				0: name: "string.quoted.double.inputrc"
+				1: name: "punctuation.definition.string.begin.inputrc"
+			endCaptures:
+				0: name: "string.quoted.double.inputrc"
+				1: name: "punctuation.definition.string.end.inputrc"
+			patterns: [include: "#keyNameInnards"]
+		},{
+			# 'Single-quoted' key
+			name: "meta.key-name.quoted.inputrc"
+			begin: "\\G(')"
+			end:   "(')|(?=$)"
+			beginCaptures:
+				0: name: "string.quoted.single.inputrc"
+				1: name: "punctuation.definition.string.begin.inputrc"
+			endCaptures:
+				0: name: "string.quoted.single.inputrc"
+				1: name: "punctuation.definition.string.end.inputrc"
+			patterns: [include: "#keyNameInnards"]
+		},{
+			# Unquoted key
+			name: "meta.key-name.unquoted.inputrc"
+			match: "\\G((?:[^\\\\:\\s]|\\\\.)+)"
+			captures:
+				1: patterns: [include: "#keyNameInnards"]
+		}]
+	
+	keyNameInnards:
+		patterns: [{
+			match: "(?i)(-)?\\b(CONTROL|DEL|ESCAPE|ESC|LFD|META|NEWLINE|RETURN|RET|RUBOUT|SPACE|SPC|TAB)\\b"
+			captures:
+				1: name: "punctuation.separator.dash.hyphen.inputrc"
+				2: name: "constant.character.key-name.symbolic.inputrc"
+		},{
+			include: "#escapes"
+		},{
+			match: "(-)?(\\S)"
+			captures:
+				1: name: "punctuation.separator.dash.hyphen.inputrc"
+				2: name: "constant.character.key-name.literal.inputrc"
+		}]
+
+	
+	# Variable assignments
+	variable:
+		begin: "(?i)^\\s*(set)(?=\\s|$)[ \\t]*"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.set.inputrc"
+		patterns: [{
+			# Bell style
+			begin: "(?i)\\G(bell-style)(?=\\s|$)"
+			end:   "(?i)(visible|audible|none)(?=\\s|$)|(?=$|#|\\S)"
+			beginCaptures: 1: name: "variable.assignment.inputrc"
+			endCaptures:   1: name: "constant.language.bell-style.inputrc"
+		},{
+			# Editing mode
+			begin: "(?i)\\G(editing-mode)(?=\\s|$)"
+			end:   "(?i)(emacs|vi)(?=\\s|$)|(?=$|#|\\S)"
+			beginCaptures: 1: name: "variable.assignment.inputrc"
+			endCaptures:   1: name: "constant.language.editing-mode.inputrc"
+		},{
+			# String-type variables
+			begin: "(?i)\\G(comment-begin|emacs-mode-string|vi-(?:cmd|ins)-mode-string)(?=\\s|$)\\s*"
+			end:   "(?=$)"
+			contentName: "string.unquoted.inputc"
+			beginCaptures:
+				1: name: "variable.assignment.inputrc"
+			patterns: [include: "#escapes"]
+		},{
+			# Anything else
+			begin: "(?i)\\G([-a-z0-9]+)(?=\\s|$)"
+			end:   "(?i)(?:(on|off)(?=\\s|$)|([^#\\s]+))|(?=$|#)"
+			beginCaptures:
+				1: name: "variable.assignment.inputrc"
+			endCaptures:
+				1: name: "constant.logical.bool.boolean.${1:/downcase}.inputrc"
+				2: patterns: [
+					{include: "etc#num"}
+					{include: "etc#bareword"}
+				]
+		}]

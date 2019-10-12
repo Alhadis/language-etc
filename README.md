@@ -18,7 +18,7 @@ Supported formats
 * [x] [`.nanorc`](https://www.nano-editor.org/dist/v2.1/nanorc.5.html)
 * [x] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
 * [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
-* [ ] [`.inputrc`](https://goo.gl/cCvKes)
+* [x] [`.inputrc`](https://goo.gl/cCvKes)
 * [ ] [`.wgetrc`](https://goo.gl/KRoNsn)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
