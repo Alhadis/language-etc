@@ -25,6 +25,7 @@ Supported formats
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
+* [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)

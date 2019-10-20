@@ -10,7 +10,6 @@ patterns: [
 	{include: "#colon"}
 	{include: "#eql"}
 	{include: "#dot"}
-	{include: "#bareword"}
 ]
 
 repository:
@@ -20,10 +19,30 @@ repository:
 		name: "punctuation.separator.delimiter.comma"
 		match: ","
 
-	# Comments
+	# Comment-line; alias for `#commentHash`
 	comment:
+		patterns: [include: "#commentHash"]
+
+	# ## Hash-style comments ##
+	commentHash:
 		name:  "comment.line.number-sign"
 		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment"
+
+	# ;; Semicolon-style comment ;;
+	commentSemi:
+		name: "comment.line.semicolon"
+		begin: ";+"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment"
+	
+	# // C++ style double-slash comments
+	commentSlash:
+		name: "comment.line.double-slash"
+		begin: "//"
 		end:   "$"
 		beginCaptures:
 			0: name: "punctuation.definition.comment"
@@ -38,15 +57,57 @@ repository:
 		name:  "constant.logical.bool.boolean.${1:/downcase}"
 		match: "\\b(true|false|TRUE|FALSE)\\b"
 
+	# Unpaired bracket/brace/parenthesis
+	bracket:
+		patterns: [
+			{name: "\\{", name: "punctuation.definition.bracket.curly.brace.begin"}
+			{name: "\\}", name: "punctuation.definition.bracket.curly.brace.end"}
+			{name: "\\[", name: "punctuation.definition.bracket.square.begin"}
+			{name: "\\]", name: "punctuation.definition.bracket.square.end"}
+			{name: "\\(", name: "punctuation.definition.bracket.round.parenthesis.begin"}
+			{name: "\\)", name: "punctuation.definition.bracket.round.parenthesis.end"}
+			{name: "<",   name: "punctuation.definition.bracket.angle.begin"}
+			{name: ">",   name: "punctuation.definition.bracket.angle.end"}
+		]
+	
 	# ...↓
 	colon:
 		name: "keyword.operator.assignment.key-value.colon"
 		match: ":"
 
-	# Dots
+	# Dash/US‒ASCII “hyphen‒minus” (U+002D)
+	dash:
+		name: "punctuation.delimiter.separator.dash.hyphen"
+		match: "-"
+
+	# Dots/full-stops/periods/whatever
+	dots:
+		patterns: [
+			{include: "#ellipsis"}  # ...
+			{include: "#dotPair"}   # ..
+			{include: "#dot"}       # .
+		]
+
+	# Dot: .
 	dot:
 		name: "punctuation.delimiter.separator.property.period.dot"
 		match: "\\."
+	
+	# Lazy ellipsis: ‥
+	dotPair:
+		name: "keyword.operator.punctuation.dots.splat.range.spread.rest"
+		match: "\\.\\.|‥"
+	
+	# Full-blown ellipsis: ...
+	ellipsis:
+		name: "keyword.operator.punctuation.ellipsis.splat.range.spread.rest"
+		match: "\\.{3}|…"
+
+	# Overblown ellipsis: ........................
+	dotTrail:
+		name: "punctuation.delimiter.separator.dotted.border.leader.dots"
+		match: "\\.{4,}"
+
 
 	# Escape (Backslash-prefixed anything)
 	esc:
@@ -77,6 +138,17 @@ repository:
 	floatNoExp:
 		name: "constant.numeric.float.real.decimal.dec"
 		match: "[-+]?(?:[0-9]*\\.[0-9]+|[0-9]+\\.)++"
+
+
+	# Hexadecimal, +possibly-signed value
+	hex:
+		name: "constant.numeric.integer.int.hexadecimal.hex"
+		match: "[-+]?[A-Fa-f0-9]+"
+
+	# Hexadecimal, digits only
+	hexNoSign:
+		name: "constant.numeric.integer.int.hexadecimal.hex"
+		match: "[A-Fa-f0-9]+"
 
 
 	# Integer
@@ -245,7 +317,7 @@ repository:
 			5:  name: "meta.minor.release-number"
 			6:  patterns: [include: "#dot"]
 			7:  name: "meta.patch.release-number"
-			8:  name: "punctuation.delimiter.separator.dash.hyphen"
+			8:  patterns: [include: "#dash"]
 			9:  name: "meta.prerelease.release-number", patterns: [include: "#dot"]
 			10: name: "punctuation.delimiter.separator.plus"
 			11: name: "meta.build-metadata", patterns: [include: "#dot"]

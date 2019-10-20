@@ -52,11 +52,19 @@ repository:
 				match: "\\G(=)(\\S*)"
 				captures:
 					1: name: "etc#eql"
-					2: patterns: [include: "etc"]
+					2: patterns: [include: "#value"]
 			},{
 				# Any other argument
 				match: "\\G\\s+(?!#|-)(\\S+)"
 				captures:
-					1: patterns: [include: "etc"]
+					1: patterns: [include: "#value"]
 			}]
 		}]
+
+
+	# Stuff matched inside a tokenised argument-value
+	optionValue:
+		patterns: [
+			{include: "etc"}
+			{include: "etc#bareword"}
+		]
