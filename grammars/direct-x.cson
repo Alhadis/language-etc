@@ -1,6 +1,7 @@
 name: "DirectX 3D File"
 scopeName: "source.direct-x"
 fileTypes: ["x"]
+firstLineMatch: "\\Axof 0303(?:txt|bin|tzip|bzip)\\b"
 patterns: [include: "#main"]
 
 repository:
