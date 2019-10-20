@@ -11,6 +11,7 @@ repository:
 			{include: "#fhs"}
 			{include: "#programs"}
 			{include: "#sections"}
+			{include: "#defaultOpts"}
 			{include: "#decompressor"}
 		]
 	
@@ -44,14 +45,13 @@ repository:
 	# Program name/arguments
 	programs:
 		name: "meta.field.${1:/downcase}-path.man-conf"
-		begin: """(?x) ^ \\s*
+		match: """(?x) ^ \\s*
 			(BROWSER|CAT|COL|COMPRESS_EXT|COMPRESS|CMP|EQN|GRAP|HTMLPAGER
 			|JNEQN|JNROFF|NEQN|NROFF|PAGER|PIC|REFER|TBL|TROFF|VGRIND)
-			(?=\\s|$)"""
-		end: "$"
-		beginCaptures:
+			(?=\\s|$) (.*)"""
+		captures:
 			1: name: "keyword.control.${1:/downcase}.man-conf"
-		patterns: [include: "#programArgs"]
+			2: patterns: [include: "#programArgs"]
 	
 	programArgs:
 		patterns: [
@@ -64,28 +64,27 @@ repository:
 	# List of section numbers: 1:8:7:3:3p…
 	sections:
 		name:  "meta.field.mansect.man-conf"
-		begin: "^\\s*(MANSECT)(?=\\s|$)"
-		end:   "$"
-		beginCaptures:
+		match: "^\\s*(MANSECT)(?=\\s|$)(.*)"
+		captures:
 			1: name: "keyword.control.${1:/downcase}.man-conf"
-		patterns: [
-			{include: "etc#colon"}
-			{match: "[^:\\s]+", name: "constant.numeric.section.man-conf"}
-		]
+			2: patterns: [
+				{include: "etc#colon"}
+				{match: "[^:\\s]+", name: "constant.numeric.section.man-conf"}
+			]
 
 
 	defaultOpts:
 		name:  "meta.field.default-options.man-conf"
-		begin: "^\\s*(MANDEFOPTIONS)(?=\\s|$)"
-		end:   "$"
-		patterns: [include: "source.opts"]
+		match: "^\\s*(MANDEFOPTIONS)(?=\\s|$)(.*)"
+		captures:
+			1: name: "keyword.control.${1:/downcase}.man-conf"
+			2: patterns: [include: "source.opts"]
 
 
 	decompressor:
 		name:  "meta.field.decompressor.man-conf"
-		begin: "^\\s*((\\.)[a-zA-Z0-9]+)"
-		end:   "$"
-		beginCaptures:
+		match: "^\\s*((\\.)[a-zA-Z0-9]+)(.*)"
+		captures:
 			1: name: "variable.parameter.decompressor.suffix.man-conf"
 			2: name: "punctuation.definition.field.dot.period.full-stop.man-conf"
-		patterns: [include: "#programArgs"]
+			3: patterns: [include: "#programArgs"]
