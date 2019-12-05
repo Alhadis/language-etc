@@ -1288,8 +1288,8 @@ repository:
 			# Paired brackets, matched recursively
 			begin: "\\("
 			end:   "\\)"
-			beginCaptures: 0: name: "punctuation.definition.parameters.begin.bracket.round.m4"
-			endCaptures:   0: name: "punctuation.definition.parameters.end.bracket.round.m4"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.bracket.round.m4"
+			endCaptures:   0: name: "punctuation.definition.string.end.bracket.round.m4"
 			patterns: [include: "#macro-innards"]
 			
 			{include: "etc#comma"}
@@ -1313,8 +1313,8 @@ repository:
 		name: "string.quoted.double.other.asymmetric.m4"
 		begin: "`"
 		end:   "'"
-		beginCaptures: 0: name: "punctuation.definition.string.begin.m4"
-		endCaptures:   0: name: "punctuation.definition.string.end.m4"
+		beginCaptures: 0: name: "punctuation.definition.string.asymmetric.begin.m4"
+		endCaptures:   0: name: "punctuation.definition.string.asymmetric.end.m4"
 		patterns: [
 			{include: "#string-asymmetric"}
 			{include: "#variables"}
@@ -1326,8 +1326,8 @@ repository:
 		name:  "constant.other.quoted.m4"
 		begin: "\\["
 		end:   "\\]"
-		beginCaptures: 0: patterns: [include: "etc#bracket"]
-		endCaptures:   0: patterns: [include: "etc#bracket"]
+		beginCaptures: 0: name: "punctuation.definition.string.square.bracket.begin.m4"
+		endCaptures:   0: name: "punctuation.definition.string.square.bracket.end.m4"
 		patterns: [
 			{include: "#string-bracketed"}
 			{include: "#variables"}
