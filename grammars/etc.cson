@@ -60,14 +60,14 @@ repository:
 	# Unpaired bracket/brace/parenthesis
 	bracket:
 		patterns: [
-			{name: "\\{", name: "punctuation.definition.bracket.curly.brace.begin"}
-			{name: "\\}", name: "punctuation.definition.bracket.curly.brace.end"}
-			{name: "\\[", name: "punctuation.definition.bracket.square.begin"}
-			{name: "\\]", name: "punctuation.definition.bracket.square.end"}
-			{name: "\\(", name: "punctuation.definition.bracket.round.parenthesis.begin"}
-			{name: "\\)", name: "punctuation.definition.bracket.round.parenthesis.end"}
-			{name: "<",   name: "punctuation.definition.bracket.angle.begin"}
-			{name: ">",   name: "punctuation.definition.bracket.angle.end"}
+			{match: "\\{", name: "punctuation.definition.bracket.curly.brace.begin"}
+			{match: "\\}", name: "punctuation.definition.bracket.curly.brace.end"}
+			{match: "\\[", name: "punctuation.definition.bracket.square.begin"}
+			{match: "\\]", name: "punctuation.definition.bracket.square.end"}
+			{match: "\\(", name: "punctuation.definition.bracket.round.parenthesis.begin"}
+			{match: "\\)", name: "punctuation.definition.bracket.round.parenthesis.end"}
+			{match: "<",   name: "punctuation.definition.bracket.angle.begin"}
+			{match: ">",   name: "punctuation.definition.bracket.angle.end"}
 		]
 	
 	# ...↓
