@@ -22,8 +22,9 @@ fileTypes: [
 	"vscodeignore"
 	
 	# Almost-compatible formats (syntax doesn't conflict with Git)
-	".bazaar/ignore"
+	"bazaar/ignore"
 	"bzrignore"
+	"cpyskip.txt"
 	"cvsignore"
 	"slugignore"
 ]
