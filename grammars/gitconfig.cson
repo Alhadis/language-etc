@@ -224,7 +224,7 @@ repository:
 		},{
 			# URL-type fields
 			name:  "meta.variable-field.gitconfig"
-			begin: "(?i)\\b(email)\\s*(=)"
+			begin: "(?i)\\b(email|url)\\s*(=)"
 			end:   "$|(?=#|;)"
 			beginCaptures:
 				1: name: "variable.parameter.assignment.gitconfig"
