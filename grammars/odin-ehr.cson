@@ -1,0 +1,385 @@
+name: "Object Data Instance Notation"
+scopeName: "source.odin-ehr"
+fileTypes: ["odin"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#string"}
+			{include: "#boolean"}
+			{include: "#date"}
+			{include: "#path"}
+			{include: "etc#num"}
+			{include: "etc#url"}
+			{include: "#interval"}
+			{include: "#schema"}
+			{include: "#attribute"}
+			{include: "#type"}
+			{include: "#block"}
+			{include: "#plugin"}
+			{include: "#typedef"}
+			{include: "#term"}
+			{include: "#key"}
+			{include: "#escape"}
+			{include: "etc#ellipsis"}
+			{match: ",", name: "punctuation.delimiter.comma.odin-ehr"}
+			{match: "=", name: "keyword.operator.assignment.odin-ehr"}
+			{match: ";", name: "punctuation.terminator.statement.odin-ehr"}
+		]
+	
+	
+	# attribute_name
+	attribute:
+		name:  "entity.other.attribute-name.odin-ehr"
+		match: "\\b(?=[a-z])[A-Za-z0-9_]+"
+	
+	
+	# Stuff that groks like `< … >`
+	block:
+		name:  "meta.block.odin-ehr"
+		begin: "<"
+		end:   ">"
+		beginCaptures: 0: name: "punctuation.definition.block.begin.odin-ehr"
+		endCaptures:   0: name: "punctuation.definition.block.end.odin-ehr"
+		patterns: [include: "#main"]
+		
+	
+	# False / True
+	boolean:
+		name:  "constant.language.boolean.${1:/downcase}.odin-ehr"
+		match: "(?i)\\b(False|True)\\b"
+	
+	
+	# Comment lines
+	comment:
+		name:  "comment.line.double-dash.odin-ehr"
+		begin: "--"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.odin-ehr"
+
+
+	# Dates, times and durations
+	date:
+		patterns: [{
+			# yyyy-[MM|??]-[dd|??]T[hh|??]:[mm|??]:??
+			match: "((\\d{4})(-)(\\d{2}|\\?{2})(-)(\\d{2}|\\?{2})(T))((\\d{2}|\\?{2})(:)(\\d{2}|\\?{2})(:)(\\d{2}|\\?{2}))"
+			captures:
+				1:  name: "meta.date.partial.odin-ehr"
+				2:  name: "constant.numeric.year.odin-ehr"
+				3:  name: "punctuation.separator.date.dash.odin-ehr"
+				4:  name: "constant.numeric.month.odin-ehr"
+				5:  name: "punctuation.separator.date.dash.odin-ehr"
+				6:  name: "constant.numeric.day.odin-ehr"
+				7:  name: "constant.language.datetime-separator.odin-ehr"
+				8:  name: "meta.time.partial.odin-ehr"
+				9:  name: "constant.numeric.hour.odin-ehr"
+				10: name: "punctuation.separator.time.colon.odin-ehr"
+				11: name: "constant.numeric.minute.odin-ehr"
+				12: name: "punctuation.separator.time.colon.odin-ehr"
+				13: name: "constant.numeric.second.odin-ehr"
+		},{
+			# hh:[mm|??]:??
+			name:  "meta.time.partial.odin-ehr"
+			match: "(\\d{2})(:)(\\d{2}|\\?{2})(:)(\\?{2})"
+			captures:
+				1: name: "constant.numeric.hour.odin-ehr"
+				2: name: "punctuation.separator.time.colon.odin-ehr"
+				3: name: "constant.numeric.minute.odin-ehr"
+				4: name: "punctuation.separator.time.colon.odin-ehr"
+				5: name: "constant.numeric.second.odin-ehr"
+		},{
+			# yyyy-[MM|??]-??
+			name:  "meta.date.partial.odin-ehr"
+			match: "(\\d{4})(-)(\\d{2}|\\?{2})(-)(\\?{2})"
+			captures:
+				1: name: "constant.numeric.year.odin-ehr"
+				2: name: "punctuation.separator.date.dash.odin-ehr"
+				3: name: "constant.numeric.month.odin-ehr"
+				4: name: "punctuation.separator.date.dash.odin-ehr"
+				5: name: "constant.numeric.day.odin-ehr"
+		},{
+			# hh:mm:ss[,sss][Z|+/-hhmm]
+			name:  "meta.time.odin-ehr"
+			match: "(\\d{2})(:)(\\d{2})(:)(\\d{2})((,)(\\d+))?(Z|([-+])\\d{4})?"
+			captures:
+				1: name: "constant.numeric.hour.odin-ehr"
+				2: name: "punctuation.separator.time.colon.odin-ehr"
+				3: name: "constant.numeric.minute.odin-ehr"
+				4: name: "punctuation.separator.time.colon.odin-ehr"
+				5: name: "constant.numeric.second.odin-ehr"
+				6: name: "meta.time.fraction.odin-ehr"
+				7: name: "punctuation.separator.time.comma.odin-ehr"
+				8: name: "constant.numeric.second.odin-ehr"
+				9: name: "constant.numeric.timezone.odin-ehr"
+				10: name: "punctuation.separator.timezone.odin-ehr"
+		},{
+			# yyyy-MM-ddThh[:mm]
+			match: "((\\d{4})(-)(\\d{2})(-)(\\d{2})(T))((\\d{2})(?:(:)(\\d{2}))?)"
+			captures:
+				1:  name: "meta.date.partial.odin-ehr"
+				2:  name: "constant.numeric.year.odin-ehr"
+				3:  name: "punctuation.separator.date.dash.odin-ehr"
+				4:  name: "constant.numeric.month.odin-ehr"
+				5:  name: "punctuation.separator.date.dash.odin-ehr"
+				6:  name: "constant.numeric.day.odin-ehr"
+				7:  name: "constant.language.datetime-separator.odin-ehr"
+				8:  name: "meta.time.partial.odin-ehr"
+				9:  name: "constant.numeric.hour.odin-ehr"
+				10: name: "punctuation.separator.time.colon.odin-ehr"
+				11: name: "constant.numeric.minute.odin-ehr"
+		},{
+			# yyyy-MM-dd
+			name:  "meta.date.odin-ehr"
+			match: "(\\d{4})(-)(\\d{2})(-)(\\d{2})(T(?=\\d{2}))?"
+			captures:
+				1: name: "constant.numeric.year.odin-ehr"
+				2: name: "punctuation.separator.date.dash.odin-ehr"
+				3: name: "constant.numeric.month.odin-ehr"
+				4: name: "punctuation.separator.date.dash.odin-ehr"
+				5: name: "constant.numeric.day.odin-ehr"
+				6: name: "constant.language.datetime-separator.odin-ehr"
+		},{
+			# yyyy-MM
+			name:  "meta.date.partial.odin-ehr"
+			match: "(\\d{4})(-)(\\d{2})"
+			captures:
+				1: name: "constant.numeric.year.odin-ehr"
+				2: name: "punctuation.separator.date.dash.odin-ehr"
+				3: name: "constant.numeric.month.odin-ehr"
+		},{
+			# hh:mm
+			name:  "meta.time.partial.odin-ehr"
+			match: "(\\d{2})(:)(\\d{2})"
+			captures:
+				1: name: "constant.numeric.hour.odin-ehr"
+				2: name: "punctuation.separator.time.colon.odin-ehr"
+				3: name: "constant.numeric.minute.odin-ehr"
+		},{
+			# Period/duration
+			name: "constant.other.duration.odin-ehr"
+			match: "P(?:T?\\d+T?[YMWDHMS])+"
+		}]
+
+	
+	# Escape sequences (§3.2)
+	escape:
+		patterns: [{
+			# Recognised sequences: \r \n \t \\ \" \'
+			name:  "constant.character.escape.odin-ehr"
+			match: "(\\\\)[rnt\\\\\"']"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.odin-ehr"
+		},{
+			# Unicode codepoints: \uFFFD, \u0000FFFD
+			name:  "constant.character.escape.codepoint.odin-ehr"
+			match: "(\\\\)u(?:[0-9A-Fa-f]{4}){1,2}"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.odin-ehr"
+		},{
+			# HTML-style character entities
+			name: "constant.character.entity.odin-ehr"
+			match: "(&)\\w+(;)"
+			captures:
+				1: name: "punctuation.definition.entity.begin.odin-ehr"
+				2: name: "punctuation.definition.entity.end.odin-ehr"
+		},{
+			# Invalid sequences: anything else
+			name: "invalid.illegal.bad-escape.odin-ehr"
+			match: "\\\\."
+		}]
+
+
+	# Array[style] access[0]
+	key:
+		name:  "meta.key.member.item-access.odin-ehr"
+		begin: "\\["
+		end:   "\\]"
+		beginCaptures: 0: patterns: [include: "etc#bracket"]
+		endCaptures:   0: patterns: [include: "etc#bracket"]
+		patterns: [include: "#main"]
+
+
+	# Infinity constant
+	infinity:
+		name: "constant.language.numeric.infinity.odin-ehr"
+		match: "(?i)(?:-|\\b)infinity\\b|\\*"
+
+
+	# |Interval|
+	interval:
+		name:  "meta.interval.odin-ehr"
+		begin: "\\|"
+		end:   "\\|"
+		beginCaptures: 0: name: "punctuation.definition.interval.begin.odin─ehr"
+		endCaptures:   0: name: "punctuation.definition.interval.end.odin─ehr"
+		patterns: [
+			
+			# Workaround to stop `etc#num` matching |0..5| as `0.0 0.5`
+			match: "([-+]?(?:[\\de]|\\.(?=[-+\\de]))+)(\\.\\.)"
+			captures:
+				1: patterns: [include: "etc#num"]
+				2: patterns: [include: "etc#dotPair"]
+			
+			{match: ">=|<=|>|<",     name: "keyword.operator.comparison.odin-ehr"}
+			{match: "\\+/-",         name: "keyword.operator.variance.odin-ehr"}
+			{match: ",",             name: "invalid.illegal.unexpected-comma.odin-ehr"}
+			{include: "#infinity"}
+			{include: "#date"}
+			{include: "etc#dotPair"}
+			{include: "etc#num"}
+		]
+
+
+	# Path
+	path:
+		patterns: [{
+			# [/[/]] attr_name [[object_id]]
+			name:  "meta.path-segment.odin-ehr"
+			begin: """(?x)
+				(?:(//?)([A-Za-z0-9_]+)|(//?))
+				((\\\[))
+			"""
+			end:   "(\\])"
+			beginCaptures:
+				1: patterns: [include: "#pathSep"]
+				2: patterns: [include: "#attribute", {include: "#type"}]
+				3: patterns: [include: "#pathSep"]
+				4: name: "meta.object-id.odin-ehr"
+				5: name: "punctuation.definition.object-id.begin.odin-ehr"
+			endCaptures:
+				0: name: "meta.object-id.odin-ehr"
+				1: name: "punctuation.definition.object-id.end.odin-ehr"
+			contentName: "meta.object-id.odin-ehr"
+			patterns: [include: "#main"]
+		},{
+			# [//?] attr_name
+			name: "meta.path-segment.odin-ehr"
+			match: "(//?)([A-Za-z0-9_]+)"
+			captures:
+				1: patterns: [include: "#pathSep"]
+				2: patterns: [include: "#attribute", {include: "#type"}]
+		}, include: "#pathSep"]
+	
+	
+	# Forward slashes
+	pathSep:
+		patterns: [
+			{match: "//", name: "punctuation.separator.path.double-slash.odin-ehr"}
+			{match: "/",  name: "punctuation.separator.path.slash.odin-ehr"}
+		]
+	
+	
+	# “Plug-in” blocks
+	plugin:
+		patterns: [{
+			# (name) <# … #>
+			name:  "markup.code.other.odin-ehr"
+			begin: "((\\()\\s*(\\w+)\\s*(\\)))\\s*((<#))"
+			end:   "(#>)"
+			beginCaptures:
+				1: name: "meta.type.odin-ehr"
+				2: patterns: [include: "etc#bracket"]
+				3: name: "storage.type.class.syntax.odin-ehr"
+				4: patterns: [include: "etc#bracket"]
+				5: name: "meta.block.plugin.odin-ehr"
+				6: name: "punctuation.definition.plugin.block.begin.odin-ehr"
+			endCaptures:
+				0: name: "meta.block.plugin.odin-ehr"
+				1: name: "punctuation.definition.plugin.block.end.odin-ehr"
+			contentName: "source.embedded.${3:/downcase}.odin-ehr"
+			patterns: [include: "#pluginInnards"]
+		},{
+			# <# … #>
+			name:  "meta.block.plugin.odin-ehr"
+			begin: "<#"
+			end:   "#>"
+			beginCaptures: 0: name: "punctuation.definition.block.begin.odin-ehr"
+			endCaptures:   0: name: "punctuation.definition.block.end.odin-ehr"
+			contentName: "markup.raw.code.other.odin-ehr"
+			patterns: [include: "#pluginInnards"]
+		}]
+	
+	
+	# Stuff matched between <# … #>
+	pluginInnards:
+		patterns: [
+			{include: "#comment"}
+			{match: "{|}", captures: 0: patterns: [include: "etc#bracket"]}
+		]
+
+
+	# @schema_name
+	schema:
+		name:  "variable.other.schema.odin-ehr"
+		match: "(@)[A-Za-z0-9_]+"
+		captures:
+			1: name: "punctuation.definition.variable.schema.odin-ehr"
+
+
+	# Quoted strings
+	string:
+		patterns: [{
+			# "Double-quoted"
+			name:  "string.quoted.double.odin-ehr"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.odin-ehr"
+			endCaptures:   0: name: "punctuation.definition.string.end.odin-ehr"
+			patterns: [include: "#escape"]
+		},{
+			# 'Single-quoted'
+			name:  "string.quoted.single.odin-ehr"
+			begin: "'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.odin-ehr"
+			endCaptures:   0: name: "punctuation.definition.string.end.odin-ehr"
+			patterns: [include: "#escape"]
+		}]
+
+
+	# Coded term: [terminology_id::code]
+	term:
+		name:  "meta.coded-term.odin-ehr"
+		begin: "\\[(?=[^\\]:]+::)"
+		end:   "\\]"
+		beginCaptures: 0: name: "punctuation.definition.coded-term.begin.odin-ehr"
+		endCaptures:   0: name: "punctuation.definition.coded-term.end.odin-ehr"
+		patterns: [
+			{match: "\\G\\s*([-\\w]+)", name: "constant.other.coded-term.name.odin-ehr"}
+			{match: "::",               name: "punctuation.separator.key-value.odin-ehr"}
+			{match: "[-.\\w]+",         name: "constant.other.coded-term.code.odin-ehr"}
+			{include: "#termVersion"}
+			{include: "#main"}
+		]
+
+	
+	# Term version: `(3.1)`, `(3.5 (4))`
+	termVersion:
+		name:  "meta.term-version.odin-ehr"
+		begin: "\\("
+		end:   "\\)"
+		beginCaptures: 0: patterns: [include: "etc#bracket"]
+		endCaptures:   0: patterns: [include: "etc#bracket"]
+		patterns: [
+			{include: "etc#num"}
+			{include: "#termVersion"}
+		]
+
+
+	# TYPE_NAME
+	type:
+		name: "storage.type.name.odin-ehr"
+		match: "\\b(?=[A-Z])[A-Za-z0-9_]+"
+
+
+	# (TYPE_DEFINITION) … (I_THINK)
+	typedef:
+		name:  "meta.type.odin-ehr"
+		begin: "\\("
+		end:   "\\)"
+		beginCaptures: 0: patterns: [include: "etc#bracket"]
+		endCaptures:   0: patterns: [include: "etc#bracket"]
+		patterns: [include: "#main"]

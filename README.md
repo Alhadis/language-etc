@@ -28,6 +28,7 @@ Supported formats
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
+* [x] [Object Data Instance Notation](https://git.io/JvetL)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [ ] [Tags index](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
