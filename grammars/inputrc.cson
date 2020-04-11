@@ -145,7 +145,7 @@ repository:
 			begin: ":[ \\t]*"
 			end:   "(?=$)"
 			beginCaptures:
-				0: patterns: [include: "etc#colon"]
+				0: patterns: [include: "etc#kolon"]
 			patterns: [{
 				# Quoted strings are interpreted by readline(3) as macros
 				name:  "string.quoted.double.macro.inputrc"

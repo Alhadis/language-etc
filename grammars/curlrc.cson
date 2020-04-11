@@ -35,12 +35,12 @@ repository:
 			match: "([^\\s:;]+)(:)([^\\s=:;]*)"
 			captures:
 				1: name: "constant.other.auth-info.curlrc"
-				2: patterns: [include: "etc#colon"]
+				2: patterns: [include: "etc#kolon"]
 				3: name: "constant.other.auth-info.curlrc"
 		},{
 			match: "(:)([^\\s:;]*)"
 			captures:
-				1: patterns: [include: "etc#colon"]
+				1: patterns: [include: "etc#kolon"]
 				2: name: "constant.other.auth-info.curlrc"
 		}]
 
@@ -75,7 +75,7 @@ repository:
 		match: "(?:\\G|^)\\s*([-A-Za-z0-9]+)\\s*(?:(:)\\s*(.*)|(;))"
 		captures:
 			1: name: "entity.name.header.curlrc"
-			2: patterns: [include: "etc#colon"]
+			2: patterns: [include: "etc#kolon"]
 			3: name: "string.unquoted.header-value.curlrc"
 			4: name: "punctuation.terminator.statement.semicolon.curlrc"
 
@@ -366,7 +366,7 @@ repository:
 	separators:
 		patterns: [
 			{include: "etc#eql"}
-			{include: "etc#colon"}
+			{include: "etc#kolon"}
 		]
 
 

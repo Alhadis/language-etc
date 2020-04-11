@@ -30,7 +30,7 @@ repository:
 			1: name: "keyword.operator.field.man-conf"
 		patterns: [
 			{include: "etc#str"}
-			{include: "etc#colon"}
+			{include: "etc#kolon"}
 			{include: "#arg"}
 		]
 
@@ -68,7 +68,7 @@ repository:
 		captures:
 			1: name: "keyword.control.${1:/downcase}.man-conf"
 			2: patterns: [
-				{include: "etc#colon"}
+				{include: "etc#kolon"}
 				{match: "[^:\\s]+", name: "constant.numeric.section.man-conf"}
 			]
 

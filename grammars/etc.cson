@@ -72,7 +72,7 @@ repository:
 	
 	# ...↓
 	colon:
-		name: "keyword.operator.assignment.key-value.colon"
+		name: "punctuation.delimiter.separator.colon"
 		match: ":"
 
 	# Dash/US‒ASCII “hyphen‒minus” (U+002D)
@@ -175,6 +175,12 @@ repository:
 		match: "(?:\\d+\\.){3,}\\d+(?=\\s|$)"
 		captures:
 			0: patterns: [include: "#dot"]
+	
+	
+	# Colon with keyword highlighting
+	kolon:
+		name: "keyword.operator.assignment.key-value.colon"
+		match: ":"
 	
 	
 	# Both floats and integers
