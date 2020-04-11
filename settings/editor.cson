@@ -9,7 +9,8 @@
 	editor:
 		commentStart: "# "
 
-".source.man-conf":
+".source.man-conf,
+ .source.generic-db":
 	editor:
 		commentStart: "# "
 		tabLength: 8

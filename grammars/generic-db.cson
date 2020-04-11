@@ -1,0 +1,25 @@
+# Highlighting for generic plain-text database files
+name: "Generic Database"
+scopeName: "source.generic-db"
+fileTypes: ["birthtoken", "flowers"]
+patterns: [include: "#main"]
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#record"}
+		]
+
+	record:
+		name: "meta.record.generic-db"
+		begin: "^(?=\\s*[^#:\\s])"
+		end: "$"
+		patterns: [
+			{include: "etc#colon"}
+			{include: "etc#tab"}
+			{include: "#field"}
+		]
+	
+	field:
+		name: "constant.other.field.generic-db"
+		match: "[^#:\\s][^:\\t]*"

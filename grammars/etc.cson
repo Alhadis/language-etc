@@ -217,6 +217,15 @@ repository:
 		patterns: [include: "#esc"]
 
 
+	# Horizontal tab (U+0009)
+	tab:
+		patterns: [
+			{match: "^\\t+", captures: 0: patterns: [match: "\\t", name: "punctuation.whitespace.leading.tab.hard-tab"]}
+			{match: "\\t+$", captures: 0: patterns: [match: "\\t", name: "punctuation.whitespace.trailing.tab.hard-tab"]}
+			{match: "\\t",   name: "punctuation.whitespace.tab.hard-tab"}
+		]
+
+
 	# URL/e-mail address
 	url:
 		patterns: [{
