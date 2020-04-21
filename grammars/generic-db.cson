@@ -1,7 +1,7 @@
 # Highlighting for generic plain-text database files
 name: "Generic Database"
 scopeName: "source.generic-db"
-fileTypes: ["birthtoken", "flowers"]
+fileTypes: ["birthtoken", "flowers", "shells"]
 patterns: [include: "#main"]
 repository:
 	main:
