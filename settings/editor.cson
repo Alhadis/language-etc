@@ -37,3 +37,7 @@
 ".source.odin-ehr":
 	editor:
 		commentStart: "-- "
+
+".source.openbsd-pkg.contents":
+	editor:
+		commentStart: "@comment "

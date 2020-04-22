@@ -29,6 +29,7 @@ Supported formats
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
+* [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [ ] [Tags index](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)

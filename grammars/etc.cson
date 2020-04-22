@@ -191,6 +191,102 @@ repository:
 		]
 	
 	
+	# C-like unary and binary operators
+	op:
+		patterns: [
+			{include: "#opBitAssign"}
+			{include: "#opMathAssign"}
+			{include: "#opBit"}
+			{include: "#opFix"}
+			{include: "#opCmp"}
+			{include: "#opLog"}
+			{include: "#opMath"}
+		]
+	
+	# Bitwise operators
+	opBit:
+		patterns: [
+			{match: "\\^", name: "keyword.operator.bitwise.xor"}
+			{match: "~",   name: "keyword.operator.bitwise.not"}
+			{match: "&",   name: "keyword.operator.bitwise.and"}
+			{match: "\\|", name: "keyword.operator.bitwise.or"}
+			{match: "<<",  name: "keyword.operator.bitwise.shift.left"}
+			{match: ">>>", name: "keyword.operator.bitwise.shift.right.unsigned"}
+			{match: ">>",  name: "keyword.operator.bitwise.shift.right.signed"}
+		]
+	
+	# Bitwise assignment operators
+	opBitAssign:
+		patterns: [
+			{match: "\\^=", name: "keyword.operator.assignment.bitwise.xor"}
+			{match: "~=",   name: "keyword.operator.assignment.bitwise.not"}
+			{match: "&=",   name: "keyword.operator.assignment.bitwise.and"}
+			{match: "\\|=", name: "keyword.operator.assignment.bitwise.or"}
+			{match: "<<=",  name: "keyword.operator.assignment.bitwise.shift.left"}
+			{match: ">>>=", name: "keyword.operator.assignment.bitwise.shift.right.unsigned"}
+			{match: ">>=",  name: "keyword.operator.assignment.bitwise.shift.right.signed"}
+		]
+	
+	# Comparison operators
+	opCmp:
+		patterns: [
+			{match: "<=>", name: "keyword.operator.logical.comparison.starship.spaceship"}
+			{match: "<=",  name: "keyword.operator.logical.comparison.less-than-or-equal-to.lte"}
+			{match: "<",   name: "keyword.operator.logical.comparison.less-than.lt"}
+			{match: ">=",  name: "keyword.operator.logical.comparison.greater-than-or-equal-to.gte"}
+			{match: ">",   name: "keyword.operator.logical.comparison.greater-than.gt"}
+			{match: "===", name: "keyword.operator.logical.comparison.equal-to.equals.equal.eql.eq.strict"}
+			{match: "==",  name: "keyword.operator.logical.comparison.equal-to.equals.equal.eql.eq"}
+			{match: "!==", name: "keyword.operator.logical.comparison.not-equal-to.not-equal.unequal.neql.ne.strict"}
+			{match: "!=",  name: "keyword.operator.logical.comparison.not-equal-to.not-equal.unequal.neql.ne"}
+		]
+	
+	# Prefix and postfix
+	opFix:
+		patterns: [
+			{match: "\\+{2}", name: "keyword.operator.increment"}
+			{match: "-{2}",   name: "keyword.operator.decrement"}
+		]
+	
+	# Logical operators
+	opLog:
+		patterns: [
+			{match: "!!",     name: "keyword.operator.logical.boolean.cast"}
+			{match: "!",      name: "keyword.operator.logical.boolean.not.negation.negate"}
+			{match: "&&",     name: "keyword.operator.logical.boolean.and"}
+			{match: "\\|{2}", name: "keyword.operator.logical.boolean.or"}
+			{match: "\\?{2}", name: "keyword.operator.logical.boolean.or.nullish"}
+		]
+	
+	# Mathematical operators
+	opMath:
+		patterns: [
+			{match: "\\*{2}|\\^", name: "keyword.operator.arithmetic.exponentiation.exponent.exp.power"}
+			{match: "\\+",        name: "keyword.operator.arithmetic.addition.add.plus"}
+			{match: "\\*",        name: "keyword.operator.arithmetic.multiplication.multiply.times"}
+			{match: "/",          name: "keyword.operator.arithmetic.division.divide"}
+			{match: "%",          name: "keyword.operator.arithmetic.remainder.modulo.modulus.mod"}
+			
+			# This should really be `\p{Dash}`, but Atom whines about an "invalid character property",
+			# even though ECMAScript, Oniguruma and Perl's regular expression syntaxes all support it.
+			name: "keyword.operator.arithmetic.subtraction.subtract.minus"
+			match: "[-\u058A\u05BE\u1400\u1806‐-―\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]"
+		]
+	
+	# Arithmetical assignment operators
+	opMathAssign:
+		patterns: [
+			{match: "\\*{2}=",    name: "keyword.operator.assignment.arithmetic.exponentiation.exponent.exp.power"}
+			{match: "\\+=",       name: "keyword.operator.assignment.arithmetic.addition.add.plus"}
+			{match: "\\*=",       name: "keyword.operator.assignment.arithmetic.multiplication.multiply.times"}
+			{match: "/=",         name: "keyword.operator.assignment.arithmetic.division.divide"}
+			{match: "%=",         name: "keyword.operator.assignment.arithmetic.remainder.modulo.modulus.mod"}
+			
+			name: "keyword.operator.assignment.arithmetic.subtraction.subtract.minus"
+			match: "[-\u058A\u05BE\u1400\u1806‐-―\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D]="
+		]
+	
+	
 	# Strings
 	str:
 		patterns: [

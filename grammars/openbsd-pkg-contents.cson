@@ -1,0 +1,54 @@
+# Source: package(5), OpenBSD::PackingList(3p)
+name: "OpenBSD Packing List"
+scopeName: "source.openbsd-pkg.contents"
+fileTypes: ["+CONTENTS"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#annotation"}
+			{include: "#file"}
+		]
+
+	# @annotation “…”
+	annotation:
+		name:  "meta.annotation.${3:/downcase}-field.openbsd-pkg.contents"
+		begin: "^((@)([-\\w]+))\\b"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.annotation.openbsd-pkg.contents"
+			2: name: "punctuation.definition.annotation.openbsd-pkg.contents"
+		patterns: [
+			{begin: "(?<=@comment)\\G\\s*", end: "(?=\\s*$)", contentName: "comment.line.at-sign.openbsd-pkg.contents"}
+			{begin: "(?<=@name)\\G\\s*",    end: "(?=\\s*$)", contentName: "entity.name.package.contents"}
+			{begin: "(?<=@depend)\\G\\s*",  end: "(?=\\s*$)", patterns: [include: "#dependency"]}
+			{begin: "(?<=@url)\\G\\s*",     end: "(?=\\s*$)", patterns: [include: "etc#url"]}
+			{begin: "(?<=@ts|size)\\G\\s*", end: "(?=\\s*$)", patterns: [include: "etc#num"]}
+			{begin: "(?<=@sha)\\G\\s*",     end: "(?=\\s*$)", contentName: "constant.numeric.base64.sha256.openbsd-pkg.contents"}
+			{begin: "\\G\\s*",              end: "(?=\\s*$)", contentName: "constant.other.annotation.openbsd-pkg.contents"}
+		]
+
+	# Dependency versioning info
+	dependency:
+		patterns: [{
+			name:  "entity.name.package.path.openbsd-pkg.contents"
+			match: "\\G[^\\s:]+(?=:|$)"
+		}, {
+			name: "meta.package-spec.openbsd-pkg.contents"
+			match: "(?<=:)([-_\\w]+)(-)((?:[\\dPp]|[^\\s:\\w])+)(?=:|$)"
+			captures:
+				1: name: "entity.other.package.spec.openbsd-pkg.contents"
+				2: patterns: [include: "etc#dash"]
+				3: patterns: [
+					{include: "etc#op"}
+					{include: "etc#comma"}
+					{include: "etc#version"}
+				]
+		}, include: "etc#colon"]
+	
+	# /file/name
+	file:
+		name:  "string.unquoted.filename.openbsd-pkg.contents"
+		begin: "^(?!@)"
+		end:   "$"
