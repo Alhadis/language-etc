@@ -87,11 +87,12 @@ repository:
 	# Embedded CSS highlighting for `style="…"` attributes
 	attrValueCSS:
 		begin: "(?i)(?<=style)\\G\\s*(=)"
-		end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
-		beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
-		endCaptures: 1:
-			name: "string.unquoted.xml.svg"
-			patterns: [include: "source.css#rule-list-innards"]
+		end:   "(?=\\s*(?:[%?/]?>))|(?<=[\"'])([^\\s>]*)|(?:\\G|^)\\s*([^\\s\"'>]+)"
+		beginCaptures:
+			1: name: "punctuation.separator.key-value.xml.svg"
+		endCaptures:
+			1: name: "invalid.illegal.syntax.xml.svg"
+			2: name: "string.unquoted.xml.svg", patterns: [include: "source.css#rule-list-innards"]
 		patterns: [{
 			# Keep leading whitespace out of tokenised strings (below)
 			match: "(?:\\G|^)\\s+(?!/?>)"
@@ -131,9 +132,12 @@ repository:
 	# Usual string highlighting
 	attrValuePlain:
 		begin: "\\s*(=)"
-		end:   "(?=\\s*(?:[%?/]?>))|([^\\s\"'>]+)|(?<=[\"'])"
-		beginCaptures: 1: name: "punctuation.separator.key-value.xml.svg"
-		endCaptures:   1: name: "string.unquoted.xml.svg"
+		end:   "(?=\\s*(?:[%?/]?>))|(?<=[\"'])([^\\s>]*)|(?:\\G|^)\\s*([^\\s\"'>]+)"
+		beginCaptures:
+			1: name: "punctuation.separator.key-value.xml.svg"
+		endCaptures:
+			1: name: "invalid.illegal.syntax.xml.svg"
+			2: name: "string.unquoted.xml.svg"
 		patterns: [{
 			# Keep leading whitespace out of tokenised strings (below)
 			match: "(?:\\G|^)\\s+(?!/?>)"
