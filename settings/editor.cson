@@ -34,6 +34,11 @@
 		commentStart: "<!--"
 		commentEnd:   "-->"
 
+".text.xml.svg, .source.embedded.xml.svg":
+	editor:
+		increaseIndentPattern: "<[^\\s>/]+(?=\\s|>)[^>]*>\\s*$"
+		decreaseIndentPattern: "</[^>]+>\\s*$|^\\s*</(?i:style)\\s*>"
+
 ".source.odin-ehr":
 	editor:
 		commentStart: "-- "
