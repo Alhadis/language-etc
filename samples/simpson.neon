@@ -1,0 +1,34 @@
+name: Homer    # this is a comment
+
+address:
+	street: 742 Evergreen Terrace
+	city: Springfield
+	country: USA
+
+phones: { home: 555-6528, work: 555-7334 }
+
+children:
+	- Bart
+	- Lisa
+	- Maggie
+
+entity: Column(type=int, nulls=yes)
+
+string: 'quotes string'
+
+multi line string: '''
+	one line
+	second line
+	third line
+'''
+
+special types:
+	escape sequences: "\u2026 \t \n \r \f \b \x65"
+	bool: [true, false]
+	bool alternative: [yes, no]
+	exponent number: +0123.45e6
+	hex number: 0xAB01
+	octal number: 0o666
+	binary number: 0b11100111
+	date: 2020-02-02
+	date time: 2020-02-02 12:34:56

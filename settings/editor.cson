@@ -3,6 +3,7 @@
  .source.gitattributes,
  .source.inputrc,
  .source.nanorc,
+ .source.neon,
  .source.opts,
  .source.ssh-config,
  .source.wgetrc":

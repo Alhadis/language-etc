@@ -28,6 +28,7 @@ Supported formats
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
+* [x] [NEON](https://ne-on.org/)
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
 * [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
