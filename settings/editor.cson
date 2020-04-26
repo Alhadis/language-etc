@@ -5,6 +5,7 @@
  .source.nanorc,
  .source.neon,
  .source.opts,
+ .source.sieve,
  .source.ssh-config,
  .source.wgetrc":
 	editor:

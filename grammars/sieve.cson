@@ -1,0 +1,299 @@
+name: "Sieve"
+scopeName: "source.sieve"
+fileTypes: ["sieve", "rfc5228.txt"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		sieve
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		sieve
+	(?=\\s|:|$)
+"""
+
+patterns: [{
+	begin: "\\A\\s*$"
+	end:   "(?=^\\s*\\S)"
+},{
+	# TEMP: Remove this when done
+	begin: "^(?=Network Working Group)"
+	end:   "(?=A)B"
+	patterns: [{
+		begin: """(?x) ^
+			(?=.{72}$)
+			(?=9\\. +Extended Example\\s)
+			(?=.+P\\. Guenther, Ed\\.$)
+		"""
+		end: "(?=^\\S)"
+		beginCaptures:
+			0: name:  "text.plain"
+		patterns: [{
+			name:  "text.plain"
+			begin: "\\G"
+			end:   "(?=^\\s+#)"
+		},{
+			begin: "^(?=\\s+#)"
+			end:   "(?=^10\\. |^Guenther\\b)"
+			patterns: [include: "#main"]
+		}]
+	},{
+		# ABNF section
+		name:  "meta.grammar-section"
+		begin: "^(?=8\\.1\\. +Lexical Tokens)"
+		end:   "(?=^9)"
+		patterns: [{
+			begin: "^(?=\\s+[^\\s=]+\\s+(=)\\s)"
+			end:   "^(?! {3,}\\S)(?!\\s*$)"
+			patterns: [include: "source.abnf"]
+		},{
+			name: "text.plain"
+			match: "^(?!9).+"
+		}]
+	},{
+		name:  "meta.example"
+		begin: "^(\\s+)(Example:)(?=\\s|$)"
+		end:   "^(?!\\s*$|\\1\\s+\\S)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.indent"
+			2: name: "text.plain"
+		patterns: [include: "#main"]
+	},{
+		name:  "text.plain"
+		match: "^.+"
+	}]
+},{
+	begin: "(?!^Network Working Group)(?=^\\s*\\S)"
+	end:   "(?=A)B"
+	patterns: [include: "#main"]
+}, include: "#main"]
+
+
+repository:
+	main:
+		patterns: [
+			{include: "#comments"}
+			{include: "#conditional"}
+			{include: "#require"}
+			{include: "#arguments"}
+			{include: "#block"}
+			{include: "#action"}
+		]
+	
+	
+	# Action commands matched inside a block
+	action:
+		name:  "meta.action.sieve"
+		begin: "\\b(?!\\d)\\w+"
+		end:   "(?=\\s*(?:$|\\]|\\)|[};,]))"
+		beginCaptures:
+			0: name: "keyword.operator.action.sieve"
+		patterns: [include: "#arguments"]
+	
+	
+	# Stuff matched after a command
+	arguments:
+		patterns: [
+			{include: "#taggedArgument"}
+			{include: "#comparator"}
+			{include: "#stringBlock"}
+			{include: "#testList"}
+			{include: "#stringList"}
+			{include: "#strings"}
+			{include: "#numbers"}
+			{include: "#comments"}
+			{include: "#punctuation"}
+		]
+	
+	
+	# { … }
+	block:
+		name:  "meta.block.sieve"
+		begin: "{"
+		end:   "}"
+		beginCaptures: 0: name: "punctuation.definition.brace.bracket.curly.begin.sieve"
+		endCaptures:   0: name: "punctuation.definition.brace.bracket.curly.end.sieve"
+		patterns: [include: "#main"]
+	
+	
+	# Comments
+	comments:
+		patterns: [{
+			# Hash-style
+			name:  "comment.line.number-sign.sieve"
+			begin: "#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.sieve"
+		},{
+			# /* Multiline */
+			name:  "comment.block.bracketed.sieve"
+			begin: "/\\*"
+			end:   "\\*/"
+			beginCaptures: 0: name: "punctuation.definition.comment.begin.sieve"
+			endCaptures:   0: name: "punctuation.definition.comment.end.sieve"
+		}]
+
+
+	# Comparators
+	comparator:
+		patterns: [{
+			# "i;octet" "i;ascii-casemap"
+			name: "storage.modifier.comparator.${3:/downcase}.sieve"
+			match: '(?i)(")i(;)(octet|ascii-casemap)(")'
+			captures:
+				1: name: "punctuation.definition.comparator.begin.sieve"
+				2: name: "punctuation.separator.delimiter.semicolon.sieve"
+				4: name: "punctuation.definition.comparator.end.sieve"
+		},{
+			# :comparator "something-else"
+			match: '(?i)(?<=:comparator)\\s*((")(?!i;(?:octet|ascii-casemap)")[^"]+("))'
+			captures:
+				1: name: "storage.modifier.comparator.non-standard.sieve"
+				2: name: "punctuation.definition.comparator.begin.sieve"
+				3: name: "punctuation.definition.comparator.end.sieve"
+		}]
+
+
+	# if … elsif … else
+	conditional:
+		name:  "meta.conditional.${1:/downcase}.sieve"
+		begin: "(?i)\\b(if|elsif|else)(?=[\\s{]|$)"
+		end:   "(?<=\\})"
+		beginCaptures:
+			1: name: "keyword.control.flow.${1:/downcase}.sieve"
+		patterns: [
+			{include: "#test"}
+			{include: "#comment"}
+			{include: "#block"}
+		]
+	
+	
+	# ${hex:AF E0}, ${unicode:FEFF}
+	encodedCharacter:
+		name:  "meta.encoded-character.${2:/downcase}.sieve"
+		match: "(?i)(\\$\\{)(hex|unicode)(:)([\\s0-9A-Fa-f]+)(})"
+		captures:
+			1: name: "punctuation.section.embedded.begin.sieve"
+			2: name: "entity.name.encoding.${2:/downcase}.sieve"
+			3: name: "punctuation.delimiter.separator.colon.sieve"
+			4: patterns: [match: "[0-9A-Fa-f]+", name: "constant.numeric.integer.hex.sieve"]
+			5: name: "punctuation.section.embedded.end.sieve"
+	
+	
+	# Number with optional trailing quantifier (K/M/G)
+	numbers:
+		name:  "constant.numeric.integer.int.decimal.sieve"
+		match: "(?i)\\d+(K|M|G)?"
+		captures:
+			1: name: "constant.language.quantifier.${1:/downcase}b.sieve"
+	
+	
+	# Noisy symbols
+	punctuation:
+		patterns: [
+			{match: ",", name: "punctuation.separator.delimiter.sieve"}
+			{match: ";", name: "punctuation.terminator.statement.semicolon.sieve"}
+		]
+	
+	
+	# require ["foo", "bar"];
+	require:
+		name:  "keyword.control.directive.include.require.sieve"
+		match: "\\b(?i:require)(?=\\s|$|\\[)"
+	
+	
+	# "Quoted strings"
+	strings:
+		name:  "string.quoted.double.sieve"
+		begin: '"'
+		end:   '"'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.sieve"
+		endCaptures:   0: name: "punctuation.definition.string.end.sieve"
+		patterns: [
+			{include: "#encodedCharacter"}
+			{include: "#stringEscapes"}
+		]
+	
+	
+	# Multi-line string
+	stringBlock:
+		name:  "meta.multi-line.sieve"
+		begin: "(?i)\\b(text(:))\\s*(?:$|(#.*))"
+		end:   "^\\.$"
+		beginCaptures:
+			1: name: "storage.type.text.sieve"
+			2: name: "punctuation.definition.heredoc.begin.sieve"
+			3: patterns: [include: "#comments"]
+		endCaptures:
+			0: name: "punctuation.definition.heredoc.end.sieve"
+		contentName: "string.unquoted.heredoc.multiline.sieve"
+	
+	
+	# Backslashed stuff
+	stringEscapes:
+		patterns: [{
+			# \\
+			name:  "constant.character.escape.backslash.sieve"
+			match: "(\\\\)\\\\"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.sieve"
+		},{
+			# \"
+			name:  "constant.character.escape.quote.sieve"
+			match: '(\\\\)"'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.sieve"
+		},{
+			# \…
+			name:  "invalid.deprecated.unknown-escape.sieve"
+			match: "(\\\\)."
+			captures:
+				1: name: "punctuation.definition.escape.backslash.sieve"
+		}]
+	
+	
+	# ["String", "list"]
+	stringList:
+		name:  "meta.string-list.sieve"
+		begin: "\\["
+		end:   "\\]"
+		beginCaptures: 0: name: "punctuation.definition.bracket.square.begin.sieve"
+		endCaptures:   0: name: "punctuation.definition.bracket.square.end.sieve"
+		patterns: [include: "#main"]
+		
+	
+	# :tagged :arguments
+	taggedArgument:
+		name:  "keyword.operator.tagged-argument.sieve"
+		match: "(:)(?!\\d)\\w+"
+		captures:
+			1: name: "punctuation.definition.colon.tagged-argument.sieve"
+
+
+	# Test conditions
+	test:
+		name:  "meta.tests.sieve"
+		begin: "(?:\\G|^|(?<=,|\\())\\s*(?i:(not)\\s+)?((?:[^\\s(){},:\\[\\]#/]|/[^*])++)"
+		end:   "(?=\\s*[{,\\)])"
+		beginCaptures:
+			1: name: "entity.name.function.test.negation.sieve"
+			2: name: "entity.name.function.test.sieve"
+		patterns: [include: "#arguments"]
+
+
+	# ( Test list )
+	testList:
+		name:  "meta.test-list.sieve"
+		begin: "\\("
+		end:   "\\)"
+		beginCaptures: 0: name: "punctuation.definition.bracket.round.begin.sieve"
+		endCaptures:   0: name: "punctuation.definition.bracket.round.end.sieve"
+		patterns: [
+			{include: "#test"}
+			{include: "#main"}
+		]
