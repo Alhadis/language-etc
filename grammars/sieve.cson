@@ -1,6 +1,6 @@
 name: "Sieve"
 scopeName: "source.sieve"
-fileTypes: ["sieve", "rfc5228.txt"]
+fileTypes: ["sieve"]
 firstLineMatch: """(?ix)
 
 	# Emacs modeline
@@ -15,63 +15,8 @@ firstLineMatch: """(?ix)
 		sieve
 	(?=\\s|:|$)
 """
-
-patterns: [{
-	begin: "\\A\\s*$"
-	end:   "(?=^\\s*\\S)"
-},{
-	# TEMP: Remove this when done
-	begin: "^(?=Network Working Group)"
-	end:   "(?=A)B"
-	patterns: [{
-		begin: """(?x) ^
-			(?=.{72}$)
-			(?=9\\. +Extended Example\\s)
-			(?=.+P\\. Guenther, Ed\\.$)
-		"""
-		end: "(?=^\\S)"
-		beginCaptures:
-			0: name:  "text.plain"
-		patterns: [{
-			name:  "text.plain"
-			begin: "\\G"
-			end:   "(?=^\\s+#)"
-		},{
-			begin: "^(?=\\s+#)"
-			end:   "(?=^10\\. |^Guenther\\b)"
-			patterns: [include: "#main"]
-		}]
-	},{
-		# ABNF section
-		name:  "meta.grammar-section"
-		begin: "^(?=8\\.1\\. +Lexical Tokens)"
-		end:   "(?=^9)"
-		patterns: [{
-			begin: "^(?=\\s+[^\\s=]+\\s+(=)\\s)"
-			end:   "^(?! {3,}\\S)(?!\\s*$)"
-			patterns: [include: "source.abnf"]
-		},{
-			name: "text.plain"
-			match: "^(?!9).+"
-		}]
-	},{
-		name:  "meta.example"
-		begin: "^(\\s+)(Example:)(?=\\s|$)"
-		end:   "^(?!\\s*$|\\1\\s+\\S)"
-		beginCaptures:
-			1: name: "punctuation.whitespace.leading.indent"
-			2: name: "text.plain"
-		patterns: [include: "#main"]
-	},{
-		name:  "text.plain"
-		match: "^.+"
-	}]
-},{
-	begin: "(?!^Network Working Group)(?=^\\s*\\S)"
-	end:   "(?=A)B"
-	patterns: [include: "#main"]
-}, include: "#main"]
-
+limitLineLength: no
+patterns: [include: "#main"]
 
 repository:
 	main:
