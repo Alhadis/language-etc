@@ -1,6 +1,6 @@
 {
 	"name": "language-etc",
-	"version": "0.0.0",
+	"version": "v0.0.0",
 	"description": "Syntax highlighting for various configs and file-formats too specific to warrant their own packages.",
 	"repository": "https://github.com/Alhadis/language-etc",
 	"author": "John Gardner <gardnerjohng@gmail.com>",
