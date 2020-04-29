@@ -24,6 +24,7 @@ Supported formats
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
+* [x] [LCOV tracefiles](https://linux.die.net/man/1/geninfo)
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)

@@ -1,0 +1,193 @@
+# Source: geninfo(1) (cf. v8/src/d8/d8.cc:2102)
+name: "LCOV Tracefile"
+scopeName: "source.lcov"
+fileTypes: ["lcov", "info"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#TN"}
+			{include: "#SF"}
+			{include: "#FN"}
+			{include: "#FNDA"}
+			{include: "#FNF"}
+			{include: "#FNH"}
+			{include: "#DA"}
+			{include: "#LH"}
+			{include: "#LF"}
+			{include: "#BRDA"}
+			{include: "#BRF"}
+			{include: "#BRH"}
+			{include: "#end"}
+		]
+
+
+	# BRDA:<line number>,<block number>,<branch number>,<taken>
+	BRDA:
+		name:  "meta.branch-coverage.lcov"
+		begin: "^(BRDA)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [{
+			match: "\\G\\s*(\\d+)\\s*(,)\\s*(\\d+)\\s*(,)\\s*(\\d+)\\s*(,)\\s*(?:(\\d+)|(-))"
+			captures:
+				1: name: "entity.other.branch.line-number.lcov"
+				2: patterns: [include: "etc#comma"]
+				3: name: "entity.other.branch.block-number.lcov"
+				4: patterns: [include: "etc#comma"]
+				5: name: "entity.other.branch.branch-number.lcov"
+				6: patterns: [include: "etc#comma"]
+				7: name: "entity.other.branch.use-count.lcov"
+				8: name: "comment.other.never-executed.lcov"
+		}]
+
+
+	# BRF:<number of branches found>
+	BRF:
+		name:  "meta.number-of-branches.found.lcov"
+		begin: "^(BRF)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# BRH:<number of branches hit>
+	BRH:
+		name:  "meta.number-of-branches.found.lcov"
+		begin: "^(BRH)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# TN:<test name>
+	TN:
+		name:  "meta.test-name.lcov"
+		begin: "^(TN)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		contentName: "markup.heading.1.test-name.lcov"
+
+
+	# SF:<absolute path to the source file>
+	SF:
+		name:  "meta.source-file.lcov"
+		begin: "^(SF)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		contentName: "entity.name.source-file.path.lcov"
+
+
+	# FN:<line number of function start>,<function name>
+	FN:
+		name:  "meta.function-name.lcov"
+		begin: "^(FN)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [
+			{include: "etc#comma"}
+			{match: "\\G\\d+",      name: "constant.numeric.line-number.function-start.lcov"}
+			{match: "(?!\\d)\\S.*", name: "entity.function.name.lcov"}
+		]
+
+
+	# FNDA:<execution count>,<function name>
+	FNDA:
+		name:  "meta.execution-count.lcov"
+		begin: "^(FNDA)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [
+			{include: "etc#comma"}
+			{match: "\\G\\d+",      name: "constant.numeric.execution-count.lcov"}
+			{match: "(?!\\d)\\S.*", name: "entity.function.name.lcov"}
+		]
+
+
+	# FNF:<number of functions found>
+	FNF:
+		name:  "meta.number-of-functions.found.lcov"
+		begin: "^(FNF)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# FNH:<number of function hit>
+	FNH:
+		name:  "meta.number-of-functions.hit.lcov"
+		begin: "^(FNH)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# DA:<line number>,<execution count>[,<checksum>]
+	DA:
+		name:  "meta.execution-counts.lcov"
+		begin: "^(DA)(:)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [{
+			# Line number + Execution count
+			match: "\\G\\s*(\\d+)(,)(\\d+)"
+			captures:
+				1: name: "constant.numeric.line-number.lcov"
+				2: patterns: [include: "etc#comma"]
+				3: name: "constant.numeric.execution-count.lcov"
+		},{
+			# Optional checksum
+			match: "(?<=\\d)(,)\\s*(\\S.*)\\s*$"
+			captures:
+				1: patterns: [include: "etc#comma"]
+				2: name: "string.other.md5.checksum.hash.lcov"
+		}]
+
+
+	# LH:<number of lines with a non-zero execution count>
+	LH:
+		name:  "meta.number-of-lines-with-non-zero-execution-count.lcov"
+		begin: "^(LH)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# LF:<number of instrumented lines>
+	LF:
+		name:  "meta.number-of-instrumented-lines.lcov"
+		begin: "^(LF)(:)[ \\t]*"
+		end:   "\\s*$"
+		beginCaptures:
+			1: name: "storage.type.var.lcov"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "etc#num"]
+
+
+	# End of record
+	end:
+		name:  "keyword.control.end-of-record.end.lcov"
+		match: "^end_of_record\\b"
