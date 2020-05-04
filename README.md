@@ -35,7 +35,7 @@ Supported formats
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
-* [ ] [Tags index](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
+* [x] [Tags files](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
 * [ ] [Terminfo](http://invisible-island.net/ncurses/ncurses.faq.html#which_terminfo)
 
 

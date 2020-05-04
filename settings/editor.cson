@@ -31,6 +31,12 @@
 	editor:
 		commentStart: "// "
 
+".source.tags":
+	editor:
+		commentStart: "!_TAG_COMMENT\t"
+		tabLength: 10
+		tabType: "hard"
+
 ".text.xml.svg":
 	editor:
 		commentStart: "<!--"

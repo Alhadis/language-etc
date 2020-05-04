@@ -1,0 +1,150 @@
+name: "Tags"
+scopeName: "source.tags"
+fileTypes: ["tags", "ctags", "etags"]
+patterns: [{
+	# Skip initial blank lines
+	begin: "\\A[ \\t]*$"
+	end:   "(?=[^ \\t\\r\\n])"
+},{
+	# Emacs format
+	name:  "meta.file.etags"
+	begin: "(?=\\f)"
+	end:   "(?=A)B"
+	patterns: [include: "#etags"]
+},{
+	# POSIX/Vim format
+	name:  "meta.file.ctags"
+	begin: "(?=\\S)"
+	end:   "(?=A)B"
+	patterns: [include: "#ctags"]
+}]
+
+repository:
+	# Traditional ctags(1) format
+	ctags:
+		patterns: [
+			{include: "#ctagMetadata"}
+			{include: "#ctagDefinition"}
+		]
+	
+	
+	# [name] \t [file] \t [address] (;" \t [tag-field]+)*
+	ctagDefinition:
+		name:  "meta.tag.definition.ctags"
+		match: """(?x) ^ \\s*
+			([^\\t]+) \\t+
+			([^\\t]+) \\t+
+			( (\\d+)
+			| ((/)   ((?:[^\\\\/]|\\\\.)*+)(/))
+			| ((\\?) ((?:[^\\\\?]|\\\\.)*+)(\\?))
+			) \\s*
+			((;")\\s*(.*))?
+		"""
+		captures:
+			1: name: "entity.name.tag.definition.ctags"
+			2: name: "entity.name.filename.source.ctags"
+			3: name: "meta.tag-address.ctags"
+			4: patterns: [include: "etc#int"]
+			
+			# /regexp/
+			5: name: "string.regexp.search.ctags"
+			6: name: "punctuation.definition.regexp.begin.ctags"
+			7: patterns: [include: "source.regexp"]
+			8: name: "punctuation.definition.regexp.end.ctags"
+			
+			# ?regexp?
+			9:  name: "string.regexp.search.ctags"
+			10: name: "punctuation.definition.regexp.begin.ctags"
+			11: patterns: [include: "source.regexp"]
+			12: name: "punctuation.definition.regexp.end.ctags"
+			
+			# ;" name:value
+			13: name: "comment.line.tag-fields.ctags"
+			14: name: "punctuation.definition.comment.ctags"
+			15: patterns: [include: "#fields"]
+	
+	
+	# !_TAG_{metadata}
+	ctagMetadata:
+		name:  "meta.metadata.ctags"
+		begin: "^\\s*((!)_TAG_[^\\t\\r\\n]*)(?:\\t+([^\\t\\r\\n]+))?"
+		end:   "(?=\\s*$)"
+		contentName: "comment.line.ctags"
+		beginCaptures:
+			1: name: "keyword.operator.tag.metadata.ctags"
+			2: name: "punctuation.definition.metadata.ctags"
+			3: patterns: [
+				{include: "etc#num"}
+				{include: "etc#url"}
+				{match: ".+", name: "constant.other.metadata.ctags"}
+			]
+	
+	
+	# Emacs etags(1)
+	etags:
+		patterns: [{
+			name:  "meta.section.etags"
+			begin: "^\\f$"
+			end:   "(?!\\G)(?=^\\f$)"
+			beginCaptures:
+				0: name: "punctuation.whitespace.isolated.unpadded.form-feed.etags"
+			patterns: [{
+				# [source-file] , [size-of-tag-definition-data-in-bytes]
+				name:  "meta.header.etags"
+				begin: "(?=\\G)"
+				end:   "(,\\d+)?[ \\t]*$"
+				contentName: "markup.heading.filename.source.etags"
+				endCaptures: 1: patterns: [
+					{include: "etc#comma"}
+					{include: "etc#int"}
+				]
+			},{
+				# [tag-definition-text] \x7F [tag-name] \x01 [line-number] , [byte-offset]
+				name:  "meta.tag.definition.etags"
+				match: "^([^\\x7F\\x01]+)(\\x7F)(?:([^\\x01]+)(\\x01))?(\\d+,\\d+)[ \\t]*$"
+				captures:
+					1: name: "variable.tag.definition.etags"
+					2: name: "punctuation.c0.ctrl-char.delete.etags"
+					3: name: "entity.name.tag.definition.etags"
+					4: name: "punctuation.c0.ctrl-char.delete.etags"
+					5: patterns: [{include: "etc#comma"}, {include: "etc#int"}]
+			}]
+		}]
+
+
+	# ctags(1) fields
+	fields:
+		patterns: [{
+			name:  "meta.field.$1.ctags"
+			begin: "(?:\\G|(?<=\\s|^))(function)(:)"
+			end:   "(?=\\s|$)"
+			beginCaptures:
+				1: name: "variable.assignment.ctags"
+				2: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.field-value.ctags"
+			patterns: [
+				{match: "/", name: "keyword.operator.separator.function-names.ctags"}
+				{include: "#fieldEscape"}
+			]
+		},{
+			name:  "meta.field.$1.ctags"
+			begin: "(?:\\G|(?<=\\s|^))([^:\\s]+)(:)"
+			end:   "(?=\\s|$)"
+			beginCaptures:
+				1: name: "variable.assignment.ctags"
+				2: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.field-value.ctags"
+			patterns: [include: "#fieldEscape"]
+		},{
+			# Single-letter type identifier
+			name: "constant.language.other.kind.ctags"
+			match: "(?<=\\s|^)\\w(?=\\s|$)"
+		}]
+
+
+	# Backslash-prefixed escape sequence (used in ctags(1) fields)
+	fieldEscape:
+		name: "constant.character.escape.backslash.ctags"
+		match: "(\\\\)."
+		captures:
+			1: name: "punctuation.definition.escape.backslash.ctags"
