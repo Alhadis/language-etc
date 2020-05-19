@@ -1,0 +1,114 @@
+# Direct port of Emacs' `futhark-mode'. Sources:
+# - https://futhark.readthedocs.io/en/latest/language-reference.html
+# - https://github.com/diku-dk/futhark-mode/blob/ca22b1e5/futhark-highlight.el
+name: "Futhark"
+scopeName: "source.futhark"
+fileTypes: ["fut"]
+patterns: [include: "#main"]
+firstLineMatch: """(?ix)
+
+	# Emacs modeline
+	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+		futhark
+	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+		futhark
+	(?=\\s|:|$)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#functionDefinition"}
+			{include: "#comment"}
+			{include: "#keywords"}
+			{include: "#numericTypes"}
+			{include: "#builtInTypes"}
+			{include: "#booleans"}
+			{include: "#number"}
+			{include: "#character"}
+			{include: "#var"}
+			{include: "#constructor"}
+			{include: "#operator"}
+			{include: "etc#bracket"}
+			{include: "etc"}
+		]
+	
+	functionDefinition:
+		match: "(?<![#'])\\b(let|entry|type)\\s+([_A-Za-z]['\\w]*)"
+		captures:
+			1: patterns: [include: "#keywords"]
+			2: name: "entity.name.function.futhark"
+	
+	comment:
+		name:  "comment.line.double-dash.futhark"
+		begin: "--"
+		end:   "$"
+	
+	keywords:
+		name:  "keyword.control.$1.futhark"
+		match: "(?<![#'])\\b(assert|case|do|else|entry|for|if|import|include|in|let|local|loop|match|module|open|then|type|unsafe|val|while|with)\\b(?![#'])"
+	
+	numericTypes:
+		name:  "support.type.numeric.futhark"
+		match: "(?<![#'])\\b(f32|f64|i16|i32|i64|i8|u16|u32|u64|u8)\\b(?![#'])"
+
+	builtInTypes:
+		patterns: [
+			{match: "(?<![#'])(bool)\\b(?![#'])", name: "support.type.builtin.futhark"}
+			{include: "#numericTypes"}
+		]
+	
+	booleans:
+		name: "constant.language.boolean.$1.futhark"
+		match: "(?<![#'])(true|false)\\b(?![#'])"
+
+	number:
+		name: "constant.numeric.futhark"
+		match: """(?x) -?
+			(?:
+				(?:0[xX])
+				[0-9a-fA-F]+
+				(?: \\.[0-9a-fA-F]+)?
+				(?: [Pp][+-]?[0-9]+)?
+				
+				|
+				
+				[0-9]+
+				(?:\\.[0-9]+)?
+				(?:[Ee][+-]?[0-9]+)?
+			) (?:i8|i16|i32|i64|u8|u16|u32|u64|f32|f64)?
+		"""
+
+	character:
+		name: "string.quoted.single.character.futhark"
+		match: "(')[^']?(')"
+		captures:
+			1: name: "punctuation.definition.string.begin.futhark"
+			2: name: "punctuation.definition.string.end.futhark"
+
+	var:
+		name:  "variable.other.readwrite.futhark"
+		match: "[_A-Za-z]['\\w]*"
+
+	constructor:
+		name:  "entity.name.function.constructor.futhark"
+		match: "(#)['\\w]+"
+		captures:
+			1: name: "punctuation.definition.constructor.number-sign.futhark"
+
+	operator:
+		patterns: [{
+			name:  "keyword.operator.futhark"
+			match: "[-+*/%!<>=&|@]+"
+		},{
+			name: "string.interpolated.quoted.backticks.futhark"
+			match: "(`)[^`]*(`)"
+			captures:
+				1: name: "punctuation.definition.string.begin.futhark"
+				2: name: "punctuation.definition.string.end.futhark"
+		}]

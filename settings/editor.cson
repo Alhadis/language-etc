@@ -47,7 +47,8 @@
 		increaseIndentPattern: "<[^\\s>/]+(?=\\s|>)[^>]*(?<!/)>\\s*$"
 		decreaseIndentPattern: "</[^>]+>\\s*$|^\\s*</(?i:style)\\s*>"
 
-".source.odin-ehr":
+".source.odin-ehr,
+ .source.futhark":
 	editor:
 		commentStart: "-- "
 
