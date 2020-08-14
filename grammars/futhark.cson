@@ -26,6 +26,7 @@ repository:
 			{include: "#functionDefinition"}
 			{include: "#comment"}
 			{include: "#keywords"}
+			{include: "#attribute"}
 			{include: "#numericTypes"}
 			{include: "#builtInTypes"}
 			{include: "#booleans"}
@@ -34,6 +35,7 @@ repository:
 			{include: "#var"}
 			{include: "#constructor"}
 			{include: "#operator"}
+			{match: "#"} # Inhibit `etc#comment` rule
 			{include: "etc#bracket"}
 			{include: "etc"}
 		]
@@ -52,6 +54,14 @@ repository:
 	keywords:
 		name:  "keyword.control.$1.futhark"
 		match: "(?<![#'])\\b(assert|case|do|else|entry|for|if|import|include|in|let|local|loop|match|module|open|then|type|unsafe|val|while|with)\\b(?![#'])"
+	
+	attribute:
+		name:  "meta.attribute.futhark"
+		match: "(#\\[)([^\\]]*)(\\])"
+		captures:
+			1: name: "punctuation.definition.attribute.begin.futhark"
+			2: name: "storage.modifier.attribute.futhark"
+			3: name: "punctuation.definition.attribute.end.futhark"
 	
 	numericTypes:
 		name:  "support.type.numeric.futhark"
