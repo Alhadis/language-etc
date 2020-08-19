@@ -17,6 +17,7 @@ Supported formats
 * [x] [`.gitignore`](https://git-scm.com/docs/gitignore)
 * [x] [`.hgignore`](https://www.mercurial-scm.org/wiki/.hgignore)
 * [x] [`.inputrc`](https://goo.gl/cCvKes)
+* [x] [`.mailmap`](https://git-scm.com/docs/git-check-mailmap)
 * [x] [`.nanorc`](https://www.nano-editor.org/dist/v2.1/nanorc.5.html)
 * [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)

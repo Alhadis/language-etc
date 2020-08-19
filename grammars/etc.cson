@@ -66,8 +66,10 @@ repository:
 			{match: "\\]", name: "punctuation.definition.bracket.square.end"}
 			{match: "\\(", name: "punctuation.definition.bracket.round.parenthesis.begin"}
 			{match: "\\)", name: "punctuation.definition.bracket.round.parenthesis.end"}
-			{match: "<",   name: "punctuation.definition.bracket.angle.begin"}
-			{match: ">",   name: "punctuation.definition.bracket.angle.end"}
+			{match: "<",   name: "punctuation.definition.bracket.angle.ascii.begin"}
+			{match: ">",   name: "punctuation.definition.bracket.angle.ascii.end"}
+			{match: "⟨",   name: "punctuation.definition.bracket.angle.unicode.begin"}
+			{match: "⟩",   name: "punctuation.definition.bracket.angle.unicode.end"}
 		]
 	
 	# ...↓
@@ -107,6 +109,142 @@ repository:
 	dotTrail:
 		name: "punctuation.delimiter.separator.dotted.border.leader.dots"
 		match: "\\.{4,}"
+
+
+	# E-mail address, matched informally with regards to RFC 5322
+	email:
+		patterns: [
+			{include: "#emailBracketed"}
+			{include: "#emailQuoted"}
+			{include: "#emailUnquoted"}
+		]
+	
+	
+	emailBracketed:
+		patterns: [{
+			# <ascii@angle.brackets>
+			name: "meta.email-address.bracketed.ascii.angle-brackets"
+			match: "(<)\\s*([^>@\\s]+@[^>@\\s]+)\\s*(>)"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		},{
+			# ⟨unicode@angle.brackets⟩
+			name: "meta.email-address.bracketed.unicode.angle-brackets"
+			match: "(⟨)\\s*([^⟩@\\s]+@[^⟩@\\s]+)\\s*(⟩)"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		},{
+			# «guille@mots»
+			name: "meta.email-address.bracketed.guillemots"
+			match: "(«)\\s*([^»@\\s]+@[^»@\\s]+)\\s*(»)"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		},{
+			# (round@brackets)
+			name: "meta.email-address.bracketed.round-brackets"
+			match: "(\\()\\s*([^\\)@\\s]+@[^\\)@\\s]+)\\s*(\\))"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		},{
+			# {curly@brackets}
+			name: "meta.email-address.bracketed.curly-brackets"
+			match: "({)\\s*([^}@\\s]+@[^}@\\s]+)\\s*(})"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		},{
+			# [squre@brackets]
+			name: "meta.email-address.bracketed.square-brackets"
+			match: "(\\[)\\s*([^\\]@\\s]+@[^\\]@\\s]+)\\s*(\\])"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#emailInnards"]
+				3: patterns: [include: "#bracket"]
+		}]
+
+
+	# "quoted@address.strings"
+	emailQuoted:
+		patterns: [{
+			# "straight@double.quotes"
+			name: "meta.email-address.quoted.ascii.double-quotes"
+			match: '(")\\s*([^"@\\s]+@[^"@\\s]+)\\s*(")'
+			captures:
+				0: name: "string.quoted.double"
+				1: name: "punctuation.definition.string.begin.email-address"
+				2: patterns: [include: "#emailInnards"]
+				3: name: "punctuation.definition.string.end.email-address"
+		},{
+			# “directional@double.quotes”
+			name: "meta.email-address.quoted.unicode.double-quotes"
+			match: "(“)\\s*([^”@\\s]+@[^”@\\s]+)\\s*(”)"
+			captures:
+				0: name: "string.quoted.double"
+				1: name: "punctuation.definition.string.begin.email-address"
+				2: patterns: [include: "#emailInnards"]
+				3: name: "punctuation.definition.string.end.email-address"
+		},{
+			# ‘directional@single.quotes’
+			name: "meta.email-address.quoted.unicode.single-quotes"
+			match: "(‘)\\s*([^’@\\s]+@[^’@\\s]+)\\s*(’)"
+			captures:
+				0: name: "string.quoted.single"
+				1: name: "punctuation.definition.string.begin.email-address"
+				2: patterns: [include: "#emailInnards"]
+				3: name: "punctuation.definition.string.end.email-address"
+		},{
+			# `back@ticks`
+			name: "meta.email-address.quoted.backticks"
+			match: '(`)\\s*([^`@\\s]+@[^`@\\s]+)\\s*(`)'
+			captures:
+				0: name: "string.quoted.template.backticks"
+				1: name: "punctuation.definition.string.begin.email-address"
+				2: patterns: [include: "#emailInnards"]
+				3: name: "punctuation.definition.string.end.email-address"
+		},{
+			# 'straight@single.quotes', `asymmetric@single.quotes'
+			name: "meta.email-address.quoted.single-quotes"
+			match: "(`|')\\s*([^'@\\s]+@[^'@\\s]+)\\s*(')"
+			captures:
+				0: name: "string.quoted.single"
+				1: name: "punctuation.definition.string.begin.email-address"
+				2: patterns: [include: "#emailInnards"]
+				3: name: "punctuation.definition.string.end.email-address"
+		}]
+		
+
+	# Unquoted address: local-part@domain.tld
+	emailUnquoted:
+		name: "meta.email-address.unquoted"
+		match: """(?x)
+			((?!\\.) (?:[^\\[\\(<⟨«\"'\\s@.]|\\.(?!\\.))++ @
+			([^\\[\\(<⟨«\"'\\s@.]+?\\.(?=[^\\.\\s])(?:[^\\[\\(<⟨«\"'\\s@.]|\\.(?!\\.))++))
+		"""
+		captures: 1:
+			name: "string.unquoted.email-address"
+			patterns: [include: "#emailInnards"]
+	
+	
+	# Stuff matched <inside.an.@email.address>
+	emailInnards:
+		name: "constant.other.reference.link.underline.email"
+		match: "(?:\\G|^|(?<=\\n)).+"
+		captures: 0: patterns: [{
+			match: "\\G([^@]*)(@)(.*)"
+			captures:
+				1: name: "meta.local-part"
+				2: name: "punctuation.separator.at-sign.email"
+				3: name: "meta.domain"
+		}]
 
 
 	# Escape (Backslash-prefixed anything)

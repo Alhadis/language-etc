@@ -11,7 +11,8 @@
 	editor:
 		commentStart: "# "
 
-".source.man-conf,
+".source.mailmap,
+ .source.man-conf,
  .source.generic-db":
 	editor:
 		commentStart: "# "
