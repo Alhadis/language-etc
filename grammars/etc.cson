@@ -425,6 +425,12 @@ repository:
 		]
 	
 	
+	# Semicolon
+	semi:
+		name: "punctuation.delimiter.separator.semicolon"
+		match: ";"
+	
+	
 	# Strings
 	str:
 		patterns: [

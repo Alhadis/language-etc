@@ -1,0 +1,252 @@
+# Source: http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html
+name: "Unicode NamesList"
+scopeName: "source.ucd.nameslist"
+fileTypes: ["NamesList.txt", "NamesList.lst"]
+patterns: [{
+	# ; charset=UTF-8
+	name:  "comment.line.semicolon.charset-directive.ucd.nameslist"
+	begin: "(?i)\\A(;)\\s*(charset)(=)(UTF-8)\\b"
+	end:   "$"
+	captures:
+		1: name: "punctuation.definition.comment.ucd.nameslist"
+		2: name: "keyword.control.charset.ucd.nameslist"
+		3: patterns: [include: "etc#eql"]
+		4: name: "constant.language.character-encoding.ucd.nameslist"
+}, include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#entry"}
+			{include: "#title"}
+			{include: "#subtitle"}
+			{include: "#listItems"}
+			{include: "#crossRef"}
+			{include: "#atLines"}
+			{include: "#commentary"}
+		]
+
+
+	# @@+ lines
+	atLines:
+		patterns: [
+			{include: "#beginTable"}
+			{include: "#blockHeader"}
+			{include: "#columnHeader"}
+			{include: "#subheaders"}
+			{include: "#noticeBulleted"}
+			{include: "#notice"}
+		]
+
+
+	# Begin new index table: @@+
+	beginTable:
+		name: "keyword.control.begin-table.ucd.nameslist"
+		match: "^(@@\\+).*"
+		captures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+
+	
+	# @@ 0000 Block header 007F
+	blockHeader:
+		name:  "meta.block-header.ucd.nameslist"
+		match: "^(@@)[ \\t]+([0-9A-F]{4,6})\\t+([^\\t]+)\\t+([0-9A-F]{4,6}).*"
+		captures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+			2: patterns: [include: "etc#hex"]
+			3: name: "markup.heading.3.block-header.ucd.nameslist"
+			4: patterns: [include: "etc#hex"]
+
+
+	# Column (sub)heading
+	columnHeader:
+		name: "meta.column-header.ucd.nameslist"
+		match: "^(@)[ \\t]+([^\\t]+?)[ \\t]*$"
+		captures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+			2: name: "markup.heading.4.column-header.ucd.nameslist"
+
+
+	# ; Comment
+	comment:
+		name:  "comment.line.semicolon.ucd.nameslist"
+		begin: "(?:^|(?<=\\t))(;)"
+		end:   "$"
+		beginCaptures:
+			1: name: "punctuation.definition.comment.ucd.nameslist"
+
+
+	# Like a comment, but (probably?) included in Unibook's output
+	commentary:
+		name:  "comment.line.commentary.ucd.nameslist"
+		begin: "^(\\t)(?=[^\\t]+$)(?=\\S)"
+		end:   "$"
+		beginCaptures:
+			1: patterns: [include: "etc#tab"]
+
+
+	# Cross references
+	crossRef:
+		patterns: [{
+			# x (no-break space - 00A0)
+			name:  "meta.cross-reference.ucd.nameslist"
+			begin: "^[ \\t]+(x)\\s+(\\()"
+			end:   "\\)|(?=\\s*$)"
+			beginCaptures:
+				1: name: "punctuation.definition.list.arrow-symbol.ucd.nameslist"
+				2: name: "punctuation.definition.reference.begin.ucd.nameslist"
+			endCaptures:
+				0: name: "punctuation.definition.reference.end.ucd.nameslist"
+			patterns: [{
+				name: "meta.lcname.bracketed.ucd.nameslist"
+				match: "\\G(<)\\s*([^>\\(\\)]+?)\\s*(>)|\\G([^<>\\(\\)]+?(?=\\s+-\\s+))"
+				captures:
+					1: name: "punctuation.definition.begin.ucd.nameslist"
+					2: name: "entity.name.lcname.ucd.nameslist"
+					3: name: "punctuation.definition.end.ucd.nameslist"
+					4: name: "entity.name.lcname.ucd.nameslist"
+			},{
+				match: "(?<=\\s)(-)\\s+([0-9A-F]{4,6})"
+				captures:
+					1: patterns: [include: "etc#dash"]
+					2: patterns: [include: "etc#hex"]
+			}]
+		},{
+			# x 00A0
+			name:  "meta.cross-reference.ucd.nameslist"
+			begin: "^[ \\t]+(x)\\s+(?=[A-F0-9]|$)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.list.arrow-symbol.ucd.nameslist"
+			patterns: [include: "etc#hex"]
+		}]
+
+
+	# Actual name entries: 0F00 <bar>
+	entry:
+		name:  "meta.character-entry.ucd.nameslist"
+		begin: "^([0-9A-F]{4,6})\\t([^\\t]+)\\t*$"
+		end:   "^(?!\\G)(?=[0-9A-F]{4,6}|@(?!\\+(?:\\s|$)))"
+		beginCaptures:
+			1: patterns: [include: "etc#hex"]
+			2: name: "entity.name.character.ucd.nameslist"
+		patterns: [include: "#listItems"]
+
+	
+	# Actual items belonging to the aforementioned names
+	listItems:
+		patterns: [
+			{include: "#noticeBulleted"}
+			{include: "#notice"}
+			{
+				# Various bullet-pointy stuff
+				contentName: "markup.list.unnumbered.ucd.nameslist"
+				begin: "^([ \\t]+)(?:(=)|(%)|(\\*))[ \\t]+"
+				end:   "$"
+				beginCaptures:
+					1: patterns: [include: "etc#tab"]
+					2: name: "punctuation.definition.list.equals-sign.ucd.nameslist"
+					3: name: "punctuation.definition.list.percent-sign.ucd.nameslist"
+					4: name: "punctuation.definition.list.bullet.ucd.nameslist"
+				patterns: [include: "#comment"]
+			},{
+				# Decomposition or compatibility mappings
+				name:  "meta.mapping-info.ucd.nameslist"
+				begin: "^([ \\t]+)(?:(?:(:)|(#))(?:\\s+|(?=$)))"
+				end:   "$"
+				beginCaptures:
+					1: patterns: [include: "etc#tab"]
+					2: name: "punctuation.definition.list.colon.ucd.nameslist"
+					3: name: "punctuation.definition.list.number-sign.ucd.nameslist"
+				patterns: [{
+					# <tag>
+					name:  "meta.tag.ucd.nameslist"
+					match: "(<)\\s*([^>\\s]+)\\s*(>)"
+					captures:
+						1: name: "punctuation.definition.tag.begin.ucd.nameslist"
+						2: name: "entity.name.tag.decomposition.ucd.nameslist"
+						3: name: "punctuation.definition.tag.end.ucd.nameslist"
+				},{
+					# Codepoint
+					name: "constant.numeric.integer.int.hexadecimal.hex"
+					match: "[0-9A-F]{4,}"
+				},{
+					# Character name
+					name: "entity.name.character.ucd.nameslist"
+					match: "[a-z0-9][-a-z0-9]*"
+				}]
+			}
+			{include: "#crossRef"}
+			{include: "#commentary"}
+		]
+
+
+	# @+ Notice line
+	notice:
+		name:  "comment.line.notice.ucd.nameslist"
+		begin: "^(@\\+)(?:[ \\t]+|(?=$))"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+
+
+	# @+ * Bulleted notice
+	noticeBulleted:
+		contentName: "markup.list.unnumbered.notice.ucd.nameslist"
+		begin: "^(@\\+)[ \\t]+(\\*)[ \\t]+(?=$|\\S)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+			2: name: "punctuation.definition.list.bullet.ucd.nameslist"
+
+
+	# Various subheaders
+	subheaders:
+		patterns: [{
+			# @~ Column-header (subheader), @@~ Alt-glyph thing
+			name:  "markup.heading.5.subheader.ucd.nameslist"
+			begin: "^(@@?~)[ \\t]+(?=[^\\s!])"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.directive.ucd.nameslist"
+		},{
+			# @~ ! Other shite
+			name:  "meta.subheader.ucd.nameslist"
+			begin: "^(@@?~)[ \\t]+(?:(!)(?:[ \\t]+|(?=$)))?"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.directive.ucd.nameslist"
+				2: name: "keyword.operator.output-suppression.ucd.nameslist"
+			patterns: [include: "#varsel"]
+		}]
+
+
+	# @@@ Page title
+	title:
+		name:  "markup.heading.1.title.ucd.nameslist"
+		begin: "^(@@@)(?:[ \\t]+|(?=$))"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+
+
+	# @@@+ Subtitle
+	subtitle:
+		name:  "markup.heading.2.subtitle.ucd.nameslist"
+		begin: "^(@@@\\+)[ \\t]+"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.directive.ucd.nameslist"
+
+	# What Unibook calls a VARSEL_LIST
+	varsel:
+		begin: "{"
+		end:   "}|(?=\\s*$)"
+		beginCaptures: 0: name: "punctuation.section.list.begin.ucd.nameslist"
+		endCaptures:   0: name: "punctuation.section.list.end.ucd.nameslist"
+		patterns: [
+			{include: "etc#hex"}
+			{match: "\\|", name: "keyword.logical.operator.separator.ucd.nameslist"}
+			{match: "\\+", name: "keyword.logical.operaetor.quantifier.ucd.nameslist"}
+		]

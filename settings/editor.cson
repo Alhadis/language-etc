@@ -13,7 +13,8 @@
 
 ".source.mailmap,
  .source.man-conf,
- .source.generic-db":
+ .source.generic-db,
+ .source.ucd.unidata":
 	editor:
 		commentStart: "# "
 		tabLength: 8
@@ -36,6 +37,12 @@
 	editor:
 		commentStart: "!_TAG_COMMENT\t"
 		tabLength: 10
+		tabType: "hard"
+
+".source.ucd.nameslist":
+	editor:
+		commentStart: "; "
+		tabLength: 8
 		tabType: "hard"
 
 ".text.xml.svg":

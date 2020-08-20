@@ -38,6 +38,8 @@ Supported formats
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [x] [Tags files](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
 * [ ] [Terminfo](http://invisible-island.net/ncurses/ncurses.faq.html#which_terminfo)
+* [ ] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
+* [x] [Unicode name-lists](http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html)
 
 
 Installing in Atom
