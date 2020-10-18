@@ -94,10 +94,11 @@ patterns: [{
 repository:
 	main:
 		patterns: [
-			{include: "#Properties"}
+			{include: "#USourceData"}
 			{include: "#Scripts"}
 			{include: "#SpecialCasing"}
 			{include: "#BidiMirroring"}
+			{include: "#Properties"}
 			{include: "#UnicodeData"}
 			{include: "#comment"}
 		]
@@ -106,7 +107,7 @@ repository:
 	# Line comment, introduced by U+0023 in first column
 	comment:
 		name:  "comment.line.number-sign.ucd.unidata"
-		begin: "(?:^|\\G)(#)"
+		begin: "#"
 		end:   "$"
 		beginCaptures:
 			1: name: "punctuation.definition.comment.ucd.unidata"
@@ -188,26 +189,20 @@ repository:
 	#    000E          ; Some_Value  # Comment
 	Properties:
 		name:  "meta.${1:/downcase}.ucd.unidata"
-		begin: "(?:\\G|\\A|(?:^|(?<=\\n)))(?=# (DerivedAge|Blocks|PropList)(?:-\\d+(?:\\.\\d+)*+)?\\.txt\\s*$)"
+		begin: "(?:\\G|\\A|(?:^|(?<=\\n)))(?=# ([A-Z][A-Za-z]+)(?:-\\d+(?:\\.\\d+)*+)?\\.txt\\s*$)"
 		end:   "(?=A)B"
 		patterns: [include: "#PropertyAssignment"]
 	
 	
 	# Stuff matched inside the aforementioned format
 	PropertyAssignment:
-		patterns: [{
-			# Codepoint subject(s) in field #0: 0000..007F;
-			match: "(?:^|\\G)([0-9A-F]{4,}(?:\\.\\.[0-9A-F]{4,})?)\\s*(;)"
-			captures:
-				1: patterns: [include: "#codePoint"]
-				2: patterns: [include: "etc#semi"]
-		},{
-			# Property value, followed by possible comment
-			match: "(?<=;)\\s*((?!#)\\S.*?)(?:\\s+(#.*))?$"
-			captures:
-				1: name: "entity.name.tag.ucd.unidata"
-				2: patterns: [include: "#comment"]
-		}, include: "#comment"]
+		patterns: [
+			{include: "#codePoint"}
+			{include: "etc#semi"}
+			{include: "#comment"}
+			{include: "etc#num", match: "(?<=;|^|\\G)\\d+(?:\\.\\d+)?(?=\\s*(?:;|$|#))"}
+			{match: "[^;#]+", name: "constant.other.field.ucd.unidata"}
+		]
 
 
 	Scripts:
@@ -304,3 +299,39 @@ repository:
 				26: {patterns: [include: "etc#semi"]}, 27: {name: "constant.numeric.mapping.lowercase.ucd.unidata"}
 				28: {patterns: [include: "etc#semi"]}, 29: {name: "constant.numeric.mapping.titlecase.ucd.unidata"}
 		}]
+
+
+	# Unified CJK ideographs
+	USourceData:
+		name:  "meta.usource-data.ucd.unidata"
+		begin: "(?:\\G|\\A|(?:^|(?<=\\n)))(?=# USourceData(?:-\\d+(?:\\.\\d+)*+)?\\.txt\\s*$)"
+		end:   "(?=A)B"
+		patterns: [{
+			name: "meta.record.unified-ideograph.ucd.unidata"
+			match: """(?x) ^
+				([^;]*) (;) # U-source ID
+				([^;]*) (;) # Approval status
+				([^;]*) (;) # Unicode representation
+				([^;]*) (;) # Radical stroke count
+				([^;]*) (;) # Virtual KangXi dictionary position
+				([^;]*) (;) # Ideographic description sequence (IDS)
+				([^;]*) (;) # Source(s)
+				(.*)        # General comments
+			"""
+			captures:
+				1:  name: "entity.name.usource-id.ucd.unidata"
+				2:  patterns: [include: "etc#semi"]
+				3:  name: "constant.language.status.ucd.unidata"
+				4:  patterns: [include: "etc#semi"]
+				5:  patterns: [include: "#codePoint"]
+				6:  patterns: [include: "etc#semi"]
+				7:  patterns: [include: "etc#num"]
+				8:  patterns: [include: "etc#semi"]
+				9:  patterns: [include: "etc#num"]
+				10: patterns: [include: "etc#semi"]
+				11: name: "string.unquoted.ids.ucd.unidata"
+				12: patterns: [include: "etc#semi"]
+				13: name: "constant.other.reference.link.unidata"
+				14: patterns: [include: "etc#semi"]
+				15: name: "comment.line.field.ucd.unidata"
+		}, include: "#comment"]
