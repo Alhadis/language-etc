@@ -3,7 +3,7 @@ scopeName: "source.c.nwscript"
 fileTypes: ["nss"]
 patterns: [include: "source.c"]
 injections:
-	"L:source.c.nwscript":
+	"R:source.c.nwscript - (string | comment)":
 		patterns: [{
 			name:  "support.type.nwscript.c"
 			match: "\\b(?:effect|itemproperty|location|object|string|talent|vector)\\b"
