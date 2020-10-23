@@ -31,6 +31,7 @@ Supported formats
 * [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
 * [x] [`mocha.opts`](https://mochajs.org/#mochaopts)
 * [x] [NEON](https://ne-on.org/)
+* [x] [NWScript](https://en.wikipedia.org/wiki/NWScript)
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
 * [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
 * [x] [Sieve](http://sieve.info/)

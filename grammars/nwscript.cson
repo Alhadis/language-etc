@@ -1,0 +1,14 @@
+name: "NWScript"
+scopeName: "source.c.nwscript"
+fileTypes: ["nss"]
+patterns: [include: "source.c"]
+injections:
+	"L:source.c.nwscript":
+		patterns: [{
+			name:  "support.type.nwscript.c"
+			match: "\\b(?:effect|itemproperty|location|object|string|talent|vector)\\b"
+		},{
+			name: "support.constant.nwscript.c"
+			match: "\\b[A-Z_][A-Z0-9_]*\\b"
+		}]
+		
