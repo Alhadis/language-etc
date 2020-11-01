@@ -36,10 +36,11 @@ Supported formats
 * [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
+* [ ] [STEP-Files](https://en.wikipedia.org/wiki/ISO_10303-21)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [x] [Tags files](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)
 * [ ] [Terminfo](http://invisible-island.net/ncurses/ncurses.faq.html#which_terminfo)
-* [ ] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
+* [x] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
 * [x] [Unicode name-lists](http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html)
 
 
