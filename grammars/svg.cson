@@ -303,7 +303,7 @@ repository:
 		]
 	
 	tagAttr:
-		begin: "\\G"
+		begin: "\\G(?!\\s*/>)"
 		end: ">|(?=\\s*/>)"
 		endCaptures:
 			0: name: "punctuation.definition.tag.opening.end.xml.svg"
