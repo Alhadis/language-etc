@@ -14,6 +14,11 @@ patterns: [
 
 repository:
 
+	# Base64-encoded data
+	base64:
+		name: "constant.numeric.base64"
+		match: "[A-Za-z0-9+/=]{4,}"
+
 	# Commas
 	comma:
 		name: "punctuation.separator.delimiter.comma"

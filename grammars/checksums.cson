@@ -1,0 +1,70 @@
+name: "Checksums"
+scopeName: "text.checksums"
+fileTypes: [
+	"sum",      "sums"
+	"cksum",    "cksums"
+	"checksum", "checksums"
+	
+	# Algorithms/Hash functions
+	"crc",    "crcsum",    "crcsums"
+	"crc32",  "crc32sum",  "crc32sums"
+	"md5",    "md5sum",    "md5sums"
+	"rmd160", "rmd160sum", "rmd160sums"
+	"sha1",   "sha1sum",   "sha1sums"
+	"sha2",   "sha2sum",   "sha2sums"
+	"sha3",   "sha3sum",   "sha3sums"
+	"sha224", "sha224sum", "sha224sums"
+	"sha256", "sha256sum", "sha256sums"
+	"sha384", "sha384sum", "sha384sums"
+	"sha512", "sha512sum", "sha512sums"
+]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#bsd-style"}
+			{include: "#gnu-style"}
+			{include: "#isolated"}
+		]
+
+	# Checksum of the form `ALGORITHM (FILENAME) = CHECKSUM`
+	"bsd-style":
+		name:  "meta.bsd-style.checksum"
+		match: "^\\s*(\\S+) ((\\().+(\\))) (=) (\\S+)\\s*$"
+		captures:
+			1: name: "keyword.operator.hash-function.${1:/downcase}.checksum"
+			2: name: "string.quoted.other.filename.checksum"
+			3: name: "punctuation.definition.string.begin.checksum"
+			4: name: "punctuation.definition.string.end.checksum"
+			5: patterns: [include: "etc#eql"]
+			6: patterns: [include: "#digest"]
+
+	# Checksum of the form `CHECKSUM [ *]FILENAME`
+	"gnu-style":
+		name: "meta.gnu-style.checksum"
+		match: "^\\s*(?=\\S{24})([A-Za-z0-9+/]=*|[A-Fa-f0-9]+) (?: |(\\*))(\\S.*)"
+		captures:
+			1: patterns: [include: "#digest"]
+			2: name: "storage.modifier.binary-mode.checksum"
+			3: name: "string.unquoted.other.filename.checksum"
+
+	# A line containing a fixed-length checksum value
+	isolated:
+		name: "constant.numeric.integer.int.hexadecimal.hex.checksum"
+		match: "(?ix) (?:^|\\G)
+			( [A-F0-9]{32}  # MD5
+			| [A-F0-9]{40}  # SHA-1
+			| [A-F0-9]{56}  # SHA-224
+			| [A-F0-9]{64}  # SHA-256
+			| [A-F0-9]{96}  # SHA-384
+			| [A-F0-9]{128} # SHA-512
+			) \\s*$"
+
+	# An actual checksum value
+	digest:
+		patterns: [
+			{include: "etc#base64"}
+			{include: "etc#hexNoSign"}
+			{match: "\\S+", name: "invalid.illegal.bad-character.checksum"}
+		]

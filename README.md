@@ -23,7 +23,7 @@ Supported formats
 * [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
 * [x] [`.wgetrc`](https://goo.gl/KRoNsn)
-* [ ] [Checksum lists](https://en.wikipedia.org/wiki/sha1sum)
+* [x] [Checksum lists](https://en.wikipedia.org/wiki/sha1sum)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
 * [ ] [Connection Control Language](https://en.wikipedia.org/wiki/Softmodem "/Library/Modem Scripts/*.ccl")
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
