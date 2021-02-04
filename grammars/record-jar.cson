@@ -1,0 +1,122 @@
+name: "Record Jar"
+scopeName: "source.record-jar"
+fileTypes: [
+	"language-subtag-registry"
+	"language-subtag-registry.txt"
+	"nametable"
+	"nametable.txt"
+]
+firstLineMatch: """(?ix)
+	# Modeline
+	(?i:
+		# Emacs
+		-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
+			record-?jar
+		(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+		
+		|
+		
+		# Vim
+		(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))
+		(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:]
+		(?:filetype|ft|syntax)\\s*=
+			record-?jar
+		(?=\\s|:|$)
+	)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#record"}
+			{include: "etc#commentHash"}
+		]
+
+
+	# Escaped character
+	escape:
+		patterns: [{
+			# Line continuation
+			begin: "\\\\$\\s*"
+			end:   "(?<=[^\\s#%\"'])(?!\\G)"
+			beginCaptures:
+				0: name: "constant.character.escape.newline.record-jar"
+		},{
+			# Something that ain't a newline
+			name:  "constant.character.escape.backslash.record-jar"
+			match: "\\\\."
+		}]
+		
+
+	# Multiline record blocks
+	record:
+		name:  "meta.record.record-jar"
+		begin: "\\A|(?:^|\\G)(%%)(?:\\s*(\\S.*?))?[ \\t]*$"
+		end:   "(?=^%%)(?!\\G)"
+		beginCaptures:
+			1: name: "meta.separator.record-jar"
+			2: name: "comment.line.ignored.record-jar"
+		patterns: [
+			{include: "#field"}
+			{include: "etc#commentHash"}
+		]
+
+
+	# `Key: value` pairing
+	field:
+		name:  "meta.field.record-jar"
+		begin: "(?:\\G|^)(\\s*)((?!%%|#)\\S.*?)\\s*(:)\\s*"
+		end:   "(?!\\G)^(?!\\1\\s)(?=\\S)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.field.record-jar"
+			2: name: "variable.assignment.field-name.record-jar"
+			3: patterns: [include: "etc#kolon"]
+		patterns: [{
+			# Date: DDDD-MM-YY
+			name:  "constant.other.date.record-jar"
+			match: "\\G([0-9]{4})(-)(0[0-9]|1[0-2])(-)([0-2][0-9]|3[01])(?=\\s|$)"
+			captures:
+				1: name: "constant.numeric.integer.year.record-jar"
+				3: name: "constant.numeric.integer.month.record-jar"
+				5: name: "constant.numeric.integer.day.record-jar"
+				2: patterns: [include: "etc#dash"]
+				4: patterns: [include: "etc#dash"]
+		},{
+			# Double-quoted list of "strings", "and", "commas",
+			name:  "meta.list.record-jar"
+			begin: "\\G\\s*(?=\"|')"
+			end:   "(?=^)(?! |\\t)"
+			patterns: [
+				{include: "#string"}
+				{include: "etc#comma"}
+				{include: "#lineContinuation"}
+			]
+		},{
+			# Anything else
+			begin: "\\G\\s*(?=[^\"'#%\\s])"
+			end:   "(?=^)(?! |\\t)"
+			contentName: "string.unquoted.record-jar"
+			patterns: [include: "#escape"]
+		}, include: "#comment"]
+
+
+	# "Double-quoted" or 'single-quoted' string
+	string:
+		patterns: [{
+			# "Double"
+			name:  "string.quoted.double.record-jar"
+			begin: '"'
+			end:   '"|(?=\\s*(?<!\\\\)$)'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.record-jar"
+			endCaptures:   0: name: "punctuation.definition.string.end.record-jar"
+			patterns: [include: "#escape"]
+		},{
+			# 'Single'
+			name:  "string.quoted.single.record-jar"
+			begin: "'"
+			end:   "'(?=\\s*(?<!\\\\)$)"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.record-jar"
+			endCaptures:   0: name: "punctuation.definition.string.end.record-jar"
+			patterns: [include: "#escape"]
+		}]

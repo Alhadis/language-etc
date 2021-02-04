@@ -42,6 +42,7 @@ Supported formats
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
 * [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
 * [ ] [`pf.os`](http://man.openbsd.org/pf.os)
+* [x] [Record jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2906931)
 * [ ] [Sandbox profiles](https://github.com/malus-security/sandblaster "/usr/share/sandbox/*.sb")
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
