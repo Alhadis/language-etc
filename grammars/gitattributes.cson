@@ -24,6 +24,7 @@ repository:
 	main:
 		patterns: [
 			{include: "#comment"}
+			{include: "#macro"}
 			{include: "#pattern"}
 			{include: "source.gitignore#escape"}
 		]
@@ -78,3 +79,17 @@ repository:
 			{match: "-", name: "keyword.operator.logical.not.negation.gitattributes"}
 			{match: "!", name: "keyword.operator.unset.delete.gitattributes"}
 		]
+
+
+	# Macro attribute definition:
+	macro:
+		name:  "meta.definition.gitattributes"
+		begin: "(?:^|\\G)(\\[)(attr)(\\])([-\\w.]+)"
+		end:   "$"
+		beginCaptures:
+			2: name: "storage.type.attribute.gitattributes"
+			4: name: "entity.name.attribute.gitattributes"
+			1: patterns: [include: "etc#bracket"]
+			3: patterns: [include: "etc#bracket"]
+		contentName: "meta.attribute-list.gitattributes"
+		patterns: [include: "#attribute"]
