@@ -38,10 +38,10 @@ repository:
 	# Comment lines
 	comment:
 		name:  "comment.line.number-sign.ssh-config"
-		begin: "#"
+		begin: "^\\s*(#)"
 		end:   "$"
 		beginCaptures:
-			0: name: "punctuation.definition.comment.ssh-config"
+			1: name: "punctuation.definition.comment.ssh-config"
 
 
 	# Logical boolean keywords
@@ -53,12 +53,13 @@ repository:
 	# Individual option lines
 	option:
 		name:  "meta.option.ssh-config"
-		begin: "^\\s*([^\\s=]+)"
+		begin: "^\\s*(?!#)([^\\s=]+)"
 		end:   "$"
 		beginCaptures:
 			1: name: "entity.option.name.ssh-config"
 		contentName: "meta.arguments.ssh-option"
 		patterns: [
+			{include: "#comment"}
 			{include: "#equals"}
 			{include: "#string"}
 			{include: "#boolean"}
