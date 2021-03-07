@@ -1,0 +1,46 @@
+name: "Code Owners"
+scopeName: "text.codeowners"
+fileTypes: ["CODEOWNERS"]
+patterns: [include: "#main"]
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "etc#esc"}
+			{include: "#pattern"}
+		]
+
+	# Restricted variant of “source.gitignore#pattern”
+	pattern:
+		name:  "meta.pattern.codeowners"
+		begin: "^((?:[^#\\s\\\\]|\\\\[^#])++)"
+		end:   "$|(?=#)"
+		beginCaptures: 1: patterns: [
+			{match: "\\*\\*", name: "keyword.operator.glob.wildcard.globstar.codeowners"}
+			{match: "[*?]",   name: "keyword.operator.glob.wildcard.codeowners"}
+			{match: "/",      name: "punctuation.directory.separator.meta.codeowners"}
+			
+			# Literal characters
+			name: "entity.other.file.name.codeowners"
+			match: "[^\\[\\]\\\\*?#/\\s]+"
+		]
+		patterns: [
+			{include: "#comment"}
+			
+			# Actual owners list
+			begin: "\\s"
+			end: "(?=$|#)"
+			patterns: [
+				{include: "etc#emailUnquoted"}
+				{include: "#owner"}
+			]
+		]
+
+
+	# Reference to a GitHub user or team/organisation
+	owner:
+		name: "meta.owner.codeowners"
+		match: "(@)((?:[-.\\w]+/)?[-.\\w]+)(?=$| |#)"
+		captures:
+			1: name: "keyword.operator.mention.codeowners"
+			2: name: "variable.assignment.team"
