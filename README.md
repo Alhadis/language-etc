@@ -47,6 +47,7 @@ Supported formats
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [ ] [STEP-Files](https://en.wikipedia.org/wiki/ISO_10303-21)
+* [x] [StringTemplate](https://www.stringtemplate.org/)
 * [ ] [`sudoers`](https://linux.die.net/man/5/sudoers)
 * [x] [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element)
 * [x] [Tags files](https://en.wikipedia.org/wiki/Ctags#Tags_file_formats)

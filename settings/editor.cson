@@ -34,6 +34,16 @@
 	editor:
 		commentStart: "// "
 
+".source.string-template":
+	editor:
+		commentStart: "<!"
+		commentEnd:   "!>"
+
+".source.string-template .meta.document.dollar-delimiters":
+    editor:
+        commentStart: "$!"
+		commentEnd:   "!$"
+
 ".source.tags":
 	editor:
 		commentStart: "!_TAG_COMMENT\t"
