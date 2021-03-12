@@ -1,24 +1,26 @@
 name: "DOSBox Configuration"
 scopeName: "source.dosbox-conf"
 fileTypes: ["dosbox.conf"]
-firstLineMatch: """(?ix)
+firstLineMatch: """(?x)
 
 	# Header comment in default config file
-	This\\s+is\\s+the\\s+configuration\\s+file\\s+for\\s+DOSBox
+	(?i:This\\s+is\\s+the\\s+configuration\\s+file\\s+for\\s+DOSBox)
 	
 	|
 
 	# Emacs modeline
-	-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
-		dosbox(?:-?conf(?:ig)?)?
-	(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:dosbox(?:-?conf(?:ig)?)?)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
 	
 	|
 		
 	# Vim modeline
-	(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
-		dosbox(?:-?conf(?:ig)?)?
-	(?=\\s|:|$)
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:dosbox(?:-?conf(?:ig)?)?)
+	(?=$|\\s|:)
 """
 patterns: [include: "#main"]
 

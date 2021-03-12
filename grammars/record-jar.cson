@@ -6,23 +6,21 @@ fileTypes: [
 	"nametable"
 	"nametable.txt"
 ]
-firstLineMatch: """(?ix)
-	# Modeline
-	(?i:
-		# Emacs
-		-\\*-(?:\\s*(?=[^:;\\s]+\\s*-\\*-)|(?:.*?[;\\s]|(?<=-\\*-))mode\\s*:\\s*)
-			record-?jar
-		(?=[\\s;]|(?<![-*])-\\*-).*?-\\*-
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:record-?jar)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
 		
-		|
-		
-		# Vim
-		(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s* set?\\s))
-		(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:]
-		(?:filetype|ft|syntax)\\s*=
-			record-?jar
-		(?=\\s|:|$)
-	)
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:record-?jar)
+	(?=$|\\s|:)
 """
 patterns: [include: "#main"]
 
