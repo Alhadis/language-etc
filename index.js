@@ -2,6 +2,7 @@
 
 module.exports = {
 	disposables: null,
+	isUpdating: false,
 	name: require(__dirname + "/package.json").name,
 	
 	/** Package configuration schema */
@@ -23,7 +24,7 @@ module.exports = {
 		this.isUpdating = false;
 		this.disposables = new (require("atom").CompositeDisposable)(
 			atom.config.observe(this.name + ".autoUpdate", value => value && this.update()),
-			atom.commands.add(this.name + ":update", () => this.update(true)),
+			atom.commands.add("atom-workspace", this.name + ":update", () => this.update(true)),
 		);
 	},
 	
@@ -34,6 +35,7 @@ module.exports = {
 	deactivate(){
 		this.disposables && this.disposables.dispose();
 		this.disposables = null;
+		this.isUpdating = false;
 	},
 	
 	/**
@@ -75,7 +77,10 @@ module.exports = {
 	 * @api public
 	 */
 	async update(verbose = false){
-		if(this.isUpdating) return;
+		if(this.isUpdating)
+			return verbose
+				? atom.notifications.addWarning("An update is already in progress.")
+				: undefined;
 		this.isUpdating = true;
 		
 		const {name} = this;
