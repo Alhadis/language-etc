@@ -9,6 +9,29 @@ Feel free to install this in Atom, but don't complain about the mess it'll make
 of your [`grammar-selector`](https://github.com/atom/grammar-selector)'s menu…
 
 
+Installing in Atom
+------------------
+You'll need [Git][2], because I don't plan on ever publishing this to `atom.io`:
+
+~~~shell
+# On Unix-like platforms
+cd ~/.atom/packages && git clone https://github.com/Alhadis/language-etc.git
+~~~
+
+~~~batchfile
+:: For Windows users
+cd %HOMEPATH%\.atom\packages
+git clone "https://github.com/Alhadis/language-etc.git"
+~~~
+
+To stay updated, run `language-etc:update` or add this to `~/.atom/config.cson`:
+
+~~~coffee
+"language-etc":
+	autoUpdate: true
+~~~
+
+
 Supported formats
 -----------------
 * [x] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
@@ -56,22 +79,6 @@ Supported formats
 * [ ] [`ttys`](http://man.openbsd.org/ttys)
 * [x] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
 * [x] [Unicode name-lists](http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html)
-
-
-Installing in Atom
-------------------
-You'll need [Git][2], because I don't plan on ever publishing this to `atom.io`:
-
-~~~shell
-# On Unix-like platforms
-cd ~/.atom/packages && git clone https://github.com/Alhadis/language-etc.git
-~~~
-
-~~~batchfile
-:: For Windows users
-cd %HOMEPATH%\.atom\packages
-git clone "https://github.com/Alhadis/language-etc.git"
-~~~
 
 
 [Referenced Links]:_____________________________________________________________
