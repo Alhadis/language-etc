@@ -20,6 +20,22 @@
 		commentStart: "# "
 		tabLength: 8
 
+".source.futhark":
+	editor:
+		commentStart: "-- "
+	"bracket-matcher":
+		autocompleteCharacters: [
+			"()"
+			"[]"
+			"{}"
+			'""'
+			"``"
+			"“”"
+			"‘’"
+			"«»"
+			"‹›"
+		]
+
 ".source.hosts":
 	editor:
 		commentStart: "# "
@@ -70,8 +86,7 @@
 		increaseIndentPattern: "<[^\\s>/]+(?=\\s|>)[^>]*(?<!/)>\\s*$"
 		decreaseIndentPattern: "</[^>]+>\\s*$|^\\s*</(?i:style)\\s*>"
 
-".source.odin-ehr,
- .source.futhark":
+".source.odin-ehr":
 	editor:
 		commentStart: "-- "
 
