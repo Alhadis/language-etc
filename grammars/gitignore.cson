@@ -52,6 +52,7 @@ repository:
 		patterns: [
 			{include: "#comment"}
 			{include: "#cvsSyntax"}
+			{include: "#magic"}
 			{include: "#pattern"}
 			{include: "#escape"}
 		]
@@ -92,7 +93,76 @@ repository:
 		match: "(\\\\)."
 		captures:
 			1: name: "punctuation.definition.escape.backslash.gitignore"
-		
+
+	# Git-specific magic signatures
+	magic:
+		patterns: [{
+			# Long-form: “:(foo,bar)…”
+			name:  "meta.magic-signature.long.gitignore"
+			begin: "^(:)(\\()(?=.*?\\))"
+			end:   "(?<!\\\\)\\)|(?=\\s*$)"
+			beginCaptures:
+				1: name: "keyword.operator.signature.begin.gitignore"
+				2: name: "punctuation.section.signature.begin.gitignore"
+			endCaptures:
+				0: name: "punctuation.section.signature.end.gitignore"
+			patterns: [
+				{include: "#escape"}
+				{include: "#magicInnards"}
+			]
+		},{
+			# Short-form: ":${MNEMONIC}pattern.*"
+			name:  "meta.magic-signature.short.gitignore"
+			match: "^(:)([!^]+)"
+			captures:
+				1: name: "keyword.operator.signature.begin.gitignore"
+				2: name: "keyword.operator.mnemonic.gitignore"
+		}]
+	
+	# Symbols matched in short-form magic signatures: `:!pattern`
+	magicMnemonic:
+		patterns: [
+			{match: "-", name: "keyword.operator.logical.not.negation.gitignore"}
+			{match: "!", name: "keyword.operator.unset.delete.gitignore"}
+		]
+	
+	# Stuff matched inside `:(long,form=signatures)`
+	magicInnards:
+		patterns: [{
+			include: "etc#comma"
+		},{
+			# Attribute list: :(attr:foo bar=baz !not)
+			name:  "meta.attribute-list.gitignore"
+			begin: "(?:\\G|(?<=,|\\())(attr)(:)"
+			end:   "(?=,|\\)|$)"
+			beginCaptures:
+				1: name: "keyword.control.magic-signature.$1.gitignore"
+				2: patterns: [include: "etc#colon"]
+			patterns: [{
+				name: "meta.attribute.gitignore"
+				match: "(-|!)?((?:[^\\\\\\s=\\(\\),]|\\\\.)++)(?:(=)((?:[^\\\\\\s=\\(\\),]|\\\\.)*+))?"
+				captures:
+					1: patterns: [include: "#magicMnemonic"]
+					2: name: "variable.parameter.attribute.gitignore", patterns: [include: "#escape"]
+					3: name: "punctuation.definition.assignment.equals-sign.gitignore"
+					4: name: "constant.language.other.gitignore", patterns: [include: "#escape"]
+			}]
+		},{
+			# Attribute that doesn't take/expect an argument
+			name:  "meta.$1-attribute.gitignore"
+			match: "(?:\\G|(?<=,|\\())(-|!)?(attr|exclude|glob|icase|literal|top)(?=,|\\))"
+			captures:
+				1: patterns: [include: "#magicMnemonic"]
+				2: name: "keyword.control.magic-signature.$2.gitignore"
+		},{
+			# Unrecognised/invalid attribute
+			name:  "meta.unknown-attribute.gitignore"
+			match: "(?:\\G|(?<=,|\\())(-|!)?((?:[^\\\\=\\s,:\\)]|\\\\.)++)(?=,|\\))"
+			captures:
+				1: patterns: [include: "#magicMnemonic"]
+				2: name: "keyword.control.magic-signature.unknown.gitignore"
+		}]
+
 	# File pattern
 	pattern:
 		name:  "meta.pattern.gitignore"

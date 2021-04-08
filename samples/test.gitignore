@@ -1,0 +1,59 @@
+# Magic signatures for pathspecs. See:
+# - https://css-tricks.com/git-pathspecs-and-how-to-use-them/
+# - https://git-scm.com/docs/gitglossary#def_pathspec
+:(attr:vendored)vendored/*
+:(attr:!vendored)not/vendored/*
+:(exclude)*.spec.js
+:(exclude)*.spec.js
+:(exclude,literal)*.spec.js
+:(glob)foo.*
+:(icase)foo.*
+:(literal)foo.*
+:(top,icase,glob,attr:!vendored)src/components/*/*.jsx
+:(top)foo.*
+
+# From Git's test-suite
+:(attr:-label)
+:(attr:-label=foo)
+:(attr:!label)
+:(attr:!label=f\too)
+:(attr:!labelB !labelA !label)
+:(attr:)
+:(attr:☺)
+:(attr:label)
+:(attr:label=bar)
+:(attr:label=f\\\oo)
+:(attr:label=foo)
+:(attr:label=foo\\ labelA=bar)
+:(attr:labelB,attr:labelC)
+:(attr:labelB)
+:(attr:whitespace=indent\,trail\,space,icase)*foo*
+:(exclude,attr:labelC)sub/
+:(exclude,glob)sub/*/file
+:(exclude,icase)SUB
+:(exclude)*expect
+:(exclude)a
+:(exclude)sub
+:(exclude)sub/
+:(exclude)sub/*file
+:(exclude)sub/sub/file
+:(exclude)sub0
+:(exclude)sub1
+:(exclude)sub2
+:(exclude)sub4
+:(exclude)submodule/subsub/*
+:(glob)**/*.txt
+:(glob)**/bar
+:(glob)**/sh
+:(glob)f[o][o]
+:(glob)f*
+:(icase)../foo/bar
+:(icase)*.txt
+:(icase)bar
+:(icase)foo/bar
+:(icase)ha
+:(literal)**/bar
+:(literal)f[o][o]
+:(literal)f*
+:(literal)foo
+:(unknown-magic)foo
