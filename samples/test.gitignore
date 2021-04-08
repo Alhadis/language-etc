@@ -1,3 +1,4 @@
+# -*- gitignore -*-
 # Magic signatures for pathspecs. See:
 # - https://css-tricks.com/git-pathspecs-and-how-to-use-them/
 # - https://git-scm.com/docs/gitglossary#def_pathspec

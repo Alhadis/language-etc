@@ -1,3 +1,4 @@
+# -*- gitattributes -*-
 *         text=auto
 *.txt     text
 *.vcproj  text eol=crlf

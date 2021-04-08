@@ -1,4 +1,4 @@
-# Include
+# -*- gitconfig -*-  vim:ft=gitconfig
 
 	# Unconditionally
 	[include]
