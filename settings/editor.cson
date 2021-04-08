@@ -1,5 +1,6 @@
 ".source.curlrc,
  .source.gitignore,
+ .source.gitconfig,
  .source.gitattributes,
  .source.inputrc,
  .source.nanorc,

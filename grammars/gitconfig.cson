@@ -28,6 +28,7 @@ repository:
 	main:
 		patterns: [
 			{include: "#comments"}
+			{include: "#includeSection"}
 			{include: "#aliasSection"}
 			{include: "#urlSection"}
 			{include: "#section"}
@@ -36,8 +37,8 @@ repository:
 	# Separate Git/shell aliases
 	alias:
 		name:  "meta.alias.gitconfig"
-		begin: "^\\s*([A-Za-z][-A-Za-z]*)\\s*(=)"
-		end:   "(?<!\\\\)$|(?=#)"
+		begin: "(?:^|(?<=\\])\\G)\\s*([A-Za-z][-A-Za-z]*)\\s*(=)"
+		end:   "(?<!\\\\)$|(?=#|;)"
 		beginCaptures:
 			1: name: "variable.parameter.assignment.gitconfig"
 			2: name: "keyword.operator.assignment.key-value.gitconfig"
@@ -70,23 +71,23 @@ repository:
 			# Git subcommands
 			name:  "meta.git.subcommands.gitconfig"
 			begin: '\\G\\s*([^\\s"#;!]+)'
-			end:   "(?<!\\\\)(?=$|[#;])"
+			end:   "(?<!\\\\)(?=$|#|;)"
 			beginCaptures:
 				0: name: "string.unquoted.source.gitconfig"
 			contentName: "string.unquoted.source.gitconfig"
-			patterns: [include: "#escapedNewline"]
+			patterns: [include: "#escapes"]
 		}]
 	
 	# [alias] - Block which defines a list of aliased commands
 	aliasSection:
 		name:  "meta.aliases.section.gitconfig"
-		begin: "(?i)^(\\\[)\\s*(alias)\\s*(\\])"
-		end:   "^(?=\\[)"
+		begin: "(?i)(?:^|\\G)\\s*(\\\[)\\s*(alias)\\s*(\\])"
+		end:   "(?!\\G)(?=^\\s*\\[)"
 		beginCaptures:
 			0: name: "meta.section.header.gitconfig"
 			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
 			2: name: "entity.section.name.gitconfig"
-			6: name: "punctuation.definition.bracket.square.end.gitconfig"
+			3: name: "punctuation.definition.bracket.square.end.gitconfig"
 		patterns: [
 			{include: "#alias"}
 			{include: "#comments"}
@@ -115,8 +116,17 @@ repository:
 	# Bare/unquoted escape sequences
 	escapes:
 		patterns: [{
-			# Include \\ and \"
-			include: "#stringEscapes"
+			# \\ — Backslash
+			name:  "constant.character.escape.backslash.gitconfig"
+			match: '(\\\\)\\\\'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
+		},{
+			# \" — Double-quote
+			name:  "constant.character.escape.quote.gitconfig"
+			match: '(\\\\)"'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.gitconfig"
 		},{
 			# \n — Newline
 			name:  "constant.character.escape.newline.gitconfig"
@@ -136,6 +146,8 @@ repository:
 			captures:
 				1: name: "punctuation.definition.escape.backslash.gitconfig"
 		},{
+			include: "#escapedNewline"
+		},{
 			# Other escape sequences are invalid
 			name:  "invalid.illegal.syntax.escape.gitconfig"
 			match: "\\\\."
@@ -148,35 +160,135 @@ repository:
 		captures:
 			1: name: "punctuation.definition.escape.backslash.gitconfig"
 
+	# [include] and [includeIf "…"] blocks
+	includeSection:
+		name:  "meta.include.section.gitconfig"
+		begin: """(?ix)
+			(?:^|\\G) \\s*
+			(\\\[) #1
+			\\s*
+			(include(?:If)?) #2
+			(?:
+				\\s*
+				(") #3
+				(   #4
+					(?: [^\\\\"]
+					|   \\\\.
+					)*+
+				)
+				(") #5
+			)?+
+			\\s* (\\]) #6
+		"""
+		end: "(?!\\G)(?=^\\s*\\[)"
+		beginCaptures:
+			0: name: "meta.section.header.gitconfig"
+			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
+			2: name: "keyword.control.directive.${2:/downcase}.gitconfig"
+			3: name: "punctuation.definition.condition.begin.gitconfig"
+			4: patterns: [{
+				name:  "meta.condition.match-directory.gitconfig"
+				begin: "(gitdir)((/)i)?(:)"
+				end:   '(?=\\s*(?:$|"))'
+				beginCaptures:
+					1: name: "entity.name.condition-type.gitconfig"
+					2: name: "storage.modifier.ignore-case.gitconfig"
+					3: name: "punctuation.separator.modifier.slash.gitconfig"
+					4: name: "punctuation.separator.key-value.gitconfig"
+				contentName: "string.other.link.gitconfig"
+				patterns: [
+					{include: "#sectionEscapes"}
+					{include: "#includeInnards"}
+				]
+			},{
+				name:  "meta.condition.match-worktree.gitconfig"
+				begin: "(onbranch)(:)"
+				end:   '(?=\\s*(?:$|"))'
+				beginCaptures:
+					1: name: "entity.name.condition-type.gitconfig"
+					2: name: "punctuation.separator.key-value.gitconfig"
+				contentName: "string.other.file.name.gitconfig"
+				patterns: [
+					{include: "#sectionEscapes"}
+					{include: "#includeInnards"}
+				]
+			}]
+			5: name: "punctuation.definition.condition.end.gitconfig"
+			6: name: "punctuation.definition.bracket.square.end.gitconfig"
+		patterns: [
+			{include: "#includePath"}
+			{include: "#comments"}
+			{include: "#variables"}
+		]
+	
+	# path = …
+	includePath:
+		name:  "meta.included-file.gitconfig"
+		begin: "(?:^|(?<=\\])\\G)\\s*(path)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:(?<!\\\\)$|#|;))"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			# Quoted pathspec
+			name:  "string.quoted.double.pathspec.gitconfig"
+			begin: '\\G\\s*"'
+			end:   '"|(?<!\\\\)(?=\\s*$)'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.gitconfig"
+			endCaptures:   0: name: "punctuation.definition.string.end.gitconfig"
+			contentName: "string.other.link.pathspec.gitconfig"
+			patterns: [include: "#includeInnards"]
+		},{
+			# Unquoted pathspec
+			match: '([^"\\s;#][^;#]*?)(?<=\\S)(?=\\s*(?:$|;|#))'
+			captures: 1:
+				name: "string.other.link.pathspec.gitconfig"
+				patterns: [include: "#includeInnards"]
+		
+		}, {include: "#comments"}, {include: "#variables"}]
+	
+	# Stuff matched inside a condition's pathspec
+	includeInnards:
+		patterns: [
+			{match: "(?:^|\\G)~(?=/)",   name: "keyword.operator.tilde.gitconfig"}
+			{match: "(?:^|\\G)\\.(?=/)", name: "keyword.operator.config-path.gitconfig"}
+			{match: "\\*\\*",            name: "keyword.operator.glob.wildcard.globstar.gitconfig"}
+			{match: "[*?]",              name: "keyword.operator.glob.wildcard.gitconfig"}
+			{match: "/",                 name: "punctuation.directory.separator.meta.gitconfig"}
+			{include: "#escapes"}
+		]
+
 	# [section] block
 	section:
 		name:  "meta.section.gitconfig"
 		begin: """(?x)
-			^ (\\[)\\s*(\\]) #1, #2
-			|
-			^ (\\\[) #3
-			\\s*
+			(?:^|\\G) \\s*
 			(?:
-				([-.A-Za-z0-9]+?) #4
-				(?:
-					(\\.)           #5
-					([-A-Za-z0-9]+) #6
-				)?
-			)
-			(?:
+				(\\[)\\s*(\\]) #1, #2
+				|
+				(\\\[) #3
 				\\s*
-				(") #7
-				(   #8
-					(?: \\\\[\\\\"]
-					|   \\\\[^\\\\"]
-					|       [^\\\\"]+
-					)*
+				(?:
+					([-.A-Za-z0-9]+?) #4
+					(?:
+						(\\.)           #5
+						([-A-Za-z0-9]+) #6
+					)?
 				)
-				(") #9
-			)?+
-			\\s* (\\]) #10
+				(?:
+					\\s*
+					(") #7
+					(   #8
+						(?: [^\\\\"]
+						|   \\\\.
+						)*+
+					)
+					(") #9
+				)?+
+				\\s* (\\]) #10
+			)
 		"""
-		end: "^(?=\\[)"
+		end: "(?!\\G)(?=^\\s*\\[)"
 		beginCaptures:
 			0:  name: "meta.section.header.gitconfig"
 			1:  name: "punctuation.definition.bracket.square.begin.gitconfig"
@@ -186,7 +298,7 @@ repository:
 			5:  name: "punctuation.delimiter.separator.meta.dot.period.gitconfig"
 			6:  name: "entity.subsection.name.deprecated-syntax.gitconfig"
 			7:  name: "punctuation.definition.subsection.begin.gitconfig"
-			8:  name: "entity.subsection.name.gitconfig", patterns: [include: "#stringEscapes"]
+			8:  name: "entity.subsection.name.gitconfig", patterns: [include: "#sectionEscapes"]
 			9:  name: "punctuation.definition.subsection.end.gitconfig"
 			10: name: "punctuation.definition.bracket.square.end.gitconfig"
 		patterns: [
@@ -194,8 +306,8 @@ repository:
 			{include: "#variables"}
 		]
 
-	# Escape sequences matched in strings
-	stringEscapes:
+	# Escape sequences matched in subsection names
+	sectionEscapes:
 		patterns: [{
 			# Escaped backslash or double-quote
 			name:  "constant.character.escape.backslash.gitconfig"
@@ -204,8 +316,10 @@ repository:
 				1: name: "punctuation.definition.escape.backslash.gitconfig"
 		},{
 			# Superfluous backslash: \t -> t
-			name:  "punctuation.definition.escape.backslash.ignored.gitconfig"
+			name:  "constant.character.escape.unknown.gitconfig"
 			match: '\\\\(?=[^\\\\"])'
+			captures:
+				0: name: "punctuation.definition.escape.backslash.ignored.gitconfig"
 		}]
 
 	# Variable lines within a section block
@@ -214,7 +328,7 @@ repository:
 			# Signing key
 			name:  "meta.variable-field.gitconfig"
 			begin: "(?i)\\b(signingkey)(?=\\s|$)"
-			end:   "$|(?=#|;)"
+			end:   "(?=\\s*(?:$|#|;))"
 			captures:
 				1: name: "variable.parameter.assignment.gitconfig"
 				2: name: "keyword.operator.assignment.key-value.gitconfig"
@@ -227,26 +341,16 @@ repository:
 			# URL-type fields
 			name:  "meta.variable-field.gitconfig"
 			begin: "(?i)\\b(email|url)\\s*(=)"
-			end:   "$|(?=#|;)"
+			end:   "(?=\\s*(?:$|#|;))"
 			beginCaptures:
 				1: name: "variable.parameter.assignment.gitconfig"
 				2: name: "keyword.operator.assignment.key-value.gitconfig"
-			patterns: [{
-				name:  "string.other.link.gitconfig"
-				begin: '"'
-				end:   '"|(?=$)'
-				beginCaptures: 0: name: "string.quoted.string.begin.gitconfig"
-				endCaptures:   0: name: "string.quoted.string.end.gitconfig"
-				patterns: [include: "#stringEscapes"]
-			},{
-				name:  "string.other.link.gitconfig"
-				match: '[^\\s"]+'
-			}]
+			patterns: [include: "#urlInnards"]
 		},{
 			# Text conversion
 			name:  "meta.variable-field.gitconfig"
 			begin: "(?i)\\b(textconv)\\s*(=)"
-			end:   "$|(?=#|;)"
+			end:   "(?=\\s*(?:$|#|;))"
 			beginCaptures:
 				1: name: "variable.parameter.assignment.gitconfig"
 				2: name: "keyword.operator.assignment.key-value.gitconfig"
@@ -257,7 +361,7 @@ repository:
 			begin: "[A-Za-z][-A-Za-z]*"
 			beginCaptures:
 				0: name: "variable.parameter.assignment.gitconfig"
-			end: "$|(?=#|;)"
+			end: "(?=\\s*(?:$|#|;))"
 			patterns: [include: "#variableInnards"]
 		}]
 
@@ -265,35 +369,51 @@ repository:
 	urlSection:
 		name:  "meta.url.section.gitconfig"
 		begin: """(?ix)
-			^ (\\\[) #1
+			(?:^|\\G) \\s*
+			(\\\[) #1
 			\\s*
-			(url) #2
+			(url|https?|core\.(?:git)?proxy) #2
 			(?:
 				\\s*
 				(") #3
 				(   #4
-					(?: \\\\[\\\\"]
-					|   \\\\[^\\\\"]
-					|       [^\\\\"]+
-					)*
+					(?: [^\\\\"]
+					|   \\\\.
+					)*+
 				)
 				(") #5
 			)?+
 			\\s* (\\]) #6
 		"""
-		end: "^(?=\\[)"
+		end: "(?!\\G)(?=^\\s*\\[)"
 		beginCaptures:
 			0: name: "meta.section.header.gitconfig"
 			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
 			2: name: "entity.section.name.gitconfig"
 			3: name: "punctuation.definition.subsection.begin.gitconfig"
-			4: name: "string.other.link.gitconfig", patterns: [include: "#stringEscapes"]
+			4: name: "string.other.link.gitconfig", patterns: [include: "#sectionEscapes"]
 			5: name: "punctuation.definition.subsection.end.gitconfig"
 			6: name: "punctuation.definition.bracket.square.end.gitconfig"
 		patterns: [
 			{include: "#comments"}
 			{include: "#variables"}
 		]
+
+	# Stuff matched inside a URL-type value
+	urlInnards:
+		patterns: [{
+			name:  "string.other.link.gitconfig"
+			begin: '"'
+			end:   '"|(?=\\s*$)'
+			beginCaptures: 0: name: "string.quoted.string.begin.gitconfig"
+			endCaptures:   0: name: "string.quoted.string.end.gitconfig"
+			patterns: [include: "#escapes"]
+		},{
+			name:  "string.other.link.gitconfig"
+			match: '(?:[^\\s";#\\\\]|\\\\.)+'
+			captures:
+				0: patterns: [include: "#escapes"]
+		}]
 
 	# Stuff matched after a variable name
 	variableInnards:
@@ -314,8 +434,26 @@ repository:
 			name:  "constant.numeric.decimal.float.gitconfig"
 			match: "[-+]?(?:[0-9]+\\.[0-9]*|\\.[0-9]+)(?=$|\\s#;)"
 		},{
+			# Unclosed string
+			name:  "string.quoted.double.argument.gitconfig"
+			match: '(")((?:[^\\\\"]|\\\\.)*?)(?<!\\\\)(?=\\s*$)'
+			captures:
+				0: name: "invalid.illegal.syntax.unclosed-string.gitconfig"
+				1: name: "punctuation.definition.string.begin.gitconfig"
+				2: patterns: [include: "#escapes"]
+		},{
+			# String
+			name:  "string.quoted.double.argument.gitconfig"
+			begin: '"'
+			end:   '"|(?<!\\\\)(?=\\s*$)'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.gitconfig"
+			endCaptures:   0: name: "punctuation.definition.string.end.gitconfig"
+			patterns: [include: "#escapes"]
+		},{
 			# Anything else
 			name: "string.unquoted.argument.gitconfig"
-			match: "(?:[^\\\\\\s]|\\\\(?!$))+"
+			match: '(?:[^\\\\\\s";#]|\\\\.)+'
+			captures:
+				0: patterns: [include: "#escapes"]
 		
 		}, include: "#escapedNewline"]

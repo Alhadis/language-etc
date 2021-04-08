@@ -1,0 +1,99 @@
+# Include
+
+	# Unconditionally
+	[include]
+		path = /path/to/foo.inc   # Include by absolute path
+		path = foo.inc            # Find "foo.inc" relative to the current file
+		path = ~/foo.inc          # Find "foo.inc" in your `$HOME` directory
+		path = ~/spa ces          # Poorly-named file, but whatever
+
+	# Only if $GIT_DIR is /path/to/foo/.git
+	[includeIf "gitdir:/path/to/foo/.git"]
+		path = /path/to/foo.inc
+
+	# Only if repository is inside /path/to/group
+	[includeif "gitdir:/path/to/group/"]
+		path = /path/to/foo.inc
+		path = foo.inc # Same as above
+
+	# Only if repository is inside $HOME/to/group
+	[includeIf "gitdir:~/to/group/"]
+		path = /path/to/foo.inc
+
+	# Only if we're in a worktree where "foo-branch" is currently checked out
+	[includeIf "onbranch:foo-branch"]
+		path = foo.inc
+
+	[includeIf "onbranch:foo/*"]
+		path = foo.inc
+
+	# Really bad pathnames
+	[includeIf "onbranch:name with spaces/*"]
+		path = /path/to foo.inc
+	
+	[includeIf "gitdir:/path with spaces/.git"]
+		path = /path/to foo.inc
+	
+	[includeIf "onbranch:name with \"quotes\"/.git"]
+		path = /path/to/\"foo\"/bar.inc
+		foo = true
+	
+	[includeIf "gitdir:/path with \"quotes\"/.git"]
+		path = /path/to/\"foo\"/bar.inc
+	
+	[includeIf "gitdir:/literal\/slash/.git"]
+	[includeIf "gitdir:/literal\/backslash/.git"]
+		path = /path/to\\foo.inc
+
+
+	[http "https://weak.example.com"]sslVerify = false
+		cookieFile = /tmp/cookie.t
+
+	[alias]co = checkout
+		co = checkout
+		s = ! git -c color.status=always status
+
+	[url "https://foo.bar.com/quote=\""]foo = 1
+
+	[url "https://foo.bar.com/backslash=\\"]foo = 1
+
+	[url "https://foo.bar.com/ignored=\z"]foo = 1
+
+	[foo "bar"]
+	[foo "double\"quoted"]
+	[foo "back\\slash"]
+	[foo "ignored\escape"]foo = 1
+		boolean-shorthand
+		boolean-longhand = true
+
+	[escapes.unquoted]foo=1
+		comment-semicolon = <\";Comment
+		comment-hash = <\"#Comment
+		newline = <\n>
+		tab = <\t>
+		backspace = <\b>
+		backslash = <\\>
+		quote = < \" > <\">
+
+	[escapes.quoted]foo=1
+		comment-semicolon = "<\";Value";Comment
+		comment-hash = "<\"#Value"#Comment
+		newline = "<\n>"
+		tab = "<\t>"
+		backspace = "<\b>"
+		backslash = "<\\>"
+		quote = "<\">"
+
+	[escapes.mixed]foo=1
+		newline = <\n>"<\n>"<\n>
+		tab = <\t>"<\t>"<\t>
+		backspace = <\b>"<\b>"<\b>
+		backslash = <\\>"<\\>"<\\>
+		quote = <\">"<\">"<\">
+
+	[escapes.invalid]foo=1
+		unquoted-unknown = <\z>
+		quoted-unclosed = "<\">
+		quoted-unknown = "<\z>"
+		mixed-invalid-unclosed = <\">"<
+		mixed-invalid-unknown = <\z>"<\z>"<\z>
