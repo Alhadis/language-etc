@@ -18,6 +18,22 @@
 	.syntax--entity.syntax--name.syntax--type.syntax--futhark{
 		color: #cbcb41;
 	}
+	.syntax--source.syntax--gitconfig{
+		.syntax--string.syntax--other.syntax--link.syntax--gitconfig,
+		.syntax--entity.syntax--subsection.syntax--name{
+			color: #9ac4d7;
+		}
+		.syntax--punctuation.syntax--definition.syntax--subsection{
+			color: #9ac4d7;
+		}
+		.syntax--string.syntax--pathspec,
+		.syntax--meta.syntax--condition .syntax--string.syntax--other{
+			&.syntax--file.syntax--name,
+			&.syntax--link{
+				color: #a074c4;
+			}
+		}
+	}
 }
 
 
