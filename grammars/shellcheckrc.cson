@@ -1,0 +1,134 @@
+# ShellCheck configuration files: https://github.com/koalaman/shellcheck/blob/58783ab3/shellcheck.1.md#rc-files
+name: ".shellcheckrc"
+scopeName: "source.shellcheckrc"
+fileTypes: ["shellcheckrc"]
+injectionSelector: "source.shell comment.line.* - (directive.shellcheckrc | embedded)"
+patterns: [{
+	# Embedded directives of the form `# shellcheck disable=SC2039`
+	name:  "directive.shellcheckrc"
+	begin: "(?<=#)\\s*(shellcheck)\\s+(?=[a-z]+=)"
+	end:   "(?=\\s*$)|(\\S*)(?=[\\)\\]}>\"'`])"
+	beginCaptures:
+		1: name: "directive.name.keyword.shellcheckrc"
+	endCaptures:
+		1: patterns: [include: "#directive"]
+	patterns: [include: "#directive"]
+},{
+	# Kludge to switch to main grammar: Atom no longer supports `injections:` fields in
+	# TextMate grammars (apparently). These would otherwise enable safe injections into
+	# an external grammar without impacting actual `.shellcheckrc` files.
+	begin: "\\A"
+	end:   "(?=A)B"
+	patterns: [include: "#main"]
+}]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:shellcheck(?:rc|[-_]?config)?)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:shellcheck(?:rc|[-_]?config)?)
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#directive"}
+		]
+	
+	# Comment
+	comment:
+		name:  "comment.line.number-sign.shellcheckrc"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.shellcheckrc"
+	
+	# key=value
+	directive:
+		name:  "meta.directive.$1.shellcheckrc"
+		begin: "(\\w[-\\w]*)(=)"
+		end:   "(?=$|\\s)"
+		beginCaptures:
+			1: name: "variable.parameter.directive.shellcheckrc"
+			2: name: "punctuation.definition.assignment.equals-sign.shellcheckrc"
+		patterns: [{
+			# disable=foo,bar / enable=foo,bar
+			name: "meta.list.shellcheckrc"
+			begin: "(?x)(?<=
+				\\s disable= |
+				\\s enable=  |
+				^   disable= |
+				^   enable=
+			)\\G"
+			end: "(?=$|\\s)"
+			patterns: [
+				{include: "#errorCodeRange"}
+				{include: "#errorCode"}
+				{include: "#warningName"}
+				{include: "etc#comma"}
+			]
+		},{
+			# source-path=SCRIPTDIR/../lib
+			name: "string.other.file.path.shellcheckrc"
+			begin: "(?x)(?<=
+				\\s source-path= |
+				^   source-path=
+			)\\G"
+			end: "(?=$|\\s)"
+			patterns: [{
+				name: "variable.environment.language.shellcheckrc"
+				match: "\\bSCRIPTDIR\\b"
+			}]
+		},{
+			# shell=bash
+			name:  "entity.name.shell.shellcheckrc"
+			begin: "(?x)(?<=
+				\\s shell= |
+				^   shell=
+			)\\G"
+			end: "(?=$|\\s)"
+			patterns: [include: "#escape"]
+		},{
+			# Unrecognised directive value
+			name:  "string.unquoted.other.shellcheckrc"
+			begin: "\\G(?=\\S)"
+			end:   "(?=$|\\s)"
+		}]
+
+	# Error code: SC1000, SC2236, etc
+	errorCode:
+		name:  "constant.numeric.error-code.shellcheckrc"
+		match: "\\bSC[0-9]{4}\\b"
+		captures:
+			0: name: "markup.underline.link.error-code.shellcheckrc"
+	
+	# Code range: disable=SC3000-SC4000
+	errorCodeRange:
+		name:  "meta.range.error-codes.shellcheckrc"
+		match: "\\b(SC[0-9]{4})(-)(SC[0-9]{4})\\b"
+		captures:
+			1: name: "meta.range.begin.shellcheckrc", patterns: [include: "#errorCode"]
+			2: name: "punctuation.separator.range.dash.shellcheckrc"
+			3: name: "meta.range.end.shellcheckrc",   patterns: [include: "#errorCode"]
+
+	# Escaped character
+	escape:
+		name:  "constant.character.escape.backslash.shellcheckrc"
+		match: "(\\\\)."
+
+	# Long-form warning name
+	warningName:
+		name: "constant.other.warning-name.shellcheckrc"
+		match: "(?:[^\\\\\\s=#,]|\\\\.)+"
+		captures:
+			0: patterns: [include: "#escape"]

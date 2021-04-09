@@ -68,6 +68,7 @@ Supported formats
 * [ ] [`pf.os`](http://man.openbsd.org/pf.os)
 * [x] [Record jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2906931)
 * [ ] [Sandbox profiles](https://github.com/malus-security/sandblaster "/usr/share/sandbox/*.sb")
+* [x] [ShellCheck configs](https://github.com/koalaman/shellcheck/blob/58783ab3/shellcheck.1.md#rc-files)
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [ ] [STEP-Files](https://en.wikipedia.org/wiki/ISO_10303-21)

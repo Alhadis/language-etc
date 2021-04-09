@@ -8,6 +8,7 @@
  .source.opts,
  .source.record-jar,
  .source.sieve,
+ .source.shellcheckrc,
  .source.ssh-config,
  .source.wgetrc":
 	editor:

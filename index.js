@@ -24,7 +24,8 @@ module.exports = {
 		this.isUpdating = false;
 		this.disposables = new (require("atom").CompositeDisposable)(
 			atom.config.observe(this.name + ".autoUpdate", value => value && this.update()),
-			atom.commands.add("atom-workspace", this.name + ":update", () => this.update(true)),
+			atom.commands.add("atom-workspace", `${this.name}:update`, this.update.bind(this, true)),
+			atom.commands.add("atom-text-editor", "link:open", this.openLink.bind(this)),
 		);
 	},
 	
@@ -36,6 +37,29 @@ module.exports = {
 		this.disposables && this.disposables.dispose();
 		this.disposables = null;
 		this.isUpdating = false;
+	},
+	
+	/**
+	 * Intercept a `link:open` command.
+	 * @param {CustomEvent} event
+	 * @api private
+	 */
+	openLink(event){
+		const editor = atom.workspace.isTextEditor(event.currentTarget)
+			? event.currentTarget
+			: atom.workspace.getActiveTextEditor();
+		if(!editor) return;
+		for(const {cursor} of editor.getSelectionsOrderedByBufferPosition()){
+			const position = cursor.getBufferPosition();
+			const token    = editor.tokenizedBuffer.tokenForPosition(position);
+			
+			// Open ShellCheck's wiki entry for the error-code under the cursor
+			if(token && token.scopes.includes("markup.underline.link.error-code.shellcheckrc")){
+				const {shell} = require("electron");
+				shell.openExternal("https://www.shellcheck.net/wiki/" + token.value.toUpperCase());
+				event.stopImmediatePropagation();
+			}
+		}
 	},
 	
 	/**
