@@ -32,6 +32,7 @@ repository:
 		patterns: [
 			{include: "#comment"}
 			{include: "#cdata"}
+			{include: "#doctype"}
 			{include: "text.xml#EntityDecl"}
 			{include: "text.xml#parameterEntity"}
 			{include: "#entity"}
@@ -63,6 +64,20 @@ repository:
 			match: "--(?!>)"
 			name: "invalid.illegal.bad-comment.xml.svg"
 		]
+
+
+	# <!DOCTYPE svg>
+	doctype:
+		name:  "meta.tag.sgml.doctype.xml.svg"
+		begin: "(<!)(DOCTYPE)\\s+([:a-zA-Z_][-:\\w.]*)"
+		end:   "\\s*(>)"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.begin.xml.svg"
+			2: name: "keyword.other.doctype.xml.svg"
+			3: name: "variable.language.documentroot.xml.svg"
+		endCaptures:
+			1: name: "punctuation.definition.tag.end.xml.svg"
+		patterns: [include: "text.xml#internalSubset"]
 
 
 	# Character entities, imported from XML grammar
