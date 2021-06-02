@@ -1,4 +1,5 @@
 ".source.curlrc,
+ .source.dotenv,
  .source.gitignore,
  .source.gitconfig,
  .source.gitattributes,

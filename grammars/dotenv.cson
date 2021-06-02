@@ -1,0 +1,141 @@
+name: ".env"
+scopeName: "source.dotenv"
+patterns: [include: "#main"]
+fileTypes: [
+	"env"
+	"env.example"
+	"env.local"
+	"env.test"
+	"env.development"
+	"env.production"
+	"env.staging"
+]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:dotenv)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:dotenv)
+	(?=$|\\s|:)
+"""
+
+injections:
+	"source.dotenv meta.field.rhs string":
+		patterns: [{
+			name:  "source.shell.embedded.dotenv"
+			match: "(?<!\\\\)(\\${)(.*?)(?<!\\\\)(})"
+			captures:
+				1: name: "punctuation.section.embedded.begin.dotenv"
+				2: name: "constant.language.environment.variable.dotenv"
+				3: name: "punctuation.section.embedded.end.dotenv"
+		},{
+			name: "entity.name.variable.dotenv"
+			match: "(?<!\\\\)(\\$)[a-zA-Z0-9_]+"
+			captures:
+				1: name: "punctuation.definition.variable.dotenv"
+		},{
+			name: "string.interpolated.dotenv"
+			match: "(?<!\\\\)({)\\s*([^{}\\s]+)\\s*(?<!\\\\)(})"
+			captures:
+				1: name: "punctuation.definition.bracket.curly.begin.dotenv"
+				2: name: "entity.name.variable.dotenv"
+				3: name: "punctuation.definition.bracket.curly.end.dotenv"
+		}]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#field"}
+		]
+
+	# Comments
+	comment:
+		begin: "^([ \\t]*)(?=#)"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.comment.dotenv"
+		patterns: [{
+			name:  "comment.line.number-sign.dotenv"
+			begin: "\\G(#)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.dotenv"
+		}]
+		
+
+	# Shell-like variable assignments, except with more generous whitespace handling
+	field:
+		name:  "meta.field.dotenv"
+		begin: "^(([ \\t]*)([-\\w.]+)\\s*)(=)"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "meta.field.lhs.dotenv"
+			2: name: "punctuation.whitespace.leading.field.dotenv"
+			3: name: "variable.assignment.environment.dotenv"
+			4: name: "keyword.operator.assignment.key-value.colon.dotenv"
+		contentName: "meta.field.rhs.dotenv"
+		patterns: [{
+			# EMPTY =
+			name: "punctuation.whitespace.trailing.empty-value.dotenv"
+			match: "\\G[ \\t]+$"
+		},{
+			# DOUBLE_QUOTED = "Foo\nBar"
+			begin: "\\G[ \\t]*(?=(\"|')(?:[^\\\\\"']|(?!\\1)[\"']|\\\\.)*+\\1$)"
+			end:   "(?!\\G)"
+			patterns: [include: "#strings"]
+		},{
+			# UNQUOTED = Literally anything that doesn't start with a quote
+			contentName: "string.unquoted.field.dotenv"
+			begin: "\\G[ \\t]*(?!\"|')(?=\\S)"
+			end:   "([ \\t]*)$"
+			endCaptures:
+				1: name: "punctuation.whitespace.trailing.dotenv"
+		}]
+
+
+	# Impartially-quoted values (i.e., no trailing whitespace after terminating quote)
+	strings:
+		patterns: [{
+			# "Double-quoted"
+			name:  "string.quoted.double.dotenv"
+			begin: '\\G"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
+			endCaptures:   0: name: "punctuation.definition.string.env.dotenv"
+			patterns: [{
+				# Embedded newline
+				name: "constant.character.escape.newline.dotenv"
+				match: "(\\\\)n"
+				captures:
+					1: name: "punctuation.definition.escape.backslash.dotenv"
+			},{
+				# Literal double-quote
+				name: "constant.character.escape.quote.dotenv"
+				match: '(\\\\)"'
+				captures:
+					1: name: "punctuation.definition.escape.backslash.dotenv"
+			}]
+		},{
+			# 'Single-quoted string'
+			name:  "string.quoted.single.dotenv"
+			begin: "\\G'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
+			endCaptures:   0: name: "punctuation.definition.string.env.dotenv"
+			patterns: [{
+				# Literal single-quote
+				name: "constant.character.escape.quote.dotenv"
+				match: "(\\\\)'"
+				captures:
+					1: name: "punctuation.definition.escape.backslash.dotenv"
+			}]
+		}]

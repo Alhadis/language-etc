@@ -35,6 +35,7 @@ To stay updated, run `language-etc:update` or add this to `~/.atom/config.cson`:
 Supported formats
 -----------------
 * [x] [`.curlrc`](https://curl.haxx.se/docs/manpage.html#-K)
+* [x] [`.env`](https://github.com/motdotla/dotenv)
 * [x] [`.gitattributes`](https://git-scm.com/docs/gitattributes)
 * [x] [`.gitconfig`](https://git-scm.com/docs/git-config)
 * [x] [`.gitignore`](https://git-scm.com/docs/gitignore)
