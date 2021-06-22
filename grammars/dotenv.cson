@@ -9,6 +9,9 @@ fileTypes: [
 	"env.development"
 	"env.production"
 	"env.staging"
+	"env.development.local"
+	"env.production.local"
+	"env.test.local"
 ]
 firstLineMatch: """(?x)
 
@@ -28,8 +31,9 @@ firstLineMatch: """(?x)
 """
 
 injections:
-	"source.dotenv meta.field.rhs string":
+	"source.dotenv meta.field.rhs string - string.quoted.single":
 		patterns: [{
+			# ${VARIABLE}
 			name:  "source.shell.embedded.dotenv"
 			match: "(?<!\\\\)(\\${)(.*?)(?<!\\\\)(})"
 			captures:
@@ -37,17 +41,27 @@ injections:
 				2: name: "constant.language.environment.variable.dotenv"
 				3: name: "punctuation.section.embedded.end.dotenv"
 		},{
+			# $VARIABLE
 			name: "entity.name.variable.dotenv"
 			match: "(?<!\\\\)(\\$)[a-zA-Z0-9_]+"
 			captures:
 				1: name: "punctuation.definition.variable.dotenv"
 		},{
-			name: "string.interpolated.dotenv"
-			match: "(?<!\\\\)({)\\s*([^{}\\s]+)\\s*(?<!\\\\)(})"
+			# $(sh -c ommands)
+			name:  "source.shell.embedded.dotenv"
+			match: "(?<!\\\\)(\\$\\()(.*?)(?<!\\\\)(\\))"
 			captures:
-				1: name: "punctuation.definition.bracket.curly.begin.dotenv"
-				2: name: "entity.name.variable.dotenv"
-				3: name: "punctuation.definition.bracket.curly.end.dotenv"
+				1: name: "punctuation.section.embedded.begin.dotenv"
+				2: patterns: [include: "source.shell"]
+				3: name: "punctuation.section.embedded.end.dotenv"
+		}]
+	"source.dotenv meta.field.rhs string.unquoted":
+		patterns: [{
+			name:  "comment.line.number-sign.inline.dotenv"
+			begin: "(?<=\\S)[ \\t]+(#)"
+			end:   "(?=$)"
+			captures:
+				1: name: "punctuation.definition.comment.dotenv"
 		}]
 
 repository:
@@ -75,13 +89,14 @@ repository:
 	# Shell-like variable assignments, except with more generous whitespace handling
 	field:
 		name:  "meta.field.dotenv"
-		begin: "^(([ \\t]*)([-\\w.]+)\\s*)(=)"
+		begin: "^(([ \\t]*)(?:(export)\\s+)?([-\\w.]+)\\s*)(=|:)"
 		end:   "(?!\\G)"
 		beginCaptures:
 			1: name: "meta.field.lhs.dotenv"
 			2: name: "punctuation.whitespace.leading.field.dotenv"
-			3: name: "variable.assignment.environment.dotenv"
-			4: name: "keyword.operator.assignment.key-value.colon.dotenv"
+			3: name: "storage.modifier.export.dotenv"
+			4: name: "variable.assignment.environment.dotenv"
+			5: name: "keyword.operator.assignment.key-value.dotenv"
 		contentName: "meta.field.rhs.dotenv"
 		patterns: [{
 			# EMPTY =
