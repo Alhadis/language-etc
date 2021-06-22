@@ -57,6 +57,7 @@ Supported formats
 * [x] [LCOV tracefiles](https://linux.die.net/man/1/geninfo)
 * [ ] [LDAP schemas](https://ldap.com/understanding-ldap-schema/ "/etc/openldap/schema/*.schema")
 * [ ] [LDIF / LDAP Data Interchange Format](https://openldap.org/software/man.cgi?query=LDIF "/etc/openldap/schema/openldap.ldif")
+* [x] [Less history files](https://greenwoodsoftware.com/less/)
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [ ] [Hunspell dictionaries](https://github.com/hunspell/hunspell/blob/master/man/hunspell.5)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)

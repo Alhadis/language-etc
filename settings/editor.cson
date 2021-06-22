@@ -96,3 +96,7 @@
 ".source.openbsd-pkg.contents":
 	editor:
 		commentStart: "@comment "
+
+".text.lesshst":
+	editor:
+		tabType: "soft"

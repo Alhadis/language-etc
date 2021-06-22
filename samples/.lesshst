@@ -1,0 +1,14 @@
+.less-history-file:
+.search
+"Foo
+"Bar
+"^\s*type 
+"preconv
+""application:open-in-new-window"
+"\.files/etc/ws.*
+.shell
+"echo Foo
+.mark
+m ' 1 73 /tmp/foo.txt
+m R 1 10 /tmp/bar.txt
+m T 1 101 C:\tmp\bad-filenames\White Space.docx

@@ -1,0 +1,97 @@
+# Source: https://github.com/gwsw/less/blob/cb3bcf8db8b2db99bcda5c3256c6dc61d4a1c7b5/cmdbuf.c#L59-L63
+name: "Less History File"
+scopeName: "text.lesshst"
+fileTypes: [
+	"lesshst"      # POSIX
+	"_lesshst"     # DOS/Windows
+	"lesshst.ini"  # OS/2
+]
+patterns: [include: "#main"]
+firstLineMatch: "^\\.less-history-file:"
+
+repository:
+	main:
+		patterns: [
+			{include: "#fileHeader"}
+			{include: "#searches"}
+			{include: "#shellCommands"}
+			{include: "#marks"}
+		]
+
+
+	# First line of history file (apparently redundant?)
+	fileHeader:
+		name:  "meta.file.lesshst"
+		begin: "^(\\.)less-history-file(:)"
+		end:   "(?=^\\.)"
+		beginCaptures:
+			0: name: "keyword.control.directive.lesshst"
+			1: name: "punctuation.definition.directive.lesshst"
+			2: patterns: [include: "etc#colon"]
+		patterns: [include: "#main"]
+
+
+	# m [LETTER] [SCROLL_OFFSET] [POS_STR] [FILE]
+	mark:
+		name:  "meta.mark.lesshst"
+		begin: "^(m)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)[ \\t]*"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.mark.lesshst"
+			2: name: "entity.name.mark.lesshst"
+			3: name: "constant.numeric.integer.scroll-offset.lesshst"
+			4: name: "constant.numeric.integer.string-position.lesshst"
+		contentName: "string.unquoted.filename.lesshst"
+
+
+	# Marks saved when running less(1) with `--save-marks` enabled
+	marks:
+		name:  "meta.section.marks.lesshst"
+		begin: "^(\\.)mark$"
+		end:   "(?=^\\.)"
+		beginCaptures:
+			0: name: "keyword.control.directive.lesshst"
+			1: name: "punctuation.definition.directive.lesshst"
+		patterns: [include: "#mark"]
+
+
+	# Individual search entries
+	search:
+		name:  "meta.history-item.lesshst"
+		begin: '^"'
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.history-item.lesshst"
+		contentName: "string.regexp.search-text.lesshst"
+		patterns: [include: "source.regexp.posix"]
+
+
+	# Search history
+	searches:
+		name:  "meta.section.searches.lesshst"
+		begin: "^(\\.)search$"
+		end:   "(?=^\\.)"
+		beginCaptures:
+			0: name: "keyword.control.directive.lesshst"
+			1: name: "punctuation.definition.directive.lesshst"
+		patterns: [include: "#search"]
+
+
+	# Individual shell command: "echo Foo
+	shellCommand:
+		name:  "meta.shell-command.lesshst"
+		match: '^(")(.*)'
+		captures:
+			1: name: "punctuation.definition.history-item.lesshst"
+			2: name: "source.embedded.shell", patterns: [include: "source.shell"]
+
+
+	# Shell command history
+	shellCommands:
+		name:  "meta.section.shell-commands.lesshst"
+		begin: "^(\\.)shell$"
+		end:   "(?=^\\.)"
+		beginCaptures:
+			0: name: "keyword.control.directive.lesshst"
+			1: name: "punctuation.definition.directive.lesshst"
+		patterns: [include: "#shellCommand"]
