@@ -5,6 +5,7 @@ fileTypes: [
 	".config/git/config"
 	"gitconfig"
 	"gitmodules"
+	"lfsconfig"
 ]
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
