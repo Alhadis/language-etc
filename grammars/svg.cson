@@ -1,5 +1,6 @@
 name: "SVG"
 scopeName: "text.xml.svg"
+maxTokensPerLine: 2048
 fileTypes: ["svg"]
 firstLineMatch: """(?xi)
 
@@ -25,7 +26,26 @@ firstLineMatch: """(?xi)
 		svg
 	(?=$|\\s|:)
 """
-patterns: [include: "#main"]
+injections:
+	"R:meta.attribute.d.xml.svg string":
+		patterns: [include: "#commands"]
+	
+patterns: [{
+	# Skip empty lines
+	begin: "\\A(?=[ \\t]*$)"
+	end:   "(?=\\S)"
+},{
+	# SVG drawing commands
+	name:  "meta.drawing-commands.xml.svg"
+	begin: "(?i)(?=[MLHVCSQTAZ][-\\d\\s.,MLHVCSQTAZ]*(?:$|['\"]))"
+	end:   "(?i)(?=[^-\\d\\s.,MLHVCSQTAZ])"
+	patterns: [include: "#commands"]
+},{
+	# Regular SVG file
+	begin: "(?=\\S)"
+	end:   "(?=A)B"
+	patterns: [include: "#main"]
+}]
 
 repository:
 	main:
@@ -51,6 +71,20 @@ repository:
 		end:   "\\]\\]>"
 		beginCaptures: 0: name: "punctuation.definition.string.begin.xml.svg"
 		endCaptures:   0: name: "punctuation.definition.string.end.xml.svg"
+
+
+	# Path drawing commands
+	commands:
+		patterns: [{
+			name: "keyword.operator.drawing-command.xml.svg"
+			match: "(?i)[MLHVCSQTAZ]"
+		},{
+			name: "constant.numeric.number.xml.svg"
+			match: "-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)"
+		},{
+			name: "punctuation.separator.coordinates.comma.xml.svg"
+			match: ","
+		}]
 
 
 	# <!-- HTML/SGML-style comments -->
