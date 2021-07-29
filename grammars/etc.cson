@@ -479,9 +479,9 @@ repository:
 				("|'|\\b)
 				(
 					# Not part of official URL schemes, included here for convenience
-					(?: (?:jdbc|mvn|view-source) :)?
+					(?: (?:jdbc|mvn|odbc|view-source) :)?
 
-					# Protocol
+					# Common protocols/URI schemes
 					( https?
 					| s?ftp
 					| ftps
@@ -498,12 +498,16 @@ repository:
 					| afp
 					| app
 					| atom
+					| aurora
 					| aw
 					| beshare
 					| bolo
+					| cassandra
 					| chrome(?:-extension)?
 					| coaps?
+					| cockroach
 					| content
+					| couchbase
 					| crid
 					| cvs
 					| dict
@@ -527,18 +531,30 @@ repository:
 					| lastfm
 					| ldaps?
 					| man(?:-?page)?
+					| maria(?:db)?
 					| market
 					| message
 					| mms
+					| modern-?sqlite
+					| mongodb
 					| ms-help
+					| mssql
 					| mumble
 					| my?sql
+					| netezza
 					| nfs
 					| ni
 					| nntp
 					| notes
+					| oleodbc
+					| oracle
 					| payto
+					| pgsql
+					| pg
 					| pop
+					| postgres(?:ql)?
+					| postgresql
+					| presto(?:dbs?|s)
 					| reload
 					| resource
 					| res
@@ -547,6 +563,7 @@ repository:
 					| rtmf?p
 					| rtmp
 					| s3
+					| saphana
 					| secondlife
 					| sgn
 					| shttp
@@ -554,6 +571,7 @@ repository:
 					| smb
 					| snmp
 					| soldat
+					| sqlite3?
 					| sqlserver
 					| steam
 					| stratum\\+[a-z]+
