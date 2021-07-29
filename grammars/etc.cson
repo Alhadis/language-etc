@@ -478,23 +478,107 @@ repository:
 			match: """(?x)
 				("|'|\\b)
 				(
+					# Not part of official URL schemes, included here for convenience
+					(?: (?:jdbc|mvn|view-source) :)?
+
 					# Protocol
 					( https?
 					| s?ftp
 					| ftps
 					| file
 					| wss?
-					| smb
-					| git (?:\\+https?)?
+					| (?:git|svn) (?:\\+(?:https?|ssh))?
 					| ssh
-					| rsync
+					
+					# Less common URI schemes
+					| aaas?
+					| acap
+					| adiumxtra
+					| admin
 					| afp
-					| nfs
-					| (?:x-)?man(?:-page)?
-					| gopher
-					| txmt
-					| issue
+					| app
 					| atom
+					| aw
+					| beshare
+					| bolo
+					| chrome(?:-extension)?
+					| coaps?
+					| content
+					| crid
+					| cvs
+					| dict
+					| dns
+					| docker
+					| ed2k
+					| facetime
+					| feed
+					| finger
+					| fish
+					| gemini
+					| github(?:-(?:mac|linux|windows))?
+					| gizmoproject
+					| gopher
+					| go
+					| hcp
+					| imap
+					| irc[6s]?
+					| issue
+					| keyparc
+					| lastfm
+					| ldaps?
+					| man(?:-?page)?
+					| market
+					| message
+					| mms
+					| ms-help
+					| mumble
+					| my?sql
+					| nfs
+					| ni
+					| nntp
+					| notes
+					| payto
+					| pop
+					| reload
+					| resource
+					| res
+					| rmi
+					| rsync
+					| rtmf?p
+					| rtmp
+					| s3
+					| secondlife
+					| sgn
+					| shttp
+					| slack
+					| smb
+					| snmp
+					| soldat
+					| sqlserver
+					| steam
+					| stratum\\+[a-z]+
+					| stuns?
+					| teamspeak
+					| telnet
+					| turns?
+					| txmt
+					| udp
+					| unreal
+					| ut2004
+					| ventrilo
+					| vnc
+					| wais
+					| web\\+[a-z]+
+					| webcal
+					| wtai
+					| wyciwyg
+					| xmpp
+					| xri
+					| z39\\.50[rs]
+					| zoommtg
+					
+					# User-defined/arbitrary URI scheme starting with `x-`
+					| x(?:-[a-z][a-z0-9]*)++
 					) ://
 					
 					# Path specifier
