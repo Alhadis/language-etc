@@ -1,9 +1,15 @@
 name: "DC"
 scopeName: "source.dc"
-fileTypes: ["dc"]
+fileTypes: ["dc", "dcrc"]
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
-
+	# Hashbang
+	^\\#!.*(?:\\s|\\/|(?<=!)\\b)
+		(?:dc)
+	(?:$|\\s)
+	
+	|
+	
 	# Emacs modeline
 	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
 		(?i:dc)
