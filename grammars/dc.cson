@@ -1,0 +1,212 @@
+name: "DC"
+scopeName: "source.dc"
+fileTypes: ["dc"]
+patterns: [include: "#main"]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:dc)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:dc)
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#register"}
+			{include: "#number"}
+			{include: "#arithmetic"}
+			{include: "#commands"}
+			{include: "#string"}
+			{include: "#shell"}
+		]
+
+
+	# Arithmetic
+	arithmetic:
+		patterns: [
+			{match: "[-+*/%^]", captures: 0: patterns: [include: "etc#opMath"]}
+			{match: "~",   name: "keyword.operator.arithmetic.divide-with-remainder.non-standard.dc"}
+			{match: "\\|", name: "keyword.operator.arithmetic.modular-exponentiation.dc"}
+			{match: "v",   name: "keyword.operator.arithmetic.square-root.dc"}
+		]
+
+
+	# Non-arithmetical commands
+	commands:
+		patterns: [
+			{match: "\\?", name: "keyword.operator.prompt.readline.dc"}
+			{match: "q",   name: "keyword.operator.quit.dc"}
+			{match: "Q",   name: "keyword.operator.exit-macro.dc"}
+			{match: "x",   name: "keyword.operator.execute.dc"}
+			{match: ">",   name: "keyword.operator.conditional.greater-than.dc"}
+			{match: "<",   name: "keyword.operator.conditional.less-than.dc"}
+			{match: "=",   name: "keyword.operator.conditional.equal.dc"}
+			{match: "!>",  name: "keyword.operator.conditional.not.greater-than.dc"}
+			{match: "!<",  name: "keyword.operator.conditional.not.less-than.dc"}
+			{match: "!=",  name: "keyword.operator.conditional.not.equal.dc"}
+			{match: "a",   name: "keyword.operator.ascii-character.non-standard.dc"}
+			{match: "c",   name: "keyword.operator.clear.dc"}
+			{match: "G",   name: "keyword.operator.comparison.equal.non-standard.dc"}
+			{match: "\\(", name: "keyword.operator.comparison.less-than.non-standard.dc"}
+			{match: "\\{", name: "keyword.operator.comparison.less-than-or-equal.non-standard.dc"}
+			{match: "J",   name: "keyword.operator.return.non-standard.dc"}
+			{match: "M",   name: "keyword.operator.mark.non-standard.dc"}
+			{match: "N",   name: "keyword.operator.convert-to-binary.non-standard.dc"}
+			{match: "d",   name: "keyword.operator.duplicate.dc"}
+			{match: "R",   name: "keyword.operator.remove.non-standard.dc"}
+			{match: "r",   name: "keyword.operator.reverse.non-standard.dc"}
+			{match: "s|S", name: "keyword.operator.register.save.dc"}
+			{match: "l|L", name: "keyword.operator.register.load.dc"}
+			{match: ";",   name: "keyword.operator.item-access.get.dc"}
+			{match: ":",   name: "keyword.operator.item-access.set.dc"}
+			{match: "i",   name: "keyword.operator.parameter.set.input-radix.dc"}
+			{match: "I",   name: "keyword.operator.parameter.get.input-radix.dc"}
+			{match: "o",   name: "keyword.operator.parameter.set.output-radix.dc"}
+			{match: "O",   name: "keyword.operator.parameter.get.output-radix.dc"}
+			{match: "k",   name: "keyword.operator.parameter.set.precision.dc"}
+			{match: "K",   name: "keyword.operator.parameter.get.precision.dc"}
+			{match: "p",   name: "keyword.operator.print.dc"}
+			{match: "e",   name: "keyword.operator.print-error.non-standard.dc"}
+			{match: "n",   name: "keyword.operator.print-without-newline.non-standard.dc"}
+			{match: "P",   name: "keyword.operator.print-and-pop.dc"}
+			{match: "f",   name: "keyword.operator.print-stack.dc"}
+			{match: "Z",   name: "keyword.operator.sizeof.value.dc"}
+			{match: "X",   name: "keyword.operator.sizeof.fraction.dc"}
+			{match: "z",   name: "keyword.operator.sizeof.stack.dc"}
+		]
+
+	
+	# Numeric value
+	number:
+		name: "constant.numeric.dc"
+		match: "_?(?:[0-9A-F]+(?:\\.[0-9A-F]*)?|\\.[0-9A-F]*)"
+
+
+	# Register name, which can be literally any single-byte value
+	register:
+		match: "(?:(?<=[slSL:;<=>])|(?<=[<=>].)((e)))(.)"
+		captures:
+			1: name: "keyword.operator.ternary.non-standard.dc"
+			2: name: "punctuation.separator.ternary.non-standard.dc"
+			3: name: "entity.name.register.dc"
+
+
+	# Execute remainder of line as a shell command
+	shell:
+		name: "meta.system-command.dc"
+		match: "(!)(?![<=>])(.*)"
+		captures:
+			1: name: "keyword.control.run-command.dc"
+			2: name: "source.embedded.shell", patterns: [include: "source.shell"]
+
+
+	# String or macro definition
+	string:
+		patterns: [{
+			name: "string.quoted.brackets.empty.dc"
+			match: "(\\[)(\\])"
+			captures:
+				1: name: "punctuation.definition.string.begin.dc"
+				2: name: "punctuation.definition.string.end.dc"
+		},{
+			# Something that can't be a macro due to an unrecognised command character
+			name: "string.quoted.brackets.dc"
+			match: """(?x)
+				(\\[)
+					(?:[^\\[\\]\\\\]|\\\\(?:\\\\|\\]))*?
+					[^-+*/%^~|v;:!?<=>acdefGiIJkKlLMNnoOpPqQRrsSxXZz\\s\\d_.A-F\\[\\]\\({]
+					(?:[^\\[\\]\\\\]|\\\\(?:\\\\|\\]))*?
+				(\\])
+			"""
+			captures:
+				1: name: "punctuation.definition.string.begin.dc"
+				2: name: "punctuation.definition.string.begin.dc"
+		},{
+			# Try to guess if a string is being used as a macro or not
+			match: """(?x)
+				(?:
+					(\\g<string>) (?!\\s*(?:[pfd]\\s*)*+[xsS:]) |
+					(\\g<string>) (?=\\s*(?:[pfd]\\s*)*+[xsS:])
+				)
+				
+				# Match a non-bracket or an escape sequence
+				(?<nonbracket>
+					[^\\[\\]\\\\]
+					|
+					\\\\ (?:\\\\|\\])
+				){0}
+				
+				# Match balanced brackets recursively
+				(?<string>
+					\\[
+						(?<brackets>
+							\\g<nonbracket>++
+							|
+							\\g<nonbracket>*+
+							\\[ \\g<brackets>? \\]
+							\\g<nonbracket>*+
+						)
+					\\]
+				){0}
+			"""
+			captures:
+				1: name: "string.quoted.brackets.dc", patterns: [{
+					match: "(?:^|\\G)(\\[)(.*)(\\])$"
+					captures:
+						1: name: "punctuation.definition.string.begin.dc"
+						3: name: "punctuation.definition.string.end.dc"
+						2: patterns: [include: "#stringEscape"]
+				}]
+				2: name: "meta.function.dc", patterns: [{
+					match: "(?:\\G|^)([^\\[]*)(\\[)(.*)(\\])([^\\]]*)$"
+					captures:
+						1: patterns: [include: "#stringMacro"]
+						3: patterns: [include: "#stringMacro"]
+						5: patterns: [include: "#stringMacro"]
+						2: name: "punctuation.definition.function.begin.dc"
+						4: name: "punctuation.definition.function.end.dc"
+				}]
+		},{
+			name:  "meta.function.multiline.dc"
+			begin: "\\["
+			end:   "\\]"
+			beginCaptures: 0: name: "punctuation.definition.function.begin.dc"
+			endCaptures:   0: name: "punctuation.definition.function.end.dc"
+			patterns: [include: "#main"]
+		}]
+
+	
+	# Escape sequences (not supported by all dc(1) implementations)
+	stringEscape:
+		patterns: [{
+			# \]
+			name: "constant.character.escape.bracket.dc"
+			match: "(\\\\)\\]"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dc"
+		},{
+			# \\
+			name: "constant.character.escape.backslash.dc"
+			match: "(\\\\)\\\\"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dc"
+		}]
+
+
+	# Stuff matched inside a string that's been identified as a macro
+	stringMacro:
+		patterns: [
+			{include: "#stringEscape"}
+			{include: "#main"}
+		]

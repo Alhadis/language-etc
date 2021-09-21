@@ -51,6 +51,7 @@ Supported formats
 * [x] [`CODEOWNERS`](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
 * [ ] [Connection Control Language](https://en.wikipedia.org/wiki/Softmodem "/Library/Modem Scripts/*.ccl")
+* [x] [`dc(1)`](http://man.openbsd.org/dc.1)
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [Futhark](https://futhark.readthedocs.io/en/latest/language-reference.html)

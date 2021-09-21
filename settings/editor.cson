@@ -15,6 +15,23 @@
 	editor:
 		commentStart: "# "
 
+".source.dc":
+	editor:
+		commentStart: "# "
+		increaseIndentPattern: "(?<!\\\\)\\[\\s*$"
+		decreaseIndentPattern: "^\\s*\\]\\s*$"
+	"bracket-matcher":
+		autocompleteCharacters: [
+			"[]"
+			'""'
+			"''"
+			"``"
+			"“”"
+			"‘’"
+			"«»"
+			"‹›"
+		]
+
 ".source.mailmap,
  .source.man-conf,
  .source.generic-db,

@@ -1,0 +1,22 @@
+#!/usr/bin/dc -f
+
+# Main loop
+[
+	c     # Clear stack
+	?     # Read next line
+	z     # Count stack
+	0.1 <B  # Branch to macro B if there’s more to process
+] sA
+
+# Calculation(s) being performed
+[
+	1024 * p
+	
+	# Branch back to macro A:
+	lA  # Load macro A
+	x   # Execute it
+] sB
+
+# Entry-point:
+lA  # Load macro A
+x   # Execute it
