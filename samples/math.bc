@@ -1,0 +1,39 @@
+/* Operators list */
+++ -- 	# Increment, decrement
+- 	# Unary minus
+^ 	# Power
+* / % 	# Multiply, divide, modulus
++ - 	# Plus, minus
+= += -= *= /= %= ^= 	# Assignment
+== <= >= != < > 	# Relational
+! 	# Boolean NOT
+&& 	# Boolean AND
+|| 	# Boolean OR
+
+/* Array access */
+primes[0]  = 2
+primes[1]  = 3
+primes[2]  = 5
+primes[3]  = 7
+primes[4]  = 11
+primes[5]  = 13
+primes[6]  = 17
+primes[7]  = 19
+primes[8]  = 23
+primes[9]  = 29
+primes[10] = 31
+primes[11] = 37
+primes[12] = 41
+primes[13] = 43
+primes[14] = 47
+primes[15] = 53
+primes[16] = 59
+primes[17] = 61
+primes[18] = 67
+primes[19] = 71
+
+
+first = primes[0]
+print first
+
+# vim: ts=23

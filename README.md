@@ -47,6 +47,7 @@ Supported formats
 * [x] [`.npmrc`](https://docs.npmjs.com/files/npmrc)
 * [ ] [`.tmux.conf`](https://wiki.archlinux.org/index.php/tmux#Configuration)
 * [x] [`.wgetrc`](https://goo.gl/KRoNsn)
+* [x] [`bc(1)`](http://man.openbsd.org/bc.1)
 * [x] [Checksum lists](https://en.wikipedia.org/wiki/sha1sum)
 * [x] [`CODEOWNERS`](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)

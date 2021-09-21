@@ -1,0 +1,455 @@
+name: "BC"
+scopeName: "source.bc"
+fileTypes: ["bc", "bc.library"]
+patterns: [include: "#main"]
+firstLineMatch: """(?x)
+	# Hashbang
+	^\\#!.*(?:\\s|\\/|(?<=!)\\b)
+		(?:bc)
+	(?:$|\\s)
+
+	|
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:bc)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:bc)
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comments"}
+			{include: "#function"}
+			{include: "#statement"}
+			{include: "#expression"}
+		]
+
+
+	# Arguments list to a function call
+	args:
+		name:  "meta.arguments.bc"
+		begin: "\\G\\("
+		end:   "\\)"
+		beginCaptures: 0: name: "punctuation.definition.arguments.begin.bc"
+		endCaptures:   0: name: "punctuation.definition.arguments.end.bc"
+		patterns: [include: "#expression"]
+
+
+	# Expression enclosed by square brackets
+	arrayAccess:
+		name:  "meta.item-access.bc"
+		begin: "\\["
+		end:   "\\]"
+		contentName: "meta.subscript.bc"
+		beginCaptures: 0: name: "punctuation.section.square.bracket.begin.bc"
+		endCaptures:   0: name: "punctuation.section.square.bracket.end.bc"
+		patterns: [include: "#expression"]
+
+
+	# Variable assignment
+	assignment:
+		name:  "meta.assignment.statement.bc"
+		begin: """(?x)
+			(?:
+				\\b
+				(?:
+					(ibase|obase|scale|history|last)
+					|
+					(?:
+						([a-z][a-z_0-9]+)
+						|
+						([a-z])
+					)
+					(\\s*\\[[^\\[\\]]*\\])?
+				)
+				|
+				(\\.)
+				|
+				(?<=\\])
+			)
+			\\s*
+			([-+*/%^]?=)
+		"""
+		end:   "(?=$|;|,)"
+		beginCaptures:
+			1: name: "variable.language.$1.assignment.bc"
+			2: name: "variable.assignment.long.bc"
+			3: name: "variable.assignment.short.bc"
+			4: patterns: [include: "#arrayAccess"]
+			5: name: "variable.language.last.assignment.bc"
+			6: patterns: [include: "#operators"]
+		patterns: [include: "#expression"]
+
+
+	# Locally-scoped variables list: `auto a, … z`
+	auto:
+		name:  "meta.local-variables.bc"
+		begin: "(?<=\\s|^|\\G|\\*/)\\b(auto)(?=\\s|$)"
+		end:   "$|(?=;|#|/\\*)"
+		beginCaptures:
+			1: name: "storage.modifier.auto.bc"
+		patterns: [{
+			name:  "variable.local.array.long.bc"
+			match: "\\b[a-z][a-z_0-9]+(\\[\\])"
+			captures:
+				1: name: "punctuation.definition.variable.array.bc"
+		},{
+			name:  "variable.local.array.short.bc"
+			match: "\\b[a-z](\\[\\])"
+			captures:
+				1: name: "punctuation.definition.variable.array.bc"
+		},{
+			name:  "variable.local.scalar.long.bc"
+			match: "\\b[a-z][a-z_0-9]+"
+		},{
+			name:  "variable.local.scalar.short.bc"
+			match: "\\b[a-z]\\b"
+		}, include: "#lineContinuation", {include: "etc#comma"}]
+
+
+	# Block of statements enclosed in curly brackets
+	block:
+		name:  "meta.block.bc"
+		begin: "{"
+		end:   "}"
+		beginCaptures: 0: name: "punctuation.section.block.curly.bracket.begin.bc"
+		endCaptures:   0: name: "punctuation.section.block.curly.bracket.end.bc"
+		patterns: [include: "#statement"]
+
+
+	# Function call or function-like operator
+	call:
+		patterns: [{
+			name:  "meta.expression.$1-call.bc"
+			begin: "\\b(sqrt|length|scale|read)\\s*(?=\\()"
+			end:   "(?<=\\))"
+			beginCaptures:
+				1: name: "keyword.operator.expression.$1.bc"
+			patterns: [include: "#args"]
+		},{
+			# Function call
+			name:  "meta.function-call.bc"
+			begin: "\\b(?:([scalej])|([a-z][a-z_0-9]*))\\s*(?=\\()"
+			end:   "(?<=\\))"
+			beginCaptures:
+				1: name: "support.function.math-library.bc"
+				2: name: "entity.name.function.bc"
+			patterns: [include: "#args"]
+		}]
+
+
+	# Comments
+	comments:
+		patterns: [{
+			# C-style block comments
+			name:  "comment.block.bc"
+			begin: "/\\*"
+			end:   "\\*/"
+			beginCaptures: 0: name: "punctuation.definition.comment.begin.bc"
+			endCaptures:   0: name: "punctuation.definition.comment.end.bc"
+		},{
+			# Shell-style line comments
+			name:  "comment.line.number-sign.bc"
+			begin: "#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.bc"
+		}]
+
+
+	# Bracketed expression following a condition-type keyword
+	condition:
+		name:  "meta.condition.expression.bc"
+		begin: "\\G\\("
+		end:   "\\)"
+		beginCaptures: 0: name: "punctuation.section.condition.round.bracket.begin.bc"
+		endCaptures:   0: name: "punctuation.section.condition.round.bracket.end.bc"
+		patterns: [include: "#expression"]
+
+
+	# Expressions
+	expression:
+		patterns: [
+			{include: "#comments"}
+			{include: "#operators"}
+			{include: "#number"}
+			{include: "#string"}
+			{include: "#group"}
+			{include: "#call"}
+			{include: "#variable"}
+			{include: "#arrayAccess"}
+			{include: "#lineContinuation"}
+			{include: "etc#comma"}
+		]
+
+
+	# Parenthesised expression
+	group:
+		name:  "meta.expression.group.bc"
+		begin: "\\("
+		end:   "\\)"
+		beginCaptures: 0: name: "punctuation.section.expression.round.bracket.begin.bc"
+		endCaptures:   0: name: "punctuation.section.expression.round.bracket.end.bc"
+		patterns: [include: "#expression"]
+
+
+	# For loop
+	for:
+		name:  "meta.block.for.loop.bc"
+		begin: "\\b(for)[ \\t]*"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "keyword.control.flow.loop.for.bc"
+		patterns: [{
+			begin: "\\G\\("
+			end:   "\\)"
+			beginCaptures: 0: name: "punctuation.section.condition.round.bracket.begin.bc"
+			endCaptures:   0: name: "punctuation.section.condition.round.bracket.end.bc"
+			patterns: [{
+				name:  "meta.loop.initialisation.bc"
+				begin: "\\G(?!;)"
+				end:   "(?=;|\\))"
+				patterns: [include: "#expression"]
+			},{
+				name:  "meta.loop.condition.bc"
+				begin: ";"
+				end:   ";|(?=\\))"
+				patterns: [include: "#expression"]
+				captures:
+					0: patterns: [include: "etc#semi"]
+			},{
+				name:  "meta.loop.update.bc"
+				begin: "(?<=;)"
+				end:   "(?=\\))"
+				patterns: [include: "#expression"]
+			}]
+		}]
+
+
+	# Function definition
+	function:
+		name:  "meta.function.definition.bc"
+		begin: "(?<=\\s|^|\\G)(define)(?=\\s|$)"
+		end:   "(?<=})"
+		beginCaptures:
+			1: name: "storage.type.function.bc"
+		patterns: [
+			{include: "#functionHead"}
+			{include: "#functionBody"}
+			{include: "#comments"}
+		]
+
+	# Block immediately after a function definition's parameters list
+	functionBody:
+		name:  "meta.block.function-body.bc"
+		begin: "{"
+		end:   "}"
+		beginCaptures: 0: name: "punctuation.section.block.curly.bracket.begin.bc"
+		endCaptures:   0: name: "punctuation.section.block.curly.bracket.end.bc"
+		patterns: [
+			{include: "#auto"}
+			{include: "#main"}
+		]
+
+	# Function header
+	functionHead:
+		begin: "\\G"
+		end:   "(?<=\\))|(?={)"
+		patterns: [{
+			# Name
+			begin: "\\G"
+			end:   "(?:(void)\\s+)?([a-z][a-z_0-9]+)|([a-z]\\b)|(?=[^\\sa-z/*#])"
+			endCaptures:
+				1: name: "storage.modifier.void.gnu.bc"
+				2: name: "entity.name.function.long.bc"
+				3: name: "entity.name.function.short.bc"
+		},{
+			# Parameters
+			begin: "(?<=[a-z_0-9])(?!\\G)\\s*(?=\\()"
+			end:   "(?!\\G)"
+			patterns: [{
+				name:  "meta.parameters.bc"
+				begin: "\\G\\("
+				end:   "\\)"
+				beginCaptures: 0: name: "punctuation.definition.parameters.round.bracket.begin.bc"
+				endCaptures:   0: name: "punctuation.definition.parameters.round.bracket.end.bc"
+				patterns: [{
+					name:  "variable.parameter.function.array.long.bc"
+					match: "(\\*)?\\b[a-z][a-z_0-9]+(\\[\\])"
+					captures:
+						1: name: "storage.modifier.callable.bc"
+						2: name: "punctuation.definition.variable.array.bc"
+				},{
+					name:  "variable.parameter.function.array.short.bc"
+					match: "(\\*)?\\b[a-z](\\[\\])"
+					captures:
+						1: name: "storage.modifier.callable.bc"
+						2: name: "punctuation.definition.variable.array.bc"
+				},{
+					name:  "variable.parameter.function.long.bc"
+					match: "\\b[a-z][a-z_0-9]+"
+				},{
+					name:  "variable.parameter.function.short.bc"
+					match: "\\b[a-z]\\b"
+				}, include: "#main"]
+			}]
+		}, include: "#comments"]
+
+
+	# If/else clause
+	if:
+		patterns: [{
+			name:  "meta.block.conditional.bc"
+			begin: "\\b(if)[ \\t]*"
+			end:   "(?!\\G)"
+			beginCaptures:
+				1: name: "keyword.control.flow.conditional.if.bc"
+			patterns: [
+				{include: "#condition"}
+				{include: "#comments"}
+			]
+		},{
+			name: "keyword.control.flow.conditional.else.bc"
+			match: "\\b(else)\\b"
+		}]
+
+
+	# Reserved keywords that don't belong anywhere else
+	keywords:
+		patterns: [
+			{match: "\\b(break|continue|quit)\\b", name: "keyword.control.flow.$1.bc"}
+			{match: "\\b(halt)\\b",                name: "keyword.control.flow.$1.gnu.bc"}
+			{match: "\\b(limits|warranty)\\b",     name: "keyword.operator.$1.gnu.bc"}
+		]
+
+
+	# Escaped newline
+	lineContinuation:
+		name:  "constant.character.escape.newline.line-continuation.bc"
+		begin: "(\\\\)$\\s*"
+		end:   "^"
+		beginCaptures:
+			1: name: "punctuation.definition.escape.backslash.bc"
+
+
+	# Arbitrarily-long number
+	number:
+		name: "constant.numeric.bc"
+		match: "[-+]?(?:[0-9A-F]+(?:\\.[0-9A-F]*)?|\\.[0-9A-F]*)"
+
+
+	# Double-quoted string
+	string:
+		name:  "string.quoted.double.bc"
+		begin: '"'
+		end:   '"'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.bc"
+		endCaptures:   0: name: "punctuation.definition.string.end.bc"
+		patterns: [{
+			# Escape sequences: \a \b \f \n \q \r \t \\
+			name:  "constant.character.escape.backslash.bc"
+			match: "(\\\\)[abfnqrt\\\\]"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.bc"
+		},{
+			# Anything else is ignored
+			name:  "invalid.illegal.unknown-escape.bc"
+			match: '\\\\(?:[^"]|(?="))'
+		}]
+
+
+	# Arithmetic
+	operators:
+		patterns: [
+			{include: "etc#opFix"}
+			{match: "[<=>!]=|<|>", captures: 0: patterns: [include: "etc#opCmp"]}
+			{match: "[-+*/%^]?=",  captures: 0: patterns: [include: "etc#opMathAssign", {include: "etc#eql"}]}
+			{match: "[-^*/%+]",    captures: 0: patterns: [include: "etc#opMath"]}
+			{match: "!|&&|\\|\\|", captures: 0: patterns: [include: "etc#opLog"]}
+		]
+
+
+	# Print statement
+	print:
+		name:  "meta.print.statement.bc"
+		begin: "\\b(print)\\b[ \\t]*"
+		end:   "(?=$|;)"
+		beginCaptures:
+			1: name: "keyword.operator.print.bc"
+		patterns: [include: "#expression"]
+
+
+	# Return statement
+	return:
+		name:  "meta.return.statement.bc"
+		begin: "\\b(return)\\b[ \\t]*"
+		end:   "(?=$|;|(?<=\\)))"
+		beginCaptures:
+			1: name: "keyword.control.flow.return.bc"
+		patterns: [include: "#expression"]
+
+
+	# Semicolon
+	semi:
+		name: "punctuation.terminator.statement.semicolon.bc"
+		match: ";"
+
+
+	# Statements
+	statement:
+		patterns: [
+			{include: "#if"}
+			{include: "#while"}
+			{include: "#for"}
+			{include: "#block"}
+			{include: "#assignment"}
+			{include: "#keywords"}
+			{include: "#return"}
+			{include: "#print"}
+			{include: "#semi"}
+			{include: "#expression"}
+		]
+
+
+	# While loop
+	while:
+		name:  "meta.block.while.loop.bc"
+		begin: "\\b(while)[ \\t]*"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "keyword.control.flow.loop.while.bc"
+		patterns: [
+			{include: "#condition"}
+			{include: "#comments"}
+		]
+
+
+	# Variable name
+	variable:
+		patterns: [{
+			# “Special” variables
+			name: "variable.language.$1.dereference.bc"
+			match: "\\b(ibase|obase|scale|history|last)\\b"
+		},{
+			# Alias for `last`
+			name: "variable.language.last.dereference.bc"
+			match: "\\.(?![0-9A-F])"
+		},{
+			# Multi-character identifier
+			name: "variable.dereference.long.bc"
+			match: "\\b[a-z][a-z_0-9]+\\b"
+		},{
+			# Single-character identifier
+			name: "variable.dereference.short.bc"
+			match: "\\b[a-z]\\b"
+		}]

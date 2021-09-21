@@ -15,6 +15,11 @@
 	editor:
 		commentStart: "# "
 
+".source.bc":
+    editor:
+        commentStart: "/*"
+        commentEnd:   "*/"
+
 ".source.dc":
 	editor:
 		commentStart: "# "
