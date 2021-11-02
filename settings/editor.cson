@@ -10,7 +10,6 @@
  .source.record-jar,
  .source.sieve,
  .source.shellcheckrc,
- .source.ssh-config,
  .source.wgetrc":
 	editor:
 		commentStart: "# "
@@ -74,6 +73,11 @@
 ".source.smpl":
 	editor:
 		commentStart: "// "
+
+".source.ssh-config":
+    editor:
+        commentStart: "# "
+        maxScreenLineLength: 1000
 
 ".source.string-template":
 	editor:

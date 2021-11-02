@@ -1,0 +1,129 @@
+# Source: $OpenBSD: readconf.c,v 1.363 2021/09/16 05:36:03 djm Exp $
+
+# Deprecated options
+Protocol                         sftp # Ignored
+Cipher                           chacha20-poly1305@openssh.com
+FallbackToRSH                    no
+GlobalKnownHostsFile2            /dev/null
+RHostsAuthentication             no
+UserKnownHostsFile2              /dev/null
+UseRoaming                       no
+UseRSH                           no
+UsePrivilegedPort                no
+
+# Unsupported options
+AFSTokenPassing                  no
+KerberosAuthentication           no
+KerberosTGTPassing               no
+RSAAuthentication                no
+RHostsRSAAuthentication          no
+CompressionLevel                 6
+
+# Sometimes-supported options
+GSSAPIAuthentication             no
+GSSAPIDelegateCredentials        no
+PKCS11Provider                   none
+SmartCardDevice                  /dev/null
+
+# Everything else
+ForwardAgent                     no
+ForwardX11                       no
+ForwardX11Trusted                no
+ForwardX11Timeout                20m
+ExitOnForwardFailure             no
+XAuthLocation                    /usr/X11R6/bin/xauth
+GatewayPorts                     clientspecified
+PasswordAuthentication           no
+KbdInteractiveAuthentication     no
+KbdInteractiveDevices            no
+ChallengeResponseAuthentication  no
+SKeyAuthentication               no
+TISAuthentication                no
+PubkeyAuthentication             no
+DSAAuthentication                no
+HostbasedAuthentication          no
+IdentityFile                     ~/.ssh/id_dsa ~/.ssh/id_ecdsa ~/.ssh/id_ecdsa_sk ~/.ssh/id_ed25519 ~/.ssh/id_ed25519_sk ~/.ssh/id_rsa
+IdentityFile2                    $HOME/.ssh/id_dsa
+IdentitiesOnly                   no
+CertificateFile                  /dev/null
+AddKeysToAgent                   confirm 30s
+IdentityAgent                    SSH_AUTH_SOCK
+Hostname                         127.0.0.1
+HostKeyAlias                     none
+ProxyCommand                     /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
+Port                             22
+Ciphers                          chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+MACs                             umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+RemoteForward                    localhost:80
+LocalForward                     localhost:80
+PermitRemoteOpen                 [fe80::1ff:fe23:4567:890A%eth2]:80
+User                             johngardner
+Host
+Match
+EscapeChar                       ^V
+GlobalKnownHostsFile             /etc/ssh/ssh_known_hosts /etc/ssh/ssh_known_hosts2
+UserKnownHostsFile               ~/.ssh/known_hosts ~/.ssh/known_hosts2
+ConnectionAttempts               1
+BatchMode                        no
+CheckHostIP                      no
+StrictHostKeyChecking            ask
+Compression                      no
+TCPKeepAlive                     yes
+KeepAlive                        yes
+NumberOfPasswordPrompts          3
+SyslogFacility                   USER
+LogLevel                         INFO
+LogVerbose                       kex.c:*:1000,*:kex_exchange_identification():*,packet.c:*
+DynamicForward                   localhost:80
+PreferredAuthentications         gssapi-with-mic,hostbased,publickey,keyboard-interactive,password
+HostKeyAlgorithms                ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256
+CASignatureAlgorithms           +ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+BindAddress                      none
+BindInterface                    none
+ClearAllForwardings              no
+EnableSSHKeysign                 no
+VerifyHostKeyDNS                 no
+NoHostAuthenticationForLocalhost no
+RekeyLimit                       1M 1m30s
+ConnectTimeout                   30s
+AddressFamily                    inet6
+ServerAliveInterval              0
+ServerAliveCountMax              3
+SendEnv                          *_KEY
+SetEnv                           TERM=vt220
+ControlPath                      none
+ControlMaster                    no
+ControlPersist                   no
+HashKnownHosts                   no
+Include                          /etc/ssh_config
+Tunnel                           point-to-point
+TunnelDevice                     any:any
+LocalCommand                     echo "Hello, world"
+PermitLocalCommand               no
+RemoteCommand                    printf '%s\n' "Foo"
+VisualHostKey                    no
+KexAlgorithms                    curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256
+IPQoS                            af21 cs1
+RequestTTY                       force
+SessionType                      subsystem
+StdinNull                        no
+ForkAfterAuthentication          no
+ProxyUseFdpass                   no
+CanonicalDomains                 none
+CanonicalizeFallbackLocal        yes
+CanonicalizeHostname             always
+CanonicalizeMaxDots              1
+CanonicalizePermittedCNAMEs      *.a.example.com:*.b.example.com,*.c.example.com
+StreamLocalBindMask              0177
+StreamLocalBindUnlink            no
+RevokedHostKeys                  none
+FingerprintHash                  sha256
+UpdateHostkeys                   ask
+HostbasedAcceptedAlgorithms     ^ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+HostbasedKeyTypes               -ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+PubkeyAcceptedAlgorithms        ^ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+PubkeyAcceptedKeyTypes          -ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+IgnoreUnknown                    *Keychain,Ignored
+ProxyJump                        ssh:Alhadis@github.com
+SecurityKeyProvider              $VAR_NAME
+KnownHostsCommand                true
