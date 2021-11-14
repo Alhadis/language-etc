@@ -51,7 +51,7 @@ repository:
 				# Equals-separated values
 				match: "\\G(=)(\\S*)"
 				captures:
-					1: name: "etc#eql"
+					1: patterns: [include: "etc#eql"]
 					2: patterns: [include: "#value"]
 			},{
 				# Any other argument
@@ -63,7 +63,7 @@ repository:
 
 
 	# Stuff matched inside a tokenised argument-value
-	optionValue:
+	value:
 		patterns: [
 			{include: "etc"}
 			{include: "etc#bareword"}
