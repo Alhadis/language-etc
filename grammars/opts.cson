@@ -1,6 +1,11 @@
 name: "Option list"
 scopeName: "source.opts"
-fileTypes: ["opts"]
+fileTypes: [
+	"opts"
+	"youtube-dl.conf"
+	"youtube-dl/config"
+	"youtube-dl/config.txt"
+]
 patterns: [include: "#main"]
 
 repository:
