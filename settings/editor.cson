@@ -1,7 +1,6 @@
 ".source.curlrc,
  .source.dotenv,
  .source.gitignore,
- .source.gitconfig,
  .source.gitattributes,
  .source.inputrc,
  .source.nanorc,
@@ -13,6 +12,12 @@
  .source.wgetrc":
 	editor:
 		commentStart: "# "
+
+".source.gitconfig":
+	editor:
+		commentStart: "# "
+		increaseIndentPattern: "^\\[.+\\]\\s*$"
+		decreaseIndentPattern: "^\\s*\\["
 
 ".source.bc":
     editor:
