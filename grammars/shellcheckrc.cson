@@ -69,8 +69,10 @@ repository:
 				\\s enable=  |
 				^   disable= |
 				^   enable=
-			)\\G"
+			)\\G((?<=disable=)(all)(?=$|\\s))?"
 			end: "(?=$|\\s)"
+			beginCaptures:
+				1: name: "keyword.operator.all-warnings.shellcheckrc"
 			patterns: [
 				{include: "#errorCodeRange"}
 				{include: "#errorCode"}
