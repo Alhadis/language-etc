@@ -99,6 +99,17 @@ repository:
 			end: "(?=$|\\s)"
 			patterns: [include: "#escape"]
 		},{
+			# external-sources=true
+			begin: "(?x)(?<=
+				\\s external-sources= |
+				^   external-sources=
+			)\\G"
+			end: "(?=$|\\s)"
+			patterns: [{
+				name:  "constant.language.boolean.$1.shellcheckrc"
+				match: "\\G(true|false)(?=$|\\s)"
+			}, include: "#escape"]
+		},{
 			# Unrecognised directive value
 			name:  "string.unquoted.other.shellcheckrc"
 			begin: "\\G(?=\\S)"
