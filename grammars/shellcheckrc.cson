@@ -1,4 +1,4 @@
-# ShellCheck configuration files: https://github.com/koalaman/shellcheck/blob/58783ab3/shellcheck.1.md#rc-files
+# ShellCheck configuration files: https://github.com/koalaman/shellcheck/blob/e6e55894/shellcheck.1.md#rc-files
 name: ".shellcheckrc"
 scopeName: "source.shellcheckrc"
 fileTypes: ["shellcheckrc"]
@@ -69,11 +69,12 @@ repository:
 				\\s enable=  |
 				^   disable= |
 				^   enable=
-			)\\G((?<=disable=)(all)(?=$|\\s))?"
+			)\\G"
 			end: "(?=$|\\s)"
-			beginCaptures:
-				1: name: "keyword.operator.all-warnings.shellcheckrc"
 			patterns: [
+				name: "keyword.operator.all-warnings.shellcheckrc"
+				match: "\\Gall(?=$|\\s)"
+				
 				{include: "#errorCodeRange"}
 				{include: "#errorCode"}
 				{include: "#warningName"}
