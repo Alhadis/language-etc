@@ -1,4 +1,4 @@
-name: ".gitignore"
+name: "Ignore List"
 scopeName: "source.gitignore"
 fileTypes: [
 	"gitignore"
@@ -15,11 +15,14 @@ fileTypes: [
 	"babelignore"
 	"coffeelintignore"
 	"dockerignore"
+	"eleventyignore"
 	"eslintignore"
+	"markdownlintignore"
 	"nodemonignore"
 	"npmignore"
 	"prettierignore"
 	"stylelintignore"
+	"vercelignore"
 	"vscodeignore"
 	
 	# Almost-compatible formats (syntax doesn't conflict with Git)
