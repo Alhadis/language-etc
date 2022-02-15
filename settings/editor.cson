@@ -19,6 +19,11 @@
 		increaseIndentPattern: "^\\[.+\\]\\s*$"
 		decreaseIndentPattern: "^\\s*\\["
 
+".source.2da":
+	editor:
+		maxScreenLineLength: 1500
+		tabType: "soft"
+
 ".source.bc":
     editor:
         commentStart: "/*"

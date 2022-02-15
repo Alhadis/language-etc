@@ -1,0 +1,128 @@
+name: "2-Dimensional Array"
+scopeName: "source.2da"
+fileTypes: ["2da"]
+firstLineMatch: "^[ \\t]*2DA V[12]\\.0[ \\t]*$"
+limitLineLength: no
+maxTokensPerLine: 2048
+patterns: [{
+	# Lines 1-2: 2DA version + optional default value
+	name:  "meta.header.2da"
+	begin: "\\A(.*)$\\s*"
+	end:   "(?!\\G)$"
+	beginCaptures:
+		0: name: "meta.file-signature.2da"
+		1: patterns: [{
+			match: "(?:\\G|^)[ \\t]*(2DA V(\\d+\\.\\d+))(?=\\s|$)"
+			captures:
+				1: name: "keyword.control.format-version.2da"
+		},{
+			name: "invalid.illegal.unexpected-characters.2da"
+			match: "\\S.*?(?=[ \\t]*$)"
+		}]
+	patterns: [{
+		name:  "meta.default-value.2da"
+		begin: "(?:\\G|^)[ \\t]*(?:(DEFAULT(:))[ \\t]*)?"
+		end:   "(?=[ \\t]*$)"
+		beginCaptures:
+			1: name: "variable.assignment.default-value.2da"
+			2: name: "keyword.operator.assignment.colon.2da"
+		patterns: [include: "#value"]
+	}]
+},{
+	# Lines 3+
+	name:  "meta.body.2da"
+	begin: "^"
+	end:   "(?=A)B"
+	patterns: [{
+		# Line 3: Column headers
+		name: "meta.column-headers.2da"
+		contentName: "constant.other.reference.link"
+		begin: "\\G"
+		end:   "$"
+		patterns: [include: "#headers"]
+	},{
+		# Lines 4-∞: Table data
+		name:  "meta.records.2da"
+		begin: "(?!\\G)^"
+		end:   "(?=A)B"
+		patterns: [include: "#row"]
+	}]
+}]
+
+repository:
+	# Column headers
+	headers:
+		patterns: [{
+			name:  "entity.name.column.header.unquoted.2da"
+			match: '[^"\\s]+'
+		},{
+			name:  "entity.name.column.header.quoted.2da"
+			match: '(")(?=\\w)[^"]+(")'
+			captures:
+				1: name: "punctuation.definition.header.begin.2da"
+				2: name: "punctuation.definition.header.end.2da"
+		}]
+
+	# Individual rows of data
+	row:
+		patterns: [{
+			# Row index, provided for reader/editor convenience
+			match: "(?:\\G|^)[ \\t]*(\\d+)(?=\\s|$)"
+			captures:
+				1: name: "constant.numeric.integer.row-index.2da"
+		},{
+			# Horizontal whitespace separating each column value
+			name: "punctuation.whitespace.column-separator.2da"
+			match: "[ \\t]+"
+		}, include: "#value"]
+
+	# Special value indicating that entry is explicitly null
+	blankEntry:
+		name: "keyword.operator.null-value.2da"
+		match: "(?:\\G|^|(?<=\\s))\\*{4}(?=\\s|$)"
+
+
+	# 32-bit floating-point value
+	float:
+		name:  "constant.numeric.float.decimal.2da"
+		match: "[-+]?(?:[0-9]+\\.[0-9]+|\\.[0-9]+)(?=\\s|$)"
+
+
+	# 32-bit integer, nominally expressed in decimal (though hexadecimal has been seen)
+	integer:
+		patterns: [{
+			# 45: Decimal/base-10
+			name:  "constant.numeric.integer.dec.decimal.2da"
+			match: "[-+]?[0-9]+(?=\\s|$)"
+		},{
+			# 0xFF: Hexadecimal
+			name:  "constant.numeric.integer.hex.hexadecimal.2da"
+			match: "[-+]?0[Xx][A-Fa-f0-9]+(?=\\s|$)"
+		}]
+
+	# Sequence of alphanumeric characters
+	string:
+		patterns: [{
+			# Double-quoted entry, the only possible means of embedding whitespace
+			name:  "string.quoted.double.2da"
+			begin: '"'
+			end:   '(")|([^"]*?)(?=[ \\t]*$)'
+			beginCaptures:
+				0: name: "punctuation.definition.string.begin.2da"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.2da"
+				2: name: "invalid.illegal.unclosed-string.2da"
+		},{
+			# Unquoted identifier
+			name:  "string.unquoted.2da"
+			match: '(?![-+]?\\d)[^\\s"]+'
+		}]
+
+	# Any of three types of values that can be encoded in 2DA files
+	value:
+		patterns: [
+			{include: "#blankEntry"}
+			{include: "#float"}
+			{include: "#integer"}
+			{include: "#string"}
+		]
