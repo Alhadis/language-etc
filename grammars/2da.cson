@@ -8,8 +8,8 @@ patterns: [{
 	# Lines 1-2: 2DA version + optional default value
 	name:  "meta.header.2da"
 	begin: """(?x) \\A
-		[ \\t]* (2DA\\ V(?:\\d+\\.\\d+)) # Format signature
-		[ \\t]* (?:(\\S.*?) [ \\t]*)?    # Unexpected junk
+		[ \\t]* (2DA\\s+V(?:\\d+\\.\\d+)) # Format signature
+		[ \\t]* (?:(\\S.*?) [ \\t]*)?     # Unexpected junk
 		$ \\s*
 	"""
 	end: "(?!\\G)$"
