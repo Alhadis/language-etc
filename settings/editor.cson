@@ -25,9 +25,9 @@
 		tabType: "soft"
 
 ".source.bc":
-    editor:
-        commentStart: "/*"
-        commentEnd:   "*/"
+	editor:
+		commentStart: "/*"
+		commentEnd:   "*/"
 
 ".source.dc":
 	editor:
@@ -85,9 +85,9 @@
 		commentStart: "// "
 
 ".source.ssh-config":
-    editor:
-        commentStart: "# "
-        maxScreenLineLength: 1000
+	editor:
+		commentStart: "# "
+		maxScreenLineLength: 1000
 
 ".source.string-template":
 	editor:
@@ -95,8 +95,8 @@
 		commentEnd:   "!>"
 
 ".source.string-template .meta.document.dollar-delimiters":
-    editor:
-        commentStart: "$!"
+	editor:
+		commentStart: "$!"
 		commentEnd:   "!$"
 
 ".source.tags":
