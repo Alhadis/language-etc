@@ -1,7 +1,7 @@
 name: "2-Dimensional Array"
 scopeName: "source.2da"
 fileTypes: ["2da"]
-firstLineMatch: "^[ \\t]*2DA V[12]\\.0[ \\t]*$"
+firstLineMatch: "^[ \\t]*2DA\\s+V[12]\\.0[ \\t]*$"
 limitLineLength: no
 maxTokensPerLine: 2048
 patterns: [{
