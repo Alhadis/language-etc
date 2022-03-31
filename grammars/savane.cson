@@ -1,0 +1,247 @@
+# GNU Savannah's answer to markdown. Sources:
+# - https://github.com/apjanke/savane/blob/32a977be21c/frontend/php/include/markup.php
+# - https://savannah.gnu.org/markup-test.php
+name: "Savane Markup"
+scopeName: "text.savane"
+fileTypes: ["savane"] # HACK: Bogus file extension
+limitLineLength: no
+patterns: [include: "#fullMarkup"]
+
+repository:
+
+	# Level 1: “Basic” (inline) markup
+	basicMarkup:
+		patterns: [
+			{include: "#bold"}
+			{include: "#italic"}
+			{include: "#links"}
+			{include: "#nomarkup"}
+		]
+
+
+	# Level 2: “Rich” (multiline) markup
+	richMarkup:
+		patterns: [
+			{include: "#basicMarkup"}
+			{include: "#lists"}
+			{include: "#ruler"}
+			{include: "#verbatim"}
+			{include: "#quote"}
+		]
+
+
+	# Level 3: “Full” markup
+	fullMarkup:
+		patterns: [
+			{include: "#richMarkup"}
+			{include: "#headings"}
+		]
+
+
+	# *XYZ* -> <strong>XYZ</strong>
+	bold:
+		name:  "markup.bold.emphasis.strong.savane"
+		match: "(?:^|(?<=\\s))(\\*)([^* ][^*]*?)(\\*)"
+		captures:
+			1: name: "punctuation.definition.markup.bold.begin.savane"
+			2: name: "punctuation.definition.markup.bold.end.savane"
+
+
+	# Section headings, limited to 4 levels of depth
+	headings:
+		patterns: [{
+			# = Title =
+			name:  "markup.heading.1.title.savane"
+			match: "^(=) (.+?) (=)(?=\\s*$)"
+			captures:
+				1: name: "punctuation.definition.header.begin.savane"
+				2: patterns: [include: "#headingText"]
+				3: name: "punctuation.definition.header.end.savane"
+		},{
+			# == Subtitle ==
+			name:  "markup.heading.2.subtitle.savane"
+			match: "^(==) (.+?) (==)(?=\\s*$)"
+			captures:
+				1: name: "punctuation.definition.header.begin.savane"
+				2: patterns: [include: "#headingText"]
+				3: name: "punctuation.definition.header.end.savane"
+		},{
+			# === Subsubtitle ===
+			name:  "markup.heading.3.subsubtitle.savane"
+			match: "^(===) (.+?) (===)(?=\\s*$)"
+			captures:
+				1: name: "punctuation.definition.header.begin.savane"
+				2: patterns: [include: "#headingText"]
+				3: name: "punctuation.definition.header.end.savane"
+		},{
+			# ==== Subsubsubtitle ====
+			name:  "markup.heading.4.subsubsubtitle.savane"
+			match: "^(====) (.+?) (====)(?=\\s*$)"
+			captures:
+				1: name: "punctuation.definition.header.begin.savane"
+				2: patterns: [include: "#headingText"]
+				3: name: "punctuation.definition.header.end.savane"
+		}]
+
+
+	# Stuff matched between a header's opening and closing markers
+	headingText:
+		name:  "entity.name.section.savane"
+		begin: "(?:\\G|^)"
+		end:   "$"
+		patterns: [include: "#basicMarkup"]
+
+
+	# _XYZ_ -> <em>XYZ</em>
+	italic:
+		name:  "markup.italic.emphasis.savane"
+		match: "(?:^|(?<=[\\s\\(>]))(_)(.+?)(_)(?=$|\\W)"
+		captures:
+			1: name: "punctuation.definition.markup.italic.begin.savane"
+			2: name: "punctuation.definition.markup.italic.end.savane"
+
+
+	# Numeric identifier, shared by multiple rules
+	itemID:
+		name: "constant.numeric.integer.item-id.savane"
+		match: "(?:\\G|^)(#)\\d+"
+		captures:
+			1: name: "punctuation.definition.item-id.savane"
+
+
+	# Various constructs that yield hyperlinked text
+	links:
+		patterns: [{
+			# File reference: (file #21364 Alt text)
+			name:  "markup.link.reference.file.savane"
+			match: "(\\(?)(files?) (#\\d+)( ([^),]*))?(?:(\\))|(,)(?=$| ))?"
+			captures:
+				1: patterns: [include: "etc#bracket"]
+				2: name: "storage.type.file.savane"
+				3: patterns: [include: "#itemID"]
+				4: name: "meta.comment.savane"
+				5: name: "string.unquoted.alt-text.savane"
+				6: patterns: [include: "etc#bracket"]
+				7: patterns: [include: "etc#comma"]
+		},{
+			# Other reference-style shortlinks
+			name:  "markup.link.reference.$2.savane"
+			match: "\\b((bug|comment|recipe|task|patch|rcp|sr|support)(?:(?<!patch|rcp|sr|support)s)?)\\s{0,2}(#\\d+)"
+			captures:
+				1: name: "storage.type.$2.savane"
+				3: patterns: [include: "#itemID"]
+		},{
+			# [http://www.url.link Bracketed link]
+			name:  "markup.link.bracketed.named.web-address.savane"
+			match: "(\\[)((?:www\\.|//|(?:afs|file|https?|nfs|s?ftp):/{0,2})\\S+)(?:\\s+([^\\s\\]].*?))?(\\])"
+			captures:
+				1: patterns: [include: "etc#bracket"]
+				2: name: "constant.other.reference.link.markup.underline.savane"
+				3: name: "entity.name.tag.link.description.savane"
+				4: patterns: [include: "etc#bracket"]
+		},{
+			# [http://www.url.link]
+			name:  "markup.link.bracketed.unnamed.web-address.savane"
+			match: "(\\[)((?:www\\.|//|(?:afs|file|https?|nfs|s?ftp):/{0,2})\\S+)(\\])"
+			captures:
+				1: patterns: [include: "etc#bracket"]
+				2: name: "constant.other.reference.link.markup.underline.savane"
+				3: patterns: [include: "etc#bracket"]
+		},{
+			# http://no.brackets.around.link/
+			name:  "markup.link.unbracketed.web-address.savane"
+			match: "(?:(?:^|(?<=[^;\\[/]))(?:afs|file|https?|nfs|s?ftp)://|(?:^|(?<=\\s))www\\.)(?i:&amp;|[^\\s&]+[a-z0-9/^])++"
+			captures:
+				0: name: "constant.other.reference.link.markup.underline.savane"
+		},{
+			# send@mail.to
+			name:  "markup.link.unbracketed.mail-address.savane"
+			match: "(?:^|(?<=\\s))[-+\\w,.]+@(?:[-+\\w]+\\.)+[A-Za-z]+(?=$|\\s)"
+			captures:
+				0: name: "constant.other.reference.link.markup.underline.savane"
+		}]
+
+
+	# Nestable list blocks
+	lists:
+		patterns: [{
+			# Unnumbered lists
+			name:  "markup.list.unnumbered.savane"
+			begin: "(?:^|\\G)(\\s?)((\\*+)) +"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indentation.savane"
+				2: name: "keyword.operator.list.unnumbered.marker.savane"
+				3: name: "punctuation.definition.list.unordered.savane"
+			patterns: [include: "#basicMarkup"]
+		},{
+			# Numbered lists
+			name:  "markup.list.numbered.savane"
+			begin: "(?:^|\\G)(\\s?)(0+) +"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indentation.savane"
+				2: name: "keyword.operator.list.numbered.marker.savane"
+				3: name: "punctuation.definition.list.ordered.savane"
+			patterns: [include: "#basicMarkup"]
+		}]
+
+
+	# The moral equivalent of Wikitext's <nowiki></nowiki> tags
+	nomarkup:
+		name:  "meta.nomarkup.block.savane"
+		begin: "(\\+)nomarkup(\\+)"
+		end:   "(-)nomarkup(-)"
+		beginCaptures:
+			0: name: "keyword.control.nomarkup.block.begin.savane"
+			1: name: "punctuation.definition.keyword.begin.savane"
+			2: name: "punctuation.definition.keyword.end.savane"
+		endCaptures:
+			0: name: "keyword.control.nomarkup.block.end.savane"
+			1: name: "punctuation.definition.keyword.begin.savane"
+			2: name: "punctuation.definition.keyword.end.savane"
+		contentName: "markup.raw.literal.savane"
+
+
+	# Email-style quoted text indicator
+	quote:
+		name:  "markup.quote.block.savane"
+		begin: "(?:^|\\G)>"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.section.quote.savane"
+		patterns: [include: "#basicMarkup"]
+
+
+	# Horizontal rule(r) [sic]
+	ruler:
+		name: "meta.separator.horizontal-rule.ruler.savane"
+		match: "^-{4}(?=\\s*$)"
+		captures:
+			0: name: "punctuation.definition.divider.savane"
+
+
+	# Monospaced code-blocks
+	verbatim:
+		name:  "meta.verbatim-block.savane"
+		begin: "^\\s*((\\+)verbatim(\\+))(?:\\s*(\\S.*?))?[ \\t]*$"
+		end:   "^\\s*((-)verbatim(-))(?:\\s*(\\S.*?))?[ \\t]*$"
+		contentName: "markup.raw.code.monospace.savane"
+		beginCaptures:
+			1: name: "keyword.control.verbatim.block.begin.savane"
+			2: name: "punctuation.definition.keyword.begin.savane"
+			3: name: "punctuation.definition.keyword.end.savane"
+			4: name: "invalid.illegal.unexpected-characters.savane"
+		endCaptures:
+			1: name: "keyword.control.verbatim.block.end.savane"
+			2: name: "punctuation.definition.keyword.begin.savane"
+			3: name: "punctuation.definition.keyword.end.savane"
+			4: name: "invalid.illegal.unexpected-characters.savane"
+		patterns: [include: "#verbatimInnards"]
+
+
+	# Nested +verbatim+/-verbatim– pairs are allowed, provided they're balanced
+	verbatimInnards:
+		begin: "\\+verbatim\\+"
+		end:   "\\-verbatim-"
+		patterns: [include: "#verbatimInnards"]

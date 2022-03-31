@@ -1,0 +1,87 @@
+= Title with *inline* _formatting_ and stuff =
+
+== Lists ==
+
+Unnumbered list:
+
+* item 1
+* item 2
+** item 2 subitem 1
+** item 2 subitem 2
+* item 3
+
+Numbered list:
+
+0 item 1
+00 item 1 subitem 1
+0 item 2
+
+Horizontal rule:
+----
+
+
++verbatim+ Whoops
+seconds = 3600 *days * 24;
+_printf (_("Enter something:"));
+-verbatim-
+
++nomarkup++verba-nomarkup-tim+
+
+== URLs ==
+
+send@mail.to
+http://www.unnamed.link/
+[http://www.unnamed.link/]
+[www.unnamed.link Named link]
+[http://www.named.link/ Named link]
+
+
+== Autolinks ==
+
+comment #51
+bug #1419857
+task #289
+sr #4913 support #4913
+patch #119
+file #83521
+
+
+Links to files whose names end in '.png', '.jpg', '.jpeg' (case insensitive) are converted to HTML images, the surrounding parentheses and commas (if any) are removed:
+(file #47102)
+(file #47102 Smoking GNU)
+
+
+=== Autolink boundary tests ===
+
+(task #1)
+[task #1]
+<task #1>
+ task #1
+
+(file #47102 ZenYak™)
+[file #47102 ZenYak™]
+<file #47102 ZenYak™>
+ file #47102
+
+(file #47102 )
+(files #47102, )
+[file #47102]
+<file #47102>
+ file #47102
+
+
+=== Nested +nomarkup+_verbatim_-nomarkup- blocks ===
+
+Before
++verbatim+
+Level 0
++verbatim+
+Level 1
++verbatim+
+Level 2
+-verbatim-
+Level 1
+-verbatim-
+Level 0
+-verbatim-
+After
