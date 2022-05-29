@@ -99,6 +99,11 @@
 		commentStart: "$!"
 		commentEnd:   "!$"
 
+".source.stl":
+	editor:
+		increaseIndentPattern: "(?:^\uFEFF?|\\s)(?:facet|solid|outer[ \\t]+loop)(?:$|\\s)"
+		decreaseIndentPattern: "(?:^\uFEFF?|\\s)end(?:facet|loop|solid)(?:$|\\s)"
+
 ".source.tags":
 	editor:
 		commentStart: "!_TAG_COMMENT\t"

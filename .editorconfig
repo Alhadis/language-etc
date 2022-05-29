@@ -13,3 +13,7 @@ trim_trailing_whitespace = false
 indent_style = tab
 indent_size  = 32
 tab_width    = 32
+
+[cube.stl]
+charset = utf-8-bom
+end_of_line = crlf

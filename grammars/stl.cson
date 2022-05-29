@@ -1,0 +1,83 @@
+# ASCII stereolithography format. References:
+# - http://www.fabbers.com/tech/STL_Format#Sct_ASCII
+# - https://www.loc.gov/preservation/digital/formats/fdd/fdd000506.shtml
+name: "STL"
+scopeName: "source.stl"
+mimeType: "model/stl"
+fileTypes: ["stl"]
+firstLineMatch: "\\A\uFEFF?solid(?:$| )"
+foldingStartMarker: "(?:^\uFEFF?|\\s)(?:facet|solid|outer[ \\t]+loop)(?:$|\\s)"
+foldingStopMarker:  "(?:^\uFEFF?|\\s)end(?:facet|loop|solid)(?:$|\\s)"
+injectionSelector: "source.embedded.stl"
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#solid"}
+			{include: "#facet"}
+			{include: "#loop"}
+			{include: "#vertex"}
+		]
+
+
+	# Polygon/triangle specification
+	facet:
+		name:  "meta.facet.stl"
+		begin: "(?:^|\\G|(?<=\\s))[ \\t]*(facet)(?:$|[ \\t]+)"
+		end:   "(?:^|\\G|(?<=\\s))[ \\t]*(endfacet)(?=$|\\s)"
+		beginCaptures: 1: name: "keyword.control.begin.facet.stl"
+		endCaptures:   1: name: "keyword.control.end.facet.stl"
+		patterns: [
+			{include: "#normal"}
+			{include: "#loop"}
+			{include: "#vertex"}
+		]
+
+
+	# Pointless declarations that demarcate model's vertex data
+	loop:
+		name:  "meta.loop.stl"
+		begin: "(?:^|\\G|(?<=\\s))[ \\t]*(outer[ \\t]+loop)(?=$|\\s)"
+		end:   "(?:^|\\G|(?<=\\s))[ \\t]*(endloop)(?=$|\\s)"
+		beginCaptures: 1: name: "keyword.control.begin.loop.stl"
+		endCaptures:   1: name: "keyword.control.end.loop.stl"
+		patterns: [include: "#vertex"]
+
+
+	# Optional normal vector
+	normal:
+		name:  "meta.normal.stl"
+		begin: "(?:^|\\G|(?<=\\s))normal(?=$|\\s)"
+		end:   "(?=[ \\t]*$)"
+		beginCaptures:
+			0: name: "storage.type.normal.stl"
+		patterns: [include: "etc#num"]
+
+
+	# Top-level wrapper for individual 3D objects
+	solid:
+		name:  "meta.solid.stl"
+		begin: "(?:^\uFEFF?|\\G|(?<=\\s))[ \\t]*(solid)(?:[ \\t]+(\\S+)(?:[ \\t]+(\\S.*))?)?[ \\t]*$"
+		end:   "(?:^\uFEFF?|\\G|(?<=\\s))[ \\t]*(endsolid)(?:[ \\t]+(\\2)(?=$|\\s))?(?:[ \\t]+(\\S.*))?[ \\t]*$"
+		beginCaptures:
+			0: name: "meta.definition.header.stl"
+			1: name: "keyword.control.start.solid.stl"
+			2: name: "entity.name.solid.stl"
+			3: name: "comment.line.ignored.stl"
+		endCaptures:
+			0: name: "meta.definition.footer.stl"
+			1: name: "keyword.control.end.solid.stl"
+			2: name: "entity.name.solid.stl"
+			3: name: "comment.line.ignored.stl"
+		patterns: [include: "#facet"]
+
+
+	# Cartesian coordinates for a single vertex
+	vertex:
+		name:  "meta.vertex.stl"
+		begin: "(?:^|\\G|(?<=\\s))[ \\t]*(vertex)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.vertex.stl"
+		patterns: [include: "etc#num"]
