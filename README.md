@@ -77,6 +77,7 @@ Supported formats
 * [x] [ShellCheck configs](https://github.com/koalaman/shellcheck/blob/e6e55894/shellcheck.1.md#rc-files)
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
+* [x] [Self-defining Text Archive and Retrieval](https://en.wikipedia.org/wiki/Self-defining_Text_Archive_and_Retrieval)
 * [ ] [STEP-Files](https://en.wikipedia.org/wiki/ISO_10303-21)
 * [x] [STL files](https://en.wikipedia.org/wiki/STL_%28file_format%29)
 * [x] [StringTemplate](https://www.stringtemplate.org/)

@@ -1,0 +1,337 @@
+# STAR file format. References used:
+# - STAR-1994: https://dx.doi.org/10.1021/ci00019a005
+# - STAR-2012: https://dx.doi.org/10.1021/ci300074v
+# - https://github.com/bmrb-io/SAS/blob/1962d4f/python/sas/lexer.py
+name: "Self-defining Text Archive and Retrieval"
+scopeName: "source.star"
+fileTypes: ["star"]
+patterns: [include: "#main"]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		star
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		star
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#item"}
+			{include: "#loop"}
+			{include: "#data"}
+			{include: "#global"}
+			{include: "#value"}
+		]
+
+
+	# ASCII BEL character (U+0007), tokenised for targeting with CSS
+	alarm:
+		name: "punctuation.c0.ctrl-char.alarm.bell.star"
+		match: "\\x07"
+
+
+	# Invalid character, as specified by STAR-2012
+	badChar:
+		name: "invalid.illegal.bad-character.star"
+		match: "[^\t\n\r -\uD7FF\uE000-\uFFFD\\x{10000}-\\x{10FFF}]+"
+		captures:
+			0: patterns: [include: "#alarm"]
+
+
+	# Unquoted string
+	bareword:
+		name: "constant.other.bareword.star"
+		match: "(?i)(?:^|\\G|(?<=\\s))(?!['\"#_;]|(?:loop|global|save|stop|data)_)[--Z!-+\\\\^-z|~]+"
+
+
+	# Delimiter for compound data values (lists and tables)
+	comma:
+		name: "punctuation.separator.delimiter.comma.star"
+		match: ","
+
+
+	# Comment line, ideally preceded by whitespace
+	comment:
+		name:  "comment.line.number-sign.star"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.star"
+		patterns: [include: "#badChar"]
+
+
+	# Data block, introduced by “data_NAME”
+	data:
+		name:  "meta.data.block.star"
+		begin: "(?:^|\\G|(?<=\\s))(data)((_))([--Z!-+\\\\^-z|~]+)?(?=$|#|\\s)"
+		end:   "(?i)(?=(?:^[ \\t]*|\\s+)(?:data|global)_)"
+		beginCaptures:
+			1: name: "storage.type.data.block.star"
+			2: name: "meta.separator.block.name.star" # HACK: Accentuate divider on GitHub
+			3: name: "punctuation.definition.block.star"
+			4: name: "entity.name.block.star"
+		patterns: [
+			{include: "#comment"}
+			{include: "#save"}
+			{include: "#item"}
+		]
+	
+	
+	# Global block
+	global:
+		name: "meta.global.block.star"
+		begin: "(?:^|\\G|(?<=\\s))global(_)(?=$|#|\\s)"
+		end:   "(?i)(?=(?:^[ \\t]*|\\s+)(?:data|save|global)_)"
+		beginCaptures:
+			0: name: "keyword.control.global.star"
+			1: name: "punctuation.section.global.begin.star"
+		patterns: [
+			{include: "#comment"}
+			{include: "#data"}
+			{include: "#loop"}
+			{include: "#item"}
+		]
+	
+
+	# Key/value pair
+	item:
+		name:  "meta.entry.star"
+		begin: "(?:^|\\G|(?<=\\s))((_)[--Z!-+\\\\^-z|~]+)(?=$|#|\\s)"
+		end:   "(?!\\G)"
+		applyEndPatternLast: yes
+		beginCaptures:
+			0: name: "meta.key.star"
+			1: name: "entity.name.tag.key.star"
+			2: name: "punctuation.definition.name.star"
+		contentName: "meta.value.star"
+		patterns: [
+			{include: "#skipSpace"}
+			{include: "#value"}
+		]
+
+
+	# Array
+	list:
+		name:  "meta.list.array.star"
+		begin: "\\["
+		end:   "\\]"
+		beginCaptures: 0: name: "punctuation.definition.list.begin.star"
+		endCaptures:   0: name: "punctuation.definition.list.end.star"
+		patterns: [
+			{include: "#comma"}
+			{include: "#value"}
+		]
+
+
+	# Top-level “loop_” block
+	loop:
+		name:  "meta.loop.star"
+		begin: "(?i)(?:^|\\G|(?<=\\s))(?=loop_(?:$|\\s))"
+		end:   "(?i)(?=^[ \\t]*(?:save|data|global)_)"
+		patterns: [
+			{include: "#loopHeader"}
+			
+			# Confusingly-ordered data sets
+			name:  "meta.packets.star"
+			begin: "(?i)(?:^|\\G|(?<=\\s))(?!(?:save|data|global|loop)_)(?=[--Z!-+\\\\^-z|~]+)"
+			end:   "(?i)(?=^[ \\t]*(?:save|data|global)_)"
+			patterns: [
+				{include: "#value"}
+				
+				# “stop_” keyword, used to delimit contents of nested loops
+				name: "keyword.operator.stop.star"
+				match: "(?:^|\\G|(?<=\\s))stop(_)(?=$|\\s)"
+			]
+		]
+
+
+	# List of data-names and/or nested “loop_” blocks
+	loopHeader:
+		name:  "meta.header.star"
+		begin: "(?i)\\Gloop(_)"
+		end:   "(?i)(?=[ \\t]*(?!_|loop_(?:$|\\s))\\S)"
+		applyEndPatternLast: yes
+		beginCaptures:
+			0: name: "keyword.control.loop.star"
+			1: name: "punctuation.section.loop.begin.star"
+		patterns: [
+			{include: "#skipSpace"}
+			
+			# Data name declaration
+			name: "variable.reference.data-name.star"
+			match: "(?:^|\\G|(?<=\\s))(_)[--Z!-+\\\\^-z|~]+(?=$|#|\\s)"
+			captures:
+				1: name: "punctuation.definition.variable.star"
+			
+			{include: "#loopNested"}
+			{include: "#comment"}
+		]
+
+	# Loop block that doesn't include data-values list
+	loopNested:
+		name:  "meta.loop.nested.star"
+		begin: "(?i)(?:^|\\G|(?<=\\s))(?=loop_(?:$|\\s))"
+		end:   "(?!\\G)"
+		patterns: [include: "#loopHeader"]
+
+
+	# Semicolon-delimited heredoc
+	raw:
+		name:  "string.unquoted.heredoc.star"
+		begin: "^;"
+		end:   "^;"
+		beginCaptures: 0: name: "keyword.operator.section.begin.star"
+		endCaptures:   0: name: "keyword.operator.section.end.star"
+		patterns: [include: "#badChar"]
+
+
+	# Reference to either a single framecode or an external value
+	ref:
+		patterns: [
+			{include: "#refCode"}
+			{include: "#refTable"}
+		]
+
+
+	# Reference to a saved framecode: “$foo”
+	refCode:
+		name: "variable.reference.framecode.star"
+		match: "(?:^|\\G|(?<=\\s))(\\$)[--Z!-+\\\\^-z|~]+(?=$|#|\\s)"
+		captures:
+			1: name: "punctuation.definition.variable.reference.star"
+
+
+	# External data-cell reference (STAR-2012 extension)
+	refTable:
+		name:  "meta.table.reference.star"
+		begin: "\\${"
+		end:   "}\\$"
+		beginCaptures: 0: name: "punctuation.definition.reference.table.begin.star"
+		endCaptures:   0: name: "punctuation.definition.reference.table.end.star"
+		patterns: [
+			{include: "#tableEntry"}
+			{include: "#comma"}
+		]
+
+
+	# Save frame
+	save:
+		name:  "meta.save.block.star"
+		begin: "(?:^|\\G|(?<=\\s))(save)((_))([--Z!-+\\\\^-z|~]+)?(?=$|#|\\s)"
+		end:   "(?i)(?=(?:^[ \\t]*|\\s+)(?:save|global)_)"
+		beginCaptures:
+			1: name: "storage.type.save.block.star"
+			2: name: "meta.separator.block.name.star" # HACK: Accentuate divider on GitHub
+			3: name: "punctuation.definition.block.star"
+			4: name: "entity.name.block.framecode.star"
+		patterns: [
+			{include: "#comment"}
+			{include: "#save"}
+			{include: "#loop"}
+			{include: "#item"}
+		]
+
+
+	# Hack to stop whitespace and empty lines from terminating a data-value early
+	skipSpace:
+		begin: "\\G(?:[ \\t]+(?=\\S)|[ \\t]*$)"
+		end:   "(?=\\S)"
+
+
+	# Quoted string literals
+	string:
+		patterns: [{
+			# """Triple double-quotes"""
+			name:  "string.quoted.double.multi.heredoc.star"
+			begin: '"""'
+			end:   '"""'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.star"
+			endCaptures:   0: name: "punctuation.definition.string.end.star"
+			patterns: [include: "#stringInnards"]
+		},{
+			# '''Triple single-quotes'''
+			name:  "string.quoted.single.multi.heredoc.star"
+			begin: "'''"
+			end:   "'''"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.star"
+			endCaptures:   0: name: "punctuation.definition.string.end.star"
+			patterns: [include: "#stringInnards"]
+		},{
+			# "Double-quoted"
+			name:  "string.quoted.double.star"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.star"
+			endCaptures:   0: name: "punctuation.definition.string.end.star"
+			patterns: [include: "#stringInnards"]
+		},{
+			# 'Single-quoted'
+			name:  "string.quoted.single.star"
+			begin: "'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.star"
+			endCaptures:   0: name: "punctuation.definition.string.end.star"
+			patterns: [include: "#stringInnards"]
+		}]
+
+	stringInnards:
+		patterns: [{
+			# ASCII BEL, used as an escape character
+			name: "constant.character.escape.string.star"
+			match: "(\\x07)."
+			captures:
+				1: patterns: [include: "#alarm"]
+		}, include: "#badChar"]
+
+
+	# Dictionary/associative array
+	table:
+		name:  "meta.table.star"
+		begin: "{"
+		end:   "}"
+		beginCaptures: 0: name: "punctuation.definition.table.begin.star"
+		endCaptures:   0: name: "punctuation.definition.table.end.star"
+		patterns: [
+			{include: "#tableEntry"}
+			{include: "#comma"}
+		]
+
+
+	# Key/value pair belonging to a table
+	tableEntry:
+		name:  "meta.entry.table.star"
+		begin: "(\"(?:[^\"]|\\x07.)*+\"|'(?:[^']|\\x07.)*+')(:)"
+		end:   "(?!\\G)"
+		applyEndPatternLast: yes
+		beginCaptures:
+			1: name: "meta.key.star", patterns: [include: "#string"]
+			2: name: "keyword.operator.assignment.dictionary.key-value.star"
+		contentName: "meta.value.star"
+		patterns: [
+			{include: "#skipSpace"}
+			{include: "#value"}
+		]
+
+
+	# Anything that can be assigned to an identifier
+	value:
+		patterns: [
+			{include: "#ref"}
+			{include: "#string"}
+			{include: "#raw"}
+			{include: "#list"}
+			{include: "#table"}
+			{include: "#bareword"}
+			{include: "#badChar"}
+		]
