@@ -334,4 +334,5 @@ repository:
 			{include: "#table"}
 			{include: "#bareword"}
 			{include: "#badChar"}
+			{include: "#comment"}
 		]
