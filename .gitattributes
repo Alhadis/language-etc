@@ -3,4 +3,4 @@
 *.cson     linguist-detectable
 
 # Fixture-specific behaviour
-/samples/cube.stl crlf
+/samples/cube.stl -text
