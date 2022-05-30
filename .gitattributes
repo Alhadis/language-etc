@@ -1,2 +1,6 @@
-/samples/* linguist-documentation=true
-*.cson linguist-detectable=true
+# Fix language classification on GitHub.com
+/samples/* linguist-documentation
+*.cson     linguist-detectable
+
+# Fixture-specific behaviour
+/samples/cube.stl crlf
