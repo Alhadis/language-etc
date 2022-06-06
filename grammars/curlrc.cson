@@ -3,6 +3,7 @@ scopeName: "source.curlrc"
 fileTypes: [
 	"curlrc"
 	"_curlrc"
+	"lists/curlrc-options.tsv"
 ]
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
@@ -88,7 +89,7 @@ repository:
 			# No parameter
 			name:  "meta.option.long.curlrc"
 			match: """(?x)
-				(?:\\G|^) \\s*
+				(?:\\G|^|(?<=[ \\t])) \\s*
 				(
 					(--)?
 					(?:anyauth|append|basic|cert-status|compressed-ssh|compressed|create-dirs|crlf|digest
@@ -114,7 +115,7 @@ repository:
 		},{
 			# URLs
 			name:  "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
 				((--)?(?:doh-url|mail-auth|mail-from|mail-rcpt|noproxy|referer|url))
 				(?:\\s*(=|:)|(?=\\s|$))"""
@@ -132,7 +133,7 @@ repository:
 		},{
 			# Headers
 			name:  "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
 				((--)?(?:header|proxy-header))
 				(?:\\s*(=|:)|(?=\\s|$))"""
@@ -150,7 +151,7 @@ repository:
 		},{
 			# Form-data
 			name:  "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
 				((--)?(?:cookie|form-string|form|telnet-option))
 				(?:\\s*(=|:)|(?=\\s|$))"""
@@ -168,7 +169,7 @@ repository:
 		},{
 			# Protocol(s)
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:proto-default|proto-redir|proto))(?:\\s*(=|:)|(?=\\s|$))"
+			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:proto-default|proto-redir|proto))(?:\\s*(=|:)|(?=\\s|$))"
 			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
@@ -183,7 +184,7 @@ repository:
 		},{
 			# Port address
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?ftp-port)(?:\\s*(=|:)|(?=\\s|$))"
+			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?ftp-port)(?:\\s*(=|:)|(?=\\s|$))"
 			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
@@ -198,7 +199,7 @@ repository:
 		},{
 			# MD5
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?hostpubmd5)(?:\\s*(=|:)|(?=\\s|$))"
+			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?hostpubmd5)(?:\\s*(=|:)|(?=\\s|$))"
 			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
@@ -213,7 +214,7 @@ repository:
 		},{
 			# Byte-range
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^)(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:local-port|range))(?:\\s*(=|:)|(?=\\s|$))"
+			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:local-port|range))(?:\\s*(=|:)|(?=\\s|$))"
 			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
@@ -235,7 +236,7 @@ repository:
 		},{
 			# “foo:bar” values
 			name: "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
 				(
 					(--)?
@@ -258,7 +259,7 @@ repository:
 		},{
 			# Filename, or generic/untyped
 			name: "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
 				(
 					(--)?
@@ -294,7 +295,7 @@ repository:
 		},{
 			# Numeric
 			name: "meta.option.long.curlrc"
-			begin: """(?x) (?:\\G|^)
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:])
 				\\s*
 				(
@@ -383,63 +384,63 @@ repository:
 				|
 				
 				# Numbers
-				(?<=[CYmyz])\\G\\s*
+				(?<=[CYmyz])\\G (?:(?!\xA0)\\s)*
 				([-+]?[0-9.]+)
 				
 				|
 				
 				# Byte range
-				(?<=r)\\G\\s*
+				(?<=r)\\G (?:(?!\xA0)\\s)*
 				([-0-9,]+)
 				
 				|
 				
 				# “key=value” pairs
-				(?<=[Fbt])\\G\\s*
+				(?<=[Fbt])\\G (?:(?!\xA0)\\s)*
 				(?:
 					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
 					|
-					([^\\s]+)
+					([\\S\xA0]+)
 				)
 				
 				|
 				
 				# “key:value” pairs
-				(?<=[EUux])\\G\\s*
-				([^\\\\:\\s/]*://)?
+				(?<=[EUux])\\G (?:(?!\xA0)\\s)*
+				((?:[^\\\\:\\s/]|\xA0)*://)?
 				(
-					(?:[^\\\\:\\s]|\\\\.)+
-					(?::(?:[^\\\\:\\s]|\\\\.)+)*
+					(?:[^\\\\:\\s]|\\\\.|\xA0)+
+					(?::(?:[^\\\\:\\s]|\\\\.|\xA0)+)*
 					:?
 				)
 				
 				|
 				
 				# Headers
-				(?<=H)\\G\\s*
+				(?<=H)\\G (?:(?!\xA0)\\s)*
 				(?:
-					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
 					|
-					([^\\s]+)
+					([\\S\xA0]+)
 				)
 				
 				|
 				
 				# URLs
-				(?<=e)\\G\\s*
+				(?<=e)\\G (?:(?!\xA0)\\s)*
 				(?:
-					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
 					|
-					([^\\s]+)
+					([\\S\xA0]+)
 				)
 				
 				|
 				
 				# Anything else
 				(?:
-					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
+					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
 					|
-					([^\\s]+)
+					([\\S\xA0]+)
 				)
 			"""
 			beginCaptures:

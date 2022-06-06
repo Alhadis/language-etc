@@ -1,220 +1,220 @@
-# vim: ts=32
-	--abstract-unix-socket	<path>
+# vim: ts=32 ft=curlrc
+	--abstract-unix-socket	path
 	--anyauth
 -a	--append
 	--basic
-	--cacert	<file>
-	--capath	<dir>
+	--cacert	file
+	--capath	dir
 	--cert-status
-	--cert-type	<type>
--E	--cert	<certificate[:password]>
-	--ciphers	<list of ciphers>
+	--cert-type	type
+-E 	--cert	certificate[:password]
+	--ciphers	list-of-ciphers
 	--compressed-ssh
 	--compressed
--K	--config	<file>
-	--connect-timeout	<seconds>
-	--connect-to	<HOST1:PORT1:HOST2:PORT2>
--C	--continue-at	<offset>
--c	--cookie-jar	<filename>
--b	--cookie	<data>
+-K 	--config	file
+	--connect-timeout	seconds
+	--connect-to	HOST1:PORT1:HOST2:PORT2
+-C 	--continue-at	offset
+-c 	--cookie-jar	filename
+-b 	--cookie	data
 	--create-dirs
 	--crlf
-	--crlfile	<file>
-	--data-ascii	<data>
-	--data-binary	<data>
-	--data-raw	<data>
-	--data-urlencode	<data>
--d	--data	<data>
-	--delegation	<LEVEL>
+	--crlfile	file
+	--data-ascii	data
+	--data-binary	data
+	--data-raw	data
+	--data-urlencode	data
+-d 	--data	data
+	--delegation	LEVEL
 	--digest
 	--disable-eprt
 	--disable-epsv
--q	--disable
+-q 	--disable
 	--disallow-username-in-url
-	--dns-interface	<interface>
-	--dns-ipv4-addr	<address>
-	--dns-ipv6-addr	<address>
-	--dns-servers	<addresses>
-	--doh-url	<URL>
--D	--dump-header	<filename>
-	--egd-file	<file>
-	--engine	<name>
-	--expect100-timeout	<seconds>
+	--dns-interface	interface
+	--dns-ipv4-addr	address
+	--dns-ipv6-addr	address
+	--dns-servers	addresses
+	--doh-url	URL
+-D 	--dump-header	filename
+	--egd-file	file
+	--engine	name
+	--expect100-timeout	seconds
 	--fail-early
--f	--fail
+-f 	--fail
 	--false-start
-	--form-string	<name=string>
--F	--form	<name=content>
-	--ftp-account	<data>
-	--ftp-alternative-to-user	<command>
+	--form-string	name=string
+-F 	--form	name=content
+	--ftp-account	data
+	--ftp-alternative-to-user	command
 	--ftp-create-dirs
-	--ftp-method	<method>
+	--ftp-method	method
 	--ftp-pasv
--P	--ftp-port	<address>
+-P 	--ftp-port	address
 	--ftp-pret
 	--ftp-skip-pasv-ip
-	--ftp-ssl-ccc-mode	<active/passive>
+	--ftp-ssl-ccc-mode	active/passive
 	--ftp-ssl-ccc
 	--ftp-ssl-control
--G	--get
+-G 	--get
 -g	--globoff
-	--happy-eyeballs-timeout-ms	<milliseconds>
+	--happy-eyeballs-timeout-ms	milliseconds
 	--haproxy-protocol
 -I	--head
--H	--header	<header/@file>
+-H 	--header	header/@file
 -h	--help
-	--hostpubmd5	<md5>
--0	--http1.0
+	--hostpubmd5	md5
+-0 	--http1.0
 	--http1.1
 	--http2-prior-knowledge
 	--http2
 	--ignore-content-length
--i	--include
+-i 	--include
 -k	--insecure
-	--interface	<name>
--4	--ipv4
+	--interface	name
+-4 	--ipv4
 -6	--ipv6
 -j	--junk-session-cookies
-	--keepalive-time	<seconds>
-	--key-type	<type>
-	--key	<key>
-	--krb	<level>
-	--libcurl	<file>
-	--limit-rate	<speed>
+	--keepalive-time	seconds
+	--key-type	type
+	--key	key
+	--krb	level
+	--libcurl	file
+	--limit-rate	speed
 -l	--list-only
-	--local-port	<num/range>
+	--local-port	num/range
 	--location-trusted
 -L	--location
-	--login-options	<options>
-	--mail-auth	<address>
-	--mail-from	<address>
-	--mail-rcpt	<address>
+	--login-options	options
+	--mail-auth	address
+	--mail-from	address
+	--mail-rcpt	address
 -M	--manual
-	--max-filesize	<bytes>
-	--max-redirs	<num>
--m	--max-time	<seconds>
+	--max-filesize	bytes
+	--max-redirs	num
+-m 	--max-time	seconds
 	--metalink
 	--negotiate
-	--netrc-file	<filename>
+	--netrc-file	filename
 	--netrc-optional
--n	--netrc
+-n 	--netrc
 -:	--next
 	--no-alpn
--N	--no-buffer
+-N 	--no-buffer
 	--no-keepalive
 	--no-npn
 	--no-sessionid
-	--noproxy	<no-proxy-list>
+	--noproxy	no-proxy-list
 	--ntlm-wb
 	--ntlm
-	--oauth2-bearer	<token>
--o	--output	<file>
-	--pass	<phrase>
+	--oauth2-bearer	token
+-o 	--output	file
+	--pass	phrase
 	--path-as-is
-	--pinnedpubkey	<hashes>
+	--pinnedpubkey	hashes
 	--post301
 	--post302
 	--post303
 	--preproxy	[protocol://]host[:port]
 -#	--progress-bar
-	--proto-default	<protocol>
-	--proto-redir	<protocols>
-	--proto	<protocols>
+	--proto-default	protocol
+	--proto-redir	protocols
+	--proto	protocols
 	--proxy-anyauth
 	--proxy-basic
-	--proxy-cacert	<file>
-	--proxy-capath	<dir>
-	--proxy-cert-type	<type>
-	--proxy-cert	<cert[:passwd]>
-	--proxy-ciphers	<list>
-	--proxy-crlfile	<file>
+	--proxy-cacert	file
+	--proxy-capath	dir
+	--proxy-cert-type	type
+	--proxy-cert	cert[:passwd]
+	--proxy-ciphers	list
+	--proxy-crlfile	file
 	--proxy-digest
-	--proxy-header	<header/@file>
+	--proxy-header	header/@file
 	--proxy-insecure
-	--proxy-key-type	<type>
-	--proxy-key	<key>
+	--proxy-key-type	type
+	--proxy-key	key
 	--proxy-negotiate
 	--proxy-ntlm
-	--proxy-pass	<phrase>
-	--proxy-pinnedpubkey	<hashes>
-	--proxy-service-name	<name>
+	--proxy-pass	phrase
+	--proxy-pinnedpubkey	hashes
+	--proxy-service-name	name
 	--proxy-ssl-allow-beast
-	--proxy-tls13-ciphers	<ciphersuite list>
-	--proxy-tlsauthtype	<type>
-	--proxy-tlspassword	<string>
-	--proxy-tlsuser	<name>
+	--proxy-tls13-ciphers	ciphersuite-list
+	--proxy-tlsauthtype	type
+	--proxy-tlspassword	string
+	--proxy-tlsuser	name
 	--proxy-tlsv1
--U	--proxy-user	<user:password>
--x	--proxy	[protocol://]host[:port]
-	--proxy1.0	<host[:port]>
+-U 	--proxy-user	user:password
+-x 	--proxy	[protocol://]host[:port]
+	--proxy1.0	host[:port]
 -p	--proxytunnel
-	--pubkey	<key>
+	--pubkey	key
 -Q	--quote
-	--random-file	<file>
--r	--range	<range>
+	--random-file	file
+-r 	--range	range
 	--raw
--e	--referer	<URL>
--J	--remote-header-name
+-e 	--referer	URL
+-J 	--remote-header-name
 	--remote-name-all
--O	--remote-name
+-O 	--remote-name
 -R	--remote-time
 	--request-target
--X	--request	<command>
-	--resolve	<host:port:address[,address]...>
+-X 	--request	command
+	--resolve	host:port:address[ address]...
 	--retry-connrefused
-	--retry-delay	<seconds>
-	--retry-max-time	<seconds>
-	--retry	<num>
+	--retry-delay	seconds
+	--retry-max-time	seconds
+	--retry	num
 	--sasl-ir
-	--service-name	<name>
--S	--show-error
+	--service-name	name
+-S 	--show-error
 -s	--silent
-	--socks4	<host[:port]>
-	--socks4a	<host[:port]>
+	--socks4	host[:port]
+	--socks4a	host[:port]
 	--socks5-basic
 	--socks5-gssapi-nec
-	--socks5-gssapi-service	<name>
+	--socks5-gssapi-service	name
 	--socks5-gssapi
-	--socks5-hostname	<host[:port]>
-	--socks5	<host[:port]>
--Y	--speed-limit	<speed>
--y	--speed-time	<seconds>
+	--socks5-hostname	host[:port]
+	--socks5	host[:port]
+-Y 	--speed-limit	speed
+-y 	--speed-time	seconds
 	--ssl-allow-beast
 	--ssl-no-revoke
 	--ssl-reqd
 	--ssl
--2	--sslv2
+-2 	--sslv2
 -3	--sslv3
 	--stderr
 	--styled-output
 	--suppress-connect-headers
 	--tcp-fastopen
 	--tcp-nodelay
--t	--telnet-option	<opt=val>
-	--tftp-blksize	<value>
+-t 	--telnet-option	opt=val
+	--tftp-blksize	value
 	--tftp-no-options
--z	--time-cond	<time>
-	--tls-max	<VERSION>
-	--tls13-ciphers	<list of TLS 1.3 ciphersuites>
-	--tlsauthtype	<type>
+-z 	--time-cond	time
+	--tls-max	VERSION
+	--tls13-ciphers	list-of-TLS-1.3-ciphersuites
+	--tlsauthtype	type
 	--tlspassword
-	--tlsuser	<name>
+	--tlsuser	name
 	--tlsv1.0
 	--tlsv1.1
 	--tlsv1.2
 	--tlsv1.3
--1	--tlsv1
+-1 	--tlsv1
 	--tr-encoding
-	--trace-ascii	<file>
+	--trace-ascii	file
 	--trace-time
-	--trace	<file>
-	--unix-socket	<path>
--T	--upload-file	<file>
-	--url	<url>
+	--trace	file
+	--unix-socket	path
+-T 	--upload-file	file
+	--url	url
 -B	--use-ascii
--A	--user-agent	<name>
--u	--user	<user:password>
--v	--verbose
+-A 	--user-agent	name
+-u 	--user	user:password
+-v 	--verbose
 -V	--version
--w	--write-out	<format>
+-w 	--write-out	format
 	--xattr
