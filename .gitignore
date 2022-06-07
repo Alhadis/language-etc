@@ -16,3 +16,6 @@ package-lock.json
 !urls.log
 /test.mjs
 /test.js
+
+# Project-specific
+/tools/curl

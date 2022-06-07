@@ -1,220 +1,249 @@
-# vim: ts=32 ft=curlrc
-	--abstract-unix-socket	path
-	--anyauth
--a	--append
-	--basic
-	--cacert	file
-	--capath	dir
-	--cert-status
-	--cert-type	type
--E 	--cert	certificate[:password]
-	--ciphers	list-of-ciphers
-	--compressed-ssh
-	--compressed
--K 	--config	file
-	--connect-timeout	seconds
-	--connect-to	HOST1:PORT1:HOST2:PORT2
--C 	--continue-at	offset
--c 	--cookie-jar	filename
--b 	--cookie	data
-	--create-dirs
-	--crlf
-	--crlfile	file
-	--data-ascii	data
-	--data-binary	data
-	--data-raw	data
-	--data-urlencode	data
--d 	--data	data
-	--delegation	LEVEL
-	--digest
-	--disable-eprt
-	--disable-epsv
--q 	--disable
-	--disallow-username-in-url
-	--dns-interface	interface
-	--dns-ipv4-addr	address
-	--dns-ipv6-addr	address
-	--dns-servers	addresses
-	--doh-url	URL
--D 	--dump-header	filename
-	--egd-file	file
-	--engine	name
-	--expect100-timeout	seconds
-	--fail-early
--f 	--fail
-	--false-start
-	--form-string	name=string
--F 	--form	name=content
-	--ftp-account	data
-	--ftp-alternative-to-user	command
-	--ftp-create-dirs
-	--ftp-method	method
-	--ftp-pasv
--P 	--ftp-port	address
-	--ftp-pret
-	--ftp-skip-pasv-ip
-	--ftp-ssl-ccc-mode	active/passive
-	--ftp-ssl-ccc
-	--ftp-ssl-control
--G 	--get
--g	--globoff
-	--happy-eyeballs-timeout-ms	milliseconds
-	--haproxy-protocol
--I	--head
--H 	--header	header/@file
--h	--help
-	--hostpubmd5	md5
--0 	--http1.0
-	--http1.1
-	--http2-prior-knowledge
-	--http2
-	--ignore-content-length
--i 	--include
--k	--insecure
-	--interface	name
--4 	--ipv4
--6	--ipv6
--j	--junk-session-cookies
-	--keepalive-time	seconds
-	--key-type	type
-	--key	key
-	--krb	level
-	--libcurl	file
-	--limit-rate	speed
--l	--list-only
-	--local-port	num/range
-	--location-trusted
--L	--location
-	--login-options	options
-	--mail-auth	address
-	--mail-from	address
-	--mail-rcpt	address
--M	--manual
-	--max-filesize	bytes
-	--max-redirs	num
--m 	--max-time	seconds
-	--metalink
-	--negotiate
-	--netrc-file	filename
-	--netrc-optional
--n 	--netrc
--:	--next
-	--no-alpn
--N 	--no-buffer
-	--no-keepalive
-	--no-npn
-	--no-sessionid
-	--noproxy	no-proxy-list
-	--ntlm-wb
-	--ntlm
-	--oauth2-bearer	token
--o 	--output	file
-	--pass	phrase
-	--path-as-is
-	--pinnedpubkey	hashes
-	--post301
-	--post302
-	--post303
-	--preproxy	[protocol://]host[:port]
--#	--progress-bar
-	--proto-default	protocol
-	--proto-redir	protocols
-	--proto	protocols
-	--proxy-anyauth
-	--proxy-basic
-	--proxy-cacert	file
-	--proxy-capath	dir
-	--proxy-cert-type	type
-	--proxy-cert	cert[:passwd]
-	--proxy-ciphers	list
-	--proxy-crlfile	file
-	--proxy-digest
-	--proxy-header	header/@file
-	--proxy-insecure
-	--proxy-key-type	type
-	--proxy-key	key
-	--proxy-negotiate
-	--proxy-ntlm
-	--proxy-pass	phrase
-	--proxy-pinnedpubkey	hashes
-	--proxy-service-name	name
-	--proxy-ssl-allow-beast
-	--proxy-tls13-ciphers	ciphersuite-list
-	--proxy-tlsauthtype	type
-	--proxy-tlspassword	string
-	--proxy-tlsuser	name
-	--proxy-tlsv1
--U 	--proxy-user	user:password
--x 	--proxy	[protocol://]host[:port]
-	--proxy1.0	host[:port]
--p	--proxytunnel
-	--pubkey	key
--Q	--quote
-	--random-file	file
--r 	--range	range
-	--raw
--e 	--referer	URL
--J 	--remote-header-name
-	--remote-name-all
--O 	--remote-name
--R	--remote-time
-	--request-target
--X 	--request	command
-	--resolve	host:port:address[ address]...
-	--retry-connrefused
-	--retry-delay	seconds
-	--retry-max-time	seconds
-	--retry	num
-	--sasl-ir
-	--service-name	name
--S 	--show-error
--s	--silent
-	--socks4	host[:port]
-	--socks4a	host[:port]
-	--socks5-basic
-	--socks5-gssapi-nec
-	--socks5-gssapi-service	name
-	--socks5-gssapi
-	--socks5-hostname	host[:port]
-	--socks5	host[:port]
--Y 	--speed-limit	speed
--y 	--speed-time	seconds
-	--ssl-allow-beast
-	--ssl-no-revoke
-	--ssl-reqd
-	--ssl
--2 	--sslv2
--3	--sslv3
-	--stderr
-	--styled-output
-	--suppress-connect-headers
-	--tcp-fastopen
-	--tcp-nodelay
--t 	--telnet-option	opt=val
-	--tftp-blksize	value
-	--tftp-no-options
--z 	--time-cond	time
-	--tls-max	VERSION
-	--tls13-ciphers	list-of-TLS-1.3-ciphersuites
-	--tlsauthtype	type
-	--tlspassword
-	--tlsuser	name
-	--tlsv1.0
-	--tlsv1.1
-	--tlsv1.2
-	--tlsv1.3
--1 	--tlsv1
-	--tr-encoding
-	--trace-ascii	file
-	--trace-time
-	--trace	file
-	--unix-socket	path
--T 	--upload-file	file
-	--url	url
--B	--use-ascii
--A 	--user-agent	name
--u 	--user	user:password
--v 	--verbose
--V	--version
--w 	--write-out	format
-	--xattr
+# vim: ts=42 ft=curlrc
+	--abstract-unix-socket	path	# filename
+	--alt-svc	file-name	# filename
+	--anyauth		# no_parameter
+-a 	--append		# no_parameter
+	--aws-sigv4	provider1[:provider2[:region[:service]]]	# 
+	--basic		# no_parameter
+	--cacert	file	# filename
+	--capath	dir	# filename
+	--cert-status		# no_parameter
+	--cert-type	type	# 
+-E 	--cert	certificate[:password]	# 
+	--ciphers	list-of-ciphers	# 
+	--compressed-ssh		# no_parameter
+	--compressed		# no_parameter
+-K 	--config	file	# filename
+	--connect-timeout	fractional-seconds	# 
+	--connect-to	host1:port1:host2:port2	# 
+-C 	--continue-at	offset	# 
+-c 	--cookie-jar	filename	# filename
+-b 	--cookie	data|filename	# filename
+	--create-dirs		# no_parameter
+	--create-file-mode	mode	# 
+	--crlf		# no_parameter
+	--crlfile	file	# filename
+	--curves	algorithm-list	# 
+	--data-ascii	data	# filename
+	--data-binary	data	# filename
+	--data-raw	data	# filename
+	--data-urlencode	data	# filename
+-d 	--data	data	# filename
+	--delegation	level	# 
+	--digest		# no_parameter
+	--disable-eprt		# no_parameter
+	--disable-epsv		# no_parameter
+-q 	--disable		# no_parameter
+	--disallow-username-in-url		# no_parameter
+	--dns-interface	interface	# 
+	--dns-ipv4-addr	address	# 
+	--dns-ipv6-addr	address	# 
+	--dns-servers	addresses	# 
+	--doh-cert-status		# no_parameter
+	--doh-insecure		# no_parameter
+	--doh-url	url	# 
+-D 	--dump-header	filename	# filename
+	--egd-file	file	# filename
+	--engine	name	# 
+	--etag-compare	file	# filename
+	--etag-save	file	# filename
+	--expect100-timeout	seconds	# 
+	--fail-early		# no_parameter
+	--fail-with-body		# no_parameter
+-f 	--fail		# no_parameter
+	--false-start		# no_parameter
+	--form-escape		# no_parameter
+	--form-string	name=string	# 
+-F 	--form	name=content	# 
+	--ftp-account	data	# filename
+	--ftp-alternative-to-user	command	# 
+	--ftp-create-dirs		# no_parameter
+	--ftp-method	method	# 
+	--ftp-pasv		# no_parameter
+-P 	--ftp-port	address	# 
+	--ftp-pret		# no_parameter
+	--ftp-skip-pasv-ip		# no_parameter
+	--ftp-ssl-ccc-mode	active/passive	# 
+	--ftp-ssl-ccc		# no_parameter
+	--ftp-ssl-control		# no_parameter
+-G 	--get		# no_parameter
+-g 	--globoff		# no_parameter
+	--happy-eyeballs-timeout-ms	milliseconds	# 
+	--haproxy-protocol		# no_parameter
+-I 	--head		# no_parameter
+-H 	--header	header/@file	# 
+-h 	--help	category	# 
+	--hostpubmd5	md5	# 
+	--hostpubsha256	sha256	# 
+	--hsts	file-name	# filename
+	--http0.9		# no_parameter
+-0 	--http1.0		# no_parameter
+	--http1.1		# no_parameter
+	--http2-prior-knowledge		# no_parameter
+	--http2		# no_parameter
+	--http3		# no_parameter
+	--ignore-content-length		# no_parameter
+-i 	--include		# no_parameter
+-k 	--insecure		# no_parameter
+	--interface	name	# 
+-4 	--ipv4		# no_parameter
+-6 	--ipv6		# no_parameter
+	--json	data	# filename
+-j 	--junk-session-cookies		# no_parameter
+	--keepalive-time	seconds	# 
+	--key-type	type	# 
+	--key	key	# 
+	--krb	level	# 
+	--libcurl	file	# filename
+	--limit-rate	speed	# 
+-l 	--list-only		# no_parameter
+	--local-port	num/range	# 
+	--location-trusted		# no_parameter
+-L 	--location		# no_parameter
+	--login-options	options	# 
+	--mail-auth	address	# 
+	--mail-from	address	# 
+	--mail-rcpt-allowfails		# no_parameter
+	--mail-rcpt	address	# 
+-M 	--manual		# no_parameter
+	--max-filesize	bytes	# 
+	--max-redirs	num	# 
+-m 	--max-time	fractional-seconds	# 
+	--metalink		# no_parameter
+	--negotiate		# no_parameter
+	--netrc-file	filename	# filename
+	--netrc-optional		# no_parameter
+-n 	--netrc		# no_parameter
+-: 	--next		# no_parameter
+	--no-alpn		# no_parameter
+-N 	--no-buffer		# no_parameter
+	--no-clobber		# no_parameter
+	--no-keepalive		# no_parameter
+	--no-npn		# no_parameter
+	--no-progress-meter		# no_parameter
+	--no-sessionid		# no_parameter
+	--noproxy	no-proxy-list	# 
+	--ntlm-wb		# no_parameter
+	--ntlm		# no_parameter
+	--oauth2-bearer	token	# 
+	--output-dir	dir	# filename
+-o 	--output	file	# filename
+	--parallel-immediate		# no_parameter
+	--parallel-max	num	# 
+-Z 	--parallel		# no_parameter
+	--pass	phrase	# 
+	--path-as-is		# no_parameter
+	--pinnedpubkey	hashes	# 
+	--post301		# no_parameter
+	--post302		# no_parameter
+	--post303		# no_parameter
+	--preproxy	[protocol://]host[:port]	# 
+-# 	--progress-bar		# no_parameter
+	--proto-default	protocol	# 
+	--proto-redir	protocols	# 
+	--proto	protocols	# 
+	--proxy-anyauth		# no_parameter
+	--proxy-basic		# no_parameter
+	--proxy-cacert	file	# filename
+	--proxy-capath	dir	# filename
+	--proxy-cert-type	type	# 
+	--proxy-cert	cert[:passwd]	# 
+	--proxy-ciphers	list	# 
+	--proxy-crlfile	file	# filename
+	--proxy-digest		# no_parameter
+	--proxy-header	header/@file	# 
+	--proxy-insecure		# no_parameter
+	--proxy-key-type	type	# 
+	--proxy-key	key	# 
+	--proxy-negotiate		# no_parameter
+	--proxy-ntlm		# no_parameter
+	--proxy-pass	phrase	# 
+	--proxy-pinnedpubkey	hashes	# 
+	--proxy-service-name	name	# 
+	--proxy-ssl-allow-beast		# no_parameter
+	--proxy-ssl-auto-client-cert		# no_parameter
+	--proxy-tls13-ciphers	ciphersuite-list	# 
+	--proxy-tlsauthtype	type	# 
+	--proxy-tlspassword	string	# 
+	--proxy-tlsuser	name	# 
+	--proxy-tlsv1		# no_parameter
+-U 	--proxy-user	user:password	# 
+-x 	--proxy	[protocol://]host[:port]	# 
+	--proxy1.0	host[:port]	# 
+-p 	--proxytunnel		# no_parameter
+	--pubkey	key	# 
+-Q 	--quote	command	# 
+	--random-file	file	# filename
+-r 	--range	range	# 
+	--rate	max-request-rate	# 
+	--raw		# no_parameter
+-e 	--referer	url	# 
+-J 	--remote-header-name		# no_parameter
+	--remote-name-all		# no_parameter
+-O 	--remote-name		# no_parameter
+-R 	--remote-time		# no_parameter
+	--remove-on-error		# no_parameter
+	--request-target	path	# filename
+-X 	--request	method	# 
+	--resolve	[+]host:port:addr[,addr]...	# 
+	--retry-all-errors		# no_parameter
+	--retry-connrefused		# no_parameter
+	--retry-delay	seconds	# 
+	--retry-max-time	seconds	# 
+	--retry	num	# 
+	--sasl-authzid	identity	# 
+	--sasl-ir		# no_parameter
+	--service-name	name	# 
+-S 	--show-error		# no_parameter
+-s 	--silent		# no_parameter
+	--socks4	host[:port]	# 
+	--socks4a	host[:port]	# 
+	--socks5-basic		# no_parameter
+	--socks5-gssapi-nec		# no_parameter
+	--socks5-gssapi-service	name	# 
+	--socks5-gssapi		# no_parameter
+	--socks5-hostname	host[:port]	# 
+	--socks5	host[:port]	# 
+-Y 	--speed-limit	speed	# 
+-y 	--speed-time	seconds	# 
+	--ssl-allow-beast		# no_parameter
+	--ssl-auto-client-cert		# no_parameter
+	--ssl-no-revoke		# no_parameter
+	--ssl-reqd		# no_parameter
+	--ssl-revoke-best-effort		# no_parameter
+	--ssl		# no_parameter
+-2 	--sslv2		# no_parameter
+-3 	--sslv3		# no_parameter
+	--stderr	file	# filename
+	--styled-output		# no_parameter
+	--suppress-connect-headers		# no_parameter
+	--tcp-fastopen		# no_parameter
+	--tcp-nodelay		# no_parameter
+-t 	--telnet-option	opt=val	# 
+	--tftp-blksize	value	# 
+	--tftp-no-options		# no_parameter
+-z 	--time-cond	time	# 
+	--tls-max	version	# 
+	--tls13-ciphers	ciphersuite-list	# 
+	--tlsauthtype	type	# 
+	--tlspassword	string	# 
+	--tlsuser	name	# 
+	--tlsv1.0		# no_parameter
+	--tlsv1.1		# no_parameter
+	--tlsv1.2		# no_parameter
+	--tlsv1.3		# no_parameter
+-1 	--tlsv1		# no_parameter
+	--tr-encoding		# no_parameter
+	--trace-ascii	file	# filename
+	--trace-time		# no_parameter
+	--trace	file	# filename
+	--unix-socket	path	# filename
+-T 	--upload-file	file	# filename
+	--url	url	# 
+-B 	--use-ascii		# no_parameter
+-A 	--user-agent	name	# 
+-u 	--user	user:password	# 
+-v 	--verbose		# no_parameter
+-V 	--version		# no_parameter
+-w 	--write-out	format	# 
+	--xattr		# no_parameter

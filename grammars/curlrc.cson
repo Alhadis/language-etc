@@ -67,7 +67,7 @@ repository:
 	# Comment line
 	comment:
 		name:  "comment.line.number-sign.curlrc"
-		begin: "^#"
+		begin: "(?:^|(?<=[ \\t\\xA0\"]))#"
 		end:   "$"
 		beginCaptures:
 			0: name: "punctuation.definition.comment.curlrc"
@@ -92,20 +92,113 @@ repository:
 				(?:\\G|^|(?<=[ \\t])) \\s*
 				(
 					(--)?
-					(?:anyauth|append|basic|cert-status|compressed-ssh|compressed|create-dirs|crlf|digest
-					|disable-eprt|disable-epsv|disable|disallow-username-in-url|fail-early|fail|false-start
-					|ftp-create-dirs|ftp-pasv|ftp-pret|ftp-skip-pasv-ip|ftp-ssl-ccc|ftp-ssl-control|get
-					|globoff|haproxy-protocol|head|help|http1\\.[01]|http2(?:-prior-knowledge)?
-					|ignore-content-length|include|insecure|ipv[46]|junk-session-cookies|list-only
-					|location-trusted|location|manual|metalink|negotiate|netrc-optional|netrc|next
-					|no-alpn|no-buffer|no-keepalive|no-npn|no-sessionid|ntlm-wb|ntlm|path-as-is|post30[1-3]
-					|progress-bar|proxy-anyauth|proxy-basic|proxy-digest|proxy-insecure|proxy-negotiate
-					|proxy-ntlm|proxy-ssl-allow-beast|proxy-tlsv1|proxytunnel|quote|raw|remote-header-name
-					|remote-name-all|remote-name|remote-time|request-target|retry-connrefused|sasl-ir
-					|show-error|silent|socks5-(?:basic|gssapi-nec|gssapi)|ssl-allow-beast|ssl-no-revoke
-					|ssl-reqd|sslv[23]|ssl|stderr|styled-output|suppress-connect-headers
-					|tcp-fastopen|tcp-nodelay|tftp-no-options|tlspassword|tlsv1\\.[0-3]
-					|tlsv1|tr-encoding|trace-time|use-ascii|verbose|version|xattr)
+					(?<optlist_no_parameter>
+						anyauth
+					|	append
+					|	basic
+					|	cert-status
+					|	compressed-ssh
+					|	compressed
+					|	create-dirs
+					|	crlf
+					|	digest
+					|	disable-eprt
+					|	disable-epsv
+					|	disable
+					|	disallow-username-in-url
+					|	fail-early
+					|	fail
+					|	false-start
+					|	ftp-create-dirs
+					|	ftp-pasv
+					|	ftp-pret
+					|	ftp-skip-pasv-ip
+					|	ftp-ssl-ccc
+					|	ftp-ssl-control
+					|	get
+					|	globoff
+					|	haproxy-protocol
+					|	head
+					|	help
+					|	http1.0
+					|	http1.1
+					|	http2-prior-knowledge
+					|	http2
+					|	ignore-content-length
+					|	include
+					|	insecure
+					|	ipv4
+					|	ipv6
+					|	junk-session-cookies
+					|	list-only
+					|	location-trusted
+					|	location
+					|	manual
+					|	metalink
+					|	negotiate
+					|	netrc-optional
+					|	netrc
+					|	next
+					|	no-alpn
+					|	no-buffer
+					|	no-keepalive
+					|	no-npn
+					|	no-sessionid
+					|	ntlm-wb
+					|	ntlm
+					|	path-as-is
+					|	post301
+					|	post302
+					|	post303
+					|	progress-bar
+					|	proxy-anyauth
+					|	proxy-basic
+					|	proxy-digest
+					|	proxy-insecure
+					|	proxy-negotiate
+					|	proxy-ntlm
+					|	proxy-ssl-allow-beast
+					|	proxy-tlsv1
+					|	proxytunnel
+					|	quote
+					|	raw
+					|	remote-header-name
+					|	remote-name-all
+					|	remote-name
+					|	remote-time
+					|	request-target
+					|	retry-connrefused
+					|	sasl-ir
+					|	show-error
+					|	silent
+					|	socks5-basic
+					|	socks5-gssapi-nec
+					|	socks5-gssapi
+					|	ssl-allow-beast
+					|	ssl-no-revoke
+					|	ssl-reqd
+					|	sslv2
+					|	sslv3
+					|	ssl
+					|	stderr
+					|	styled-output
+					|	suppress-connect-headers
+					|	tcp-fastopen
+					|	tcp-nodelay
+					|	tftp-no-options
+					|	tlspassword
+					|	tlsv1.0
+					|	tlsv1.1
+					|	tlsv1.2
+					|	tlsv1.3
+					|	tlsv1
+					|	tr-encoding
+					|	trace-time
+					|	use-ascii
+					|	verbose
+					|	version
+					|	xattr
+					)
 				)
 				(?=\\s|$)
 			"""
@@ -117,13 +210,24 @@ repository:
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
-				((--)?(?:doh-url|mail-auth|mail-from|mail-rcpt|noproxy|referer|url))
+				(
+					(--)?
+					(?<optlist_urls>
+						doh-url
+					|	mail-auth
+					|	mail-from
+					|	mail-rcpt
+					|	noproxy
+					|	referer
+					|	url
+					)
+				)
 				(?:\\s*(=|:)|(?=\\s|$))"""
 			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -135,13 +239,19 @@ repository:
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
-				((--)?(?:header|proxy-header))
+				(
+					(--)?
+					(?<optlist_headers>
+						header
+					|	proxy-header
+					)
+				)
 				(?:\\s*(=|:)|(?=\\s|$))"""
 			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -153,13 +263,21 @@ repository:
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
-				((--)?(?:cookie|form-string|form|telnet-option))
+				(
+					(--)?
+					(?<optlist_form_data>
+						cookie
+					|	form-string
+					|	form
+					|	telnet-option
+					)
+				)
 				(?:\\s*(=|:)|(?=\\s|$))"""
 			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -169,12 +287,21 @@ repository:
 		},{
 			# Protocol(s)
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:proto-default|proto-redir|proto))(?:\\s*(=|:)|(?=\\s|$))"
-			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				(
+					(--)?
+					(?<optlist_protocols>
+						proto-default
+					|	proto-redir
+					|	proto
+					)
+				) (?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -184,12 +311,19 @@ repository:
 		},{
 			# Port address
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?ftp-port)(?:\\s*(=|:)|(?=\\s|$))"
-			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				(
+					(--)?
+					(?<optlist_port>
+						ftp-port
+					)
+				) (?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -199,12 +333,19 @@ repository:
 		},{
 			# MD5
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?hostpubmd5)(?:\\s*(=|:)|(?=\\s|$))"
-			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				(
+					(--)?
+					(?<optlist_md5>
+						hostpubmd5
+					)
+				) (?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -214,12 +355,20 @@ repository:
 		},{
 			# Byte-range
 			name:  "meta.option.long.curlrc"
-			begin: "(?:\\G|^|(?<=[ \\t]))(?!\\s*--\\w[-\\w]*\\s*[=:])\\s*((--)?(?:local-port|range))(?:\\s*(=|:)|(?=\\s|$))"
-			end:   '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				(
+					(--)?
+					(?<optlist_byte_range>
+						local-port
+					|	range
+					)
+				) (?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -240,8 +389,20 @@ repository:
 				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
 				(
 					(--)?
-					(?:cert|connect-to|preproxy|proxy-cert|proxy-user|proxy1\\.0
-					|proxy|resolve|socks4a?|socks5-hostname|socks5|user)
+					(?<optlist_kv_colon>
+						cert
+					|	connect-to
+					|	preproxy
+					|	proxy-cert
+					|	proxy-user
+					|	proxy1\\.0
+					|	proxy
+					|	resolve
+					|	socks4a?
+					|	socks5-hostname
+					|	socks5
+					|	user
+					)
 				)
 				(?:\\s*(=|:)|(?=\\s|$))
 			"""
@@ -249,7 +410,7 @@ repository:
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -263,14 +424,73 @@ repository:
 				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
 				(
 					(--)?
-					(?:abstract-unix-socket|cacert|capath|cert-type|ciphers|config|cookie-jar|crlfile|data-ascii
-					|data-binary|data-raw|data-urlencode|data|delegation|dns-interface|dns-ipv[46]-addr|dns-servers
-					|dump-header|egd-file|engine|ftp-(?:account|alternative-to-user|ssl-ccc-mode|method)|interface
-					|key-type|key|krb|libcurl|login-options|netrc-file|oauth2-bearer|output|pass|proxy-(?:cacert
-					|capath|cert-type|crlfile|key-type|key|pass|service-name|tlsauthtype|tlspassword|tlsuser)
-					|pinnedpubkey|proxy-ciphers|proxy-pinnedpubkey|pubkey|random-file|proxy-tls13-ciphers|request
-					|service-name|socks5-gssapi-service|tls13-ciphers|tlsauthtype|tls-max|tlsuser|trace-ascii
-					|trace|unix-socket|upload-file|user-agent|write-out)
+					(?<optlist_filename>
+						abstract-unix-socket
+					|	cacert
+					|	capath
+					|	cert-type
+					|	ciphers
+					|	config
+					|	cookie-jar
+					|	crlfile
+					|	data-ascii
+					|	data-binary
+					|	data-raw
+					|	data-urlencode
+					|	data
+					|	delegation
+					|	dns-interface
+					|	dns-ipv4-addr
+					|	dns-ipv6-addr
+					|	dns-servers
+					|	dump-header
+					|	egd-file
+					|	engine
+					|	ftp-account
+					|	ftp-alternative-to-user
+					|	ftp-method
+					|	ftp-ssl-ccc-mode
+					|	interface
+					|	key-type
+					|	key
+					|	krb
+					|	libcurl
+					|	login-options
+					|	netrc-file
+					|	oauth2-bearer
+					|	output
+					|	pass
+					|	pinnedpubkey
+					|	proxy-cacert
+					|	proxy-capath
+					|	proxy-cert-type
+					|	proxy-ciphers
+					|	proxy-crlfile
+					|	proxy-key-type
+					|	proxy-key
+					|	proxy-pass
+					|	proxy-pinnedpubkey
+					|	proxy-service-name
+					|	proxy-tls13-ciphers
+					|	proxy-tlsauthtype
+					|	proxy-tlspassword
+					|	proxy-tlsuser
+					|	pubkey
+					|	random-file
+					|	request
+					|	service-name
+					|	socks5-gssapi-service
+					|	tls-max
+					|	tls13-ciphers
+					|	tlsauthtype
+					|	tlsuser
+					|	trace-ascii
+					|	trace
+					|	unix-socket
+					|	upload-file
+					|	user-agent
+					|	write-out
+					)
 				)
 				(?:\\s*(=|:)|(?=\\s|$))
 			"""
@@ -278,7 +498,7 @@ repository:
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				# “=<@” stuff prefixing string
 				1: name: "keyword.operator.encoding-modifier.curlrc"
@@ -300,15 +520,30 @@ repository:
 				\\s*
 				(
 					(--)?
-					(?:connect-timeout|continue-at|expect100-timeout|happy-eyeballs-timeout-ms|keepalive-time
-					|limit-rate|max-filesize|max-redirs|max-time|retry-delay|retry-max-time|retry|speed-limit
-					|speed-time|tftp-blksize|time-cond)
+					(?<optlist_numeric>
+						connect-timeout
+					|	continue-at
+					|	expect100-timeout
+					|	happy-eyeballs-timeout-ms
+					|	keepalive-time
+					|	limit-rate
+					|	max-filesize
+					|	max-redirs
+					|	max-time
+					|	retry-delay
+					|	retry-max-time
+					|	retry
+					|	speed-limit
+					|	speed-time
+					|	tftp-blksize
+					|	time-cond
+					)
 				) (?:\\s*(=|:)|(?=\\s|$))"""
 			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'
 			beginCaptures:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
-				3: patterns: [include: "#separators"]
+				4: patterns: [include: "#separators"]
 			endCaptures:
 				1: name: "string.quoted.double.curlrc"
 				2: name: "punctuation.definition.string.begin.curlrc"
@@ -384,19 +619,22 @@ repository:
 				|
 				
 				# Numbers
-				(?<=[CYmyz])\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_numeric)[CYmyz])
+				\\G (?:(?!\xA0)\\s)*
 				([-+]?[0-9.]+)
 				
 				|
 				
 				# Byte range
-				(?<=r)\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_byte_range)r)
+				\\G (?:(?!\xA0)\\s)*
 				([-0-9,]+)
 				
 				|
 				
 				# “key=value” pairs
-				(?<=[Fbt])\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_form_data)[Fbt])
+				\\G (?:(?!\xA0)\\s)*
 				(?:
 					((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))
 					|
@@ -406,7 +644,8 @@ repository:
 				|
 				
 				# “key:value” pairs
-				(?<=[EUux])\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_kv_colon)[EUux])
+				\\G (?:(?!\xA0)\\s)*
 				((?:[^\\\\:\\s/]|\xA0)*://)?
 				(
 					(?:[^\\\\:\\s]|\\\\.|\xA0)+
@@ -417,7 +656,8 @@ repository:
 				|
 				
 				# Headers
-				(?<=H)\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_headers)H)
+				\\G (?:(?!\xA0)\\s)*
 				(?:
 					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
 					|
@@ -427,7 +667,8 @@ repository:
 				|
 				
 				# URLs
-				(?<=e)\\G (?:(?!\xA0)\\s)*
+				(?<=(?#optlist_urls)e)
+				\\G (?:(?!\xA0)\\s)*
 				(?:
 					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
 					|
@@ -484,7 +725,7 @@ repository:
 		},{
 			# Options which take no arguments
 			name:  "meta.option.short.curlrc"
-			match: "^\\s*((-)[:#012346BGIJLMNOQRSVafghijklnpqsv]+)"
+			match: "^\\s*((-)(?#optlist_no_parameter)[:#012346BGIJLMNOQRSVafghijklnpqsv]+)"
 			captures:
 				1: name: "entity.short.option.name.curlrc"
 				2: name: "punctuation.definition.dash.short.option.curlrc"
