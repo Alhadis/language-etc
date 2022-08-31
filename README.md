@@ -90,7 +90,6 @@ Supported formats
 * [x] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
 * [x] [Unicode name-lists](http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html)
 
-
-[Referenced Links]:_____________________________________________________________
+<!-- Referenced Links --------------------------------------------------------->
 [1]: https://github.com/github/linguist
 [2]: https://git-scm.com/downloads
