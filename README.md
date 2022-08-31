@@ -74,6 +74,7 @@ Supported formats
 * [x] [Record jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2906931)
 * [ ] [Sandbox profiles](https://github.com/malus-security/sandblaster "/usr/share/sandbox/*.sb")
 * [x] [Savane markup](https://savannah.gnu.org/markup-test.php)
+* [x] [S-expressions](https://en.wikipedia.org/wiki/S-expression)
 * [x] [ShellCheck configs](https://github.com/koalaman/shellcheck/blob/e6e55894/shellcheck.1.md#rc-files)
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)

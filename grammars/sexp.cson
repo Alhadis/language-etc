@@ -1,0 +1,196 @@
+# Generic highlighting for sexp-based formats
+name: "S-expressions"
+scopeName: "source.sexp"
+fileTypes: ["sexp"]
+patterns: [include: "#main"]
+firstLineMatch: """(?x)
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:sexpr?)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:sexpr?)
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#list"}
+			{include: "#vector"}
+			{include: "#string"}
+			{include: "#number"}
+			{include: "#nil"}
+			{include: "#quote"}
+			{include: "#symbol"}
+		]
+
+
+	# CAR: Contents of Address Register
+	car:
+		name:  "meta.car.sexp"
+		begin: "^|\\G"
+		end:   """(?x)
+			# Terminate after the closing delimiter of multi-line tokens
+			(?<=\\)|"|\\])
+			|
+			\\s*
+			(?:
+				# Match an unbracketed token
+				('?(?!")(?:[^\\s();\\\\]|\\\\.)++)
+				|
+				
+				# Match balanced brackets recursively
+				# - TODO: Deal with nested vectors like “[1 (foo)]” or “(foo [1, 2])”
+				(\\( (?<brackets>
+					\\g<nonbracket>++
+					|
+					\\g<nonbracket>*+
+					\\( \\g<brackets>? \\)
+					\\g<nonbracket>*+
+				) \\))
+				
+				# Pattern for matching a non-bracket or escaped character
+				(?<nonbracket>[^()\\\\] | \\\\(?:\\\\|\\))){0}
+			)
+		"""
+		endCaptures:
+			1: patterns: [include: "#car-innards"]
+			2: patterns: [include: "#list"]
+		patterns: [
+			{include: "#comment"}
+			{include: "#list"}
+			{include: "#vector"}
+			{include: "#string"}
+		]
+
+	# Stuff matched inside a tokenised CAR
+	"car-innards":
+		patterns: [include: "#quote", {
+			# Numeric value; retain usual highlighting
+			match: "(?:^|\\G)(?:(-?\\d*\\.\\d+)|(-?\\d+))$"
+			captures:
+				1: name: "constant.numeric.float.real.sexp"
+				2: name: "constant.numeric.integer.int.sexp"
+		},{
+			# Double-quoted string
+			name:  "string.quoted.double.sexp"
+			match: '(?:^|\\G)(")(.+)(")$'
+			captures:
+				1: name: "punctuation.definition.string.begin.sexp"
+				2: patterns: [include: "#escape"]
+				3: name: "punctuation.definition.string.end.sexp"
+		},{
+			# Unquoted symbol with highlighting distinct from CDR symbols
+			name:  "entity.name.function.sexp"
+			begin: "(?:^|\\G)"
+			end:   "$"
+			patterns: [include: "#escape"]
+		}]
+
+
+	# CDR: Contents of Decrement Register
+	cdr:
+		contentName: "meta.cdr.sexp"
+		begin: '(?!\\G)(?:(?:(?<![)"\\]])\\s+|\\s*)(\\.)(?=$|\\s|\\()[ \\t]*)?'
+		end:   "(?=\\))"
+		beginCaptures:
+			1: name: "keyword.operator.pair-separator.dot.sexp"
+		patterns: [include: "#main"]
+
+
+	# Comment line: “;…”
+	comment:
+		name:  "comment.line.semicolon.sexp"
+		begin: ";+"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.sexp"
+
+
+	# Escaped character: “\…”
+	escape:
+		name: "constant.character.escape.sexp"
+		match: "(\\\\)."
+		captures:
+			1: name: "punctuation.definition.escape.backslash.sexp"
+
+
+	# Parenthesised stuff
+	list:
+		patterns: [{
+			# Empty list
+			name:  "meta.list.empty.sexp"
+			match: "(\\()\\s*(\\))"
+			captures:
+				1: name: "punctuation.section.list.begin.sexp"
+				2: name: "punctuation.section.list.end.sexp"
+		},{
+			# Non-empty list
+			name:  "meta.list.sexp"
+			begin: "\\("
+			end:   "\\)"
+			beginCaptures: 0: name: "punctuation.section.list.begin.sexp"
+			endCaptures:   0: name: "punctuation.section.list.end.sexp"
+			patterns: [
+				{include: "#car"}
+				{include: "#cdr"}
+			]
+		}]
+
+
+	# The lonesome “nil” keyword, analogous to “()”
+	nil:
+		name: "constant.language.null.nil.sexp"
+		match: "(?i)(?<=^|\\G|\\s|\\()nil(?=$|\\s|\\)|;)"
+
+
+	# Integer or floating-point value
+	number:
+		match: "(?<=^|\\G|\\s|\\()(?:(-?\\d*\\.\\d+)|(-?\\d+))(?=$|\\s|\\)|;)"
+		captures:
+			1: name: "constant.numeric.float.real.sexp"
+			2: name: "constant.numeric.integer.int.sexp"
+
+
+	# Syntactic sugar for quoting a symbol or list: 'foo → (quote foo)
+	quote:
+		match: "(')(?:(?=[(\\[\"])|((?:[^\\s();\\\\]|\\\\.)++))"
+		captures:
+			1: name: "keyword.operator.quote.sexp"
+			2: name: "markup.quote.symbol.sexp", patterns: [include: "#escape"]
+
+
+	# Double-quoted string
+	string:
+		name:  "string.quoted.double.sexp"
+		begin: '"'
+		end:   '"'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.sexp"
+		endCaptures:   0: name: "punctuation.definition.string.end.sexp"
+		patterns: [include: "#escape"]
+
+
+	# Unquoted identifier
+	symbol:
+		name: "constant.other.symbol.sexp"
+		match: '(?<=^|\\G|\\s|\\()(?:[^"\\s();\\\\]|\\\\.)++'
+		captures:
+			0: patterns: [include: "#escape"]
+
+
+	# A 1-dimensional array (Elisp), or an M-expr (antediluvian proto-Lisp); take your pick
+	vector:
+		name:  "meta.vector.sexp"
+		begin: "\\["
+		end:   "\\]"
+		beginCaptures: 0: name: "punctuation.definition.vector.begin.sexp"
+		endCaptures:   0: name: "punctuation.definition.vector.end.sexp"
+		patterns: [include: "#main"]
