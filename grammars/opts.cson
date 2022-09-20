@@ -1,6 +1,7 @@
 name: "Option list"
 scopeName: "source.opts"
 fileTypes: [
+	"ackrc"
 	"opts"
 	"youtube-dl.conf"
 	"youtube-dl/config"
