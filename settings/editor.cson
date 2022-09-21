@@ -149,6 +149,7 @@
 	editor:
 		tabType: "soft"
 
-".text.savane":
+".text.savane,
+ .text.youtube":
 	editor:
 		softWrap: true

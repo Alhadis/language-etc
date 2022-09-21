@@ -67,6 +67,21 @@
 			color: #4d5a5e;
 		}
 	}
+	atom-text-editor[data-grammar="text youtube"]{
+		.syntax--markup{
+			&.syntax--italic,
+			&.syntax--bold{
+				color: #cbcb41;
+			}
+			&.syntax--deleted{
+				color: #cc3e44;
+				text-decoration: line-through;
+			}
+			> .syntax--punctuation.syntax--definition.syntax--markup{
+				color: #4d5a5e;
+			}
+		}
+	}
 }
 
 

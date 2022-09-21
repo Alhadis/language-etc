@@ -89,6 +89,7 @@ Supported formats
 * [ ] [`ttys`](http://man.openbsd.org/ttys)
 * [x] [Unicode database files](https://www.unicode.org/Public/UNIDATA/)
 * [x] [Unicode name-lists](http://www.unicode.org/Public/UCD/latest/ucd/NamesList.html)
+* [x] [YouTube rich text](https://support.google.com/youtube/answer/6000964?#zippy=%2Cadd-formatting-to-comments)
 
 <!-- Referenced Links --------------------------------------------------------->
 [1]: https://github.com/github/linguist

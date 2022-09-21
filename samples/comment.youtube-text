@@ -1,0 +1,32 @@
+Formatting spans:
+
+	Normal *Bold text* _Italic text_ -Strike through-
+
+Formatting spans can't contain line-breaks:
+
+	*Bold
+	text* _Italic
+	text_ -Strike
+	through-
+
+Nested formatting spans:
+
+	*_Bold italic_*
+
+	_*Italic bold*_
+
+	-*_Overstruck bold italic_*-
+
+	-_*Overstruck italic bold*_-
+
+
+short.link
+
+http://long.link
+
+00:00    Timecode, MM:SS
+0:00:00  Timecode, HH:MM:SS
+
+#hashtag
+
+@channel-mention
