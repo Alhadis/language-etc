@@ -79,6 +79,7 @@ Supported formats
 * [x] [Sieve](http://sieve.info/)
 * [x] [SSH configs](https://www.ssh.com/ssh/config/)
 * [x] [Self-defining Text Archive and Retrieval](https://en.wikipedia.org/wiki/Self-defining_Text_Archive_and_Retrieval)
+* [x] [Simple File Verification](http://rescene.wikidot.com/pdsfv#format)
 * [ ] [STEP-Files](https://en.wikipedia.org/wiki/ISO_10303-21)
 * [x] [STL files](https://en.wikipedia.org/wiki/STL_%28file_format%29)
 * [x] [StringTemplate](https://www.stringtemplate.org/)

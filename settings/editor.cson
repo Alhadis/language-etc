@@ -81,6 +81,11 @@
 	editor:
 		commentStart: "; "
 
+".source.sfv":
+	editor:
+		commentStart: "; "
+		tabType: "soft"
+
 ".source.smpl":
 	editor:
 		commentStart: "// "
