@@ -30,10 +30,10 @@ repository:
 		},{
 			# ; Single-line
 			name:  "comment.line.semicolon.sfv"
-			begin: ";"
+			begin: "^\\s*(;)"
 			end:   "$"
 			beginCaptures:
-				0: name: "punctuation.definition.comment.sfv"
+				1: name: "punctuation.definition.comment.sfv"
 		}]
 
 	# File checksum entry
