@@ -35,11 +35,11 @@ repository:
 	option:
 		patterns: [{
 			name:  "meta.option.opts"
-			begin: "(--|-)([^-\\s=][^\\s=]*)"
+			begin: "((--?)[^-\\s=][^\\s=]*)"
 			end:   "(?!\\G)(?=\\$|\\S)"
 			beginCaptures:
-				1: name: "punctuation.definition.dash.option.name.opts"
-				2: name: "entity.option.name.opts"
+				1: name: "entity.name.option.opts"
+				2: name: "punctuation.definition.option.name.dash.opts"
 			patterns: [{
 				# Fields which quack like regular expressions
 				match: """(?xi)
