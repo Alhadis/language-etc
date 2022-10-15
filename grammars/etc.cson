@@ -282,6 +282,110 @@ repository:
 		name: "constant.numeric.float.real.decimal.dec"
 		match: "[-+]?(?:[0-9]*\\.[0-9]+|[0-9]+\\.)++"
 
+	# Bash-compatible globbing operators
+	glob:
+		patterns: [
+			{include: "#globSimple"}
+			{include: "#globSet"}
+			{include: "#globBraces"}
+		]
+
+	# Brace expansion
+	globBraces:
+		patterns: [
+			{include: "#globBracesSeq"}
+			{include: "#globBracesAlt"}
+		]
+
+	# Brace expansion, alternation: “{a,b,c}”
+	globBracesAlt:
+		name: "meta.brace-expansion.alternation"
+		match: """(?x)
+			(?<char>[^\\s{,}\\\\]|\\\\[{,}\\\\]|\\g<braced>){0}
+			(?<braced>{(?:[^{},\\\\]|\\\\.)*+}){0}
+			(?<alt>\\g<char>*+,\\g<char>*+|\\g<char>++){0}
+			(?<seq>{(?:-?\\d+\\.\\.-?\\d+|[a-zA-Z]\\.\\.[a-zA-Z])(?:\\.\\.-?\\d+)?}){0}
+			(?<entry> \\g<char>*+ (?:
+				\\g<seq>+
+				|
+				(?!\\g<braced>)
+				{
+					(?<braces>
+						\\g<alt>*+
+						(?:(?!\\g<braced>) { \\g<braces>*+ } | \\g<seq>++)
+						\\g<alt>*+
+						|
+						\\g<alt>++
+					)
+				}
+			) \\g<char>*+)"""
+		captures: 0: patterns: [
+			{include: "#globBracesSeq"}
+			
+			# Inhibit matching of braces that aren't part of an expansion
+			match: "{(?:\\.?+(?:[^{},.\\\\]|\\\\.))*+}"
+			captures:
+				0: patterns: [include: "#esc"]
+			
+			{include: "#esc"}
+			{include: "#globSet"}
+			{include: "#globSimple"}
+			
+			# Punctuation
+			match: "({|})|(,)"
+			captures:
+				1: patterns: [include: "#bracket"]
+				2: patterns: [include: "#comma"]
+		]
+
+	# Brace expansion, sequence expression: “{a..z} {0..999}”
+	globBracesSeq:
+		name:  "meta.brace-expansion.sequence"
+		match: "({)(?:(-?\\d+\\.\\.-?\\d+)|([a-zA-Z]\\.\\.[a-zA-Z]))(\\.\\.-?\\d+)?(})"
+		captures:
+			1: patterns: [include: "etc#bracket"]
+			2: name: "meta.range.numeric",    patterns: [include: "#dots", {include: "#intNoExp"}]
+			3: name: "meta.range.alphabetic", patterns: [include: "#dots", {match: "\\w", name: "constant.character.letter"}]
+			4: name: "meta.increment",        patterns: [include: "#dots", {include: "#intNoExp"}]
+			5: patterns: [include: "etc#bracket"]
+
+	# Character set: “[a-fA-F0-9] [!\r\n]”
+	globSet:
+		name: "meta.character-class.set"
+		match: """(?x)
+			(\\[) (!|\\^)?
+			(
+				(?: [^\\\\\\[\\]]
+				|   \\\\.
+				|   \\[ (?::[!^]?\\w+:|\\..+?\\.|=.+?=) \\]
+				)*+
+			)(\\])
+		"""
+		captures:
+			1: name: "brackethighlighter.square.punctuation.definition.character-class.set.begin"
+			4: name: "brackethighlighter.square.punctuation.definition.character-class.set.end"
+			2: name: "keyword.operator.logical.not"
+			3: patterns: [
+				{include: "#esc"}
+				
+				# Character range indicator
+				match: "(?!^|\\G)(-)(?!\\])(-)?"
+				captures:
+					1: patterns: [include: "#dash"]
+					2: name: "constant.character.single"
+				
+				{include: "source.regexp.posix#charClass"}
+				{include: "source.regexp.posix#localeClasses"}
+				{match: ".", name: "constant.character.single"}
+			]
+
+	# Asterisk(s) or question mark
+	globSimple:
+		patterns: [
+			{match: "\\*{2}", name: "keyword.operator.glob.wildcard.globstar"}
+			{match: "[*?]",   name: "keyword.operator.glob.wildcard"}
+		]
+
 
 	# Hexadecimal, +possibly-signed value
 	hex:

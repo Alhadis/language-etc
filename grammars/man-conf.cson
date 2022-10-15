@@ -1,90 +1,472 @@
-name: "man.conf"
+name: "Man Config"
 scopeName: "source.man-conf"
-fileTypes: ["man.conf"]
+fileTypes: [
+	"man.conf",    "man.config"
+	"man_db.conf", "man_db.config"
+	"man-db.conf", "man-db.config"
+	"manpath"
+]
+injections:
+	"L:source.man-conf meta.tr-value string.quoted":
+		patterns: [include: "#escape-octal"]
 patterns: [include: "#main"]
 
 repository:
 	main:
 		patterns: [
-			{include: "etc#comment"}
-			{include: "#bin"}
-			{include: "#fhs"}
-			{include: "#programs"}
-			{include: "#sections"}
-			{include: "#defaultOpts"}
+			{include: "#comment"}
+			{include: "#fields"}
 			{include: "#decompressor"}
+			{include: "#define"}
+			{include: "#mandoc"}
+			{include: "#legacy"}
 		]
-	
-	# Unquoted bareword
-	arg:
-		name: "constant.language.other.man-conf"
-		match: "[^\\s:]+"
 
 
-	# MAN* field
-	bin:
+	# catman(8) settings related to terminal width
+	catwidth:
 		name:  "meta.field.${1:/downcase}.man-conf"
-		begin: "^\\s*(MANBIN|MANPATH_MAP|MANPATH|manpath|output|_whatdb)(?=\\s)"
+		begin: "^\\s*((?:MAX|MIN)?CATWIDTH)(?=$|\\s)"
 		end:   "$"
 		beginCaptures:
 			1: name: "keyword.operator.field.man-conf"
-		patterns: [
-			{include: "etc#str"}
-			{include: "etc#kolon"}
-			{include: "#arg"}
-		]
+		patterns: [{
+			match: "\\G\\s*(-?\\d+)(?=$|\\s)"
+			captures:
+				1: name: "constant.numeric.integer.catwidth.man-conf"
+		}, include: "#unused"]
 
 
-	# "Logical" keyword affecting man.conf interpretation
-	fhs:
-		match: "^\\s*(FSSTND|FHS|NOAUTOPATH|NOCACHE)(?=\\s|$)"
-		captures:
-			1: name: "keyword.control.${1:/downcase}.man-conf"
+	# Line beginning with an octothorpe
+	comment:
+		name:  "comment.line.number-sign.man-conf"
+		begin: "^\\s*(#)"
+		end:   "$"
+		beginCaptures:
+			1: name: "punctuation.definition.comment.man-conf"
 
 
-	# Program name/arguments
-	programs:
-		name: "meta.field.${1:/downcase}-path.man-conf"
-		match: """(?x) ^ \\s*
-			(BROWSER|CAT|COL|COMPRESS_EXT|COMPRESS|CMP|EQN|GRAP|HTMLPAGER
-			|JNEQN|JNROFF|NEQN|NROFF|PAGER|PIC|REFER|TBL|TROFF|VGRIND)
-			(?=\\s|$) (.*)"""
-		captures:
-			1: name: "keyword.control.${1:/downcase}.man-conf"
-			2: patterns: [include: "#programArgs"]
-	
-	programArgs:
-		patterns: [
-			{include: "etc#str"}
-			{include: "source.opts"}
-			{include: "#arg"}
-		]
+	# File extension used by compressed man pages: “COMPRESS_EXT .xz”
+	"compress-ext":
+		name:  "meta.field.compress-ext.man-conf"
+		begin: "^\\s*(COMPRESS_EXT)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			match: "\\G\\s*(\\S+)"
+			captures:
+				1: name: "constant.other.file-extension.man-conf"
+		}, include: "#unused"]
 
 
-	# List of section numbers: 1:8:7:3:3p…
-	sections:
-		name:  "meta.field.mansect.man-conf"
-		match: "^\\s*(MANSECT)(?=\\s|$)(.*)"
-		captures:
-			1: name: "keyword.control.${1:/downcase}.man-conf"
-			2: patterns: [
-				{include: "etc#kolon"}
-				{match: "[^:\\s]+", name: "constant.numeric.section.man-conf"}
-			]
-
-
-	defaultOpts:
-		name:  "meta.field.default-options.man-conf"
-		match: "^\\s*(MANDEFOPTIONS)(?=\\s|$)(.*)"
-		captures:
-			1: name: "keyword.control.${1:/downcase}.man-conf"
-			2: patterns: [include: "source.opts"]
-
-
+	# User-defined decompression methods
 	decompressor:
 		name:  "meta.field.decompressor.man-conf"
-		match: "^\\s*((\\.)[a-zA-Z0-9]+)(.*)"
-		captures:
-			1: name: "variable.parameter.decompressor.suffix.man-conf"
+		begin: "^\\s*((\\.)[a-zA-Z0-9]+)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "variable.parameter.decompressor.suffix.file-extension.man-conf"
 			2: name: "punctuation.definition.field.dot.period.full-stop.man-conf"
-			3: patterns: [include: "#programArgs"]
+		patterns: [include: "#program-spec"]
+
+
+	# Variable definition, specific to man-db; see “#program” for Eaton's equivalent
+	define:
+		name:  "meta.field.definition.man-conf"
+		begin: "^\\s*(DEFINE)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.var.man-conf"
+		patterns: [{
+			name:  "meta.$1-value.man-conf"
+			begin: "\\G\\s+(\\S+)"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "variable.definition.man-conf"
+			patterns: [include: "#program-spec"]
+		}]
+
+
+	# Defaults assumed by Eaton man(1) when called without options
+	defaults:
+		name:  "meta.field.default-options.man-conf"
+		begin: "^\\s*(MANDEFOPTIONS)(?=$|\\s)[ \\t]*"
+		end:   "[ \\t]*$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [include: "source.opts"]
+
+
+	# Directives that suppress elements of man(1)'s usual behaviour
+	"disable-setting":
+		name:  "meta.field.disable-${2:/downcase}.man-conf"
+		begin: "^\\s*(NO(AUTOPATH|CACHE))(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [include: "#unused"]
+
+
+	# Escaped character
+	escape:
+		name: "constant.character.escape.man-conf"
+		match: "(\\\\)."
+		captures:
+			1: name: "punctuation.definition.escape.backslash.man-conf"
+
+
+	# Octal escape: \000—\777
+	"escape-octal":
+		name: "constant.character.escape.codepoint.octal.man-conf"
+		match: "(\\\\)[0-7]{3}"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.man-conf"
+
+
+	# Configuration directives
+	fields:
+		patterns: [
+			{include: "#catwidth"}
+			{include: "#compress-ext"}
+			{include: "#defaults"}
+			{include: "#disable-setting"}
+			{include: "#hier-standard"}
+			{include: "#manbin"}
+			{include: "#mandatory-manpath"}
+			{include: "#manpath-map"}
+			{include: "#manpath"}
+			{include: "#program"}
+			{include: "#sections"}
+		]
+
+
+	# Keywords that force a particular hier(7) layout
+	# See: https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
+	"hier-standard":
+		name:  "meta.field.${1:/downcase}.man-conf"
+		begin: "^\\s*(FSSTND|FHS)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [include: "#unused"]
+
+
+	# Ancient variant of the man.conf(5) format, ostensibly used by NetBSD at some point:
+	# https://opensource.apple.com/source/doc_cmds/doc_cmds-22/man/man.conf.5.auto.html
+	legacy:
+		begin: "(?=^\\s*_(?:build|default|subdir|suffix|version)(?:$|\\s))"
+		end:   "(?=A)B"
+		patterns: [
+			{include: "#comment"}
+			{include: "#legacy-keyword"}
+			{include: "#legacy-section"}
+		]
+
+
+	# File extension, possibly specified as a globbing expression
+	"legacy-ext":
+		name: "constant.other.file-extension.man-conf"
+		match: "\\S+"
+		captures:
+			0: patterns: [include: "etc#glob"]
+
+
+	# “Keyword” field, indicated by a leading underscore
+	"legacy-keyword":
+		name:  "meta.field.$3.legacy.man-conf"
+		begin: "^\\s*((_)(build|default|subdir|suffix|version|whatdb))(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.legacy.man-conf"
+			2: name: "punctuation.definition.keyword.man-conf"
+		patterns: [{
+			# “_build suffix …command”
+			begin: "(?<=_build)\\G[ \\t]*"
+			end:   "(?=\\s*$)"
+			patterns: [{
+				# File extension
+				match: "\\G\\S+"
+				captures:
+					0: patterns: [include: "#legacy-ext"]
+			},{
+				# Command used to produce formatted manual page file
+				name: "string.unquoted.shell-command.man-conf"
+				match: "(?!\\G)(\\S.*?)(?=\\s*$)"
+				captures: 1: patterns: [{
+					name: "constant.other.placeholder.filename.man-conf"
+					match: "%s"
+				}]
+			}]
+		},{
+			# “_suffix str”
+			begin: "(?<=_suffix)\\G[ \\t]*"
+			end:   "(?=\\s*$)"
+			patterns: [include: "#legacy-ext"]
+		},{
+			# “_version string”
+			contentName: "constant.other.config-version.man-conf"
+			begin: "(?<=_version)\\G[ \\t]*"
+			end:   "(?=\\s*$)"
+		},{
+			# Anything else: “_key value”
+			name:  "string.unquoted.man-conf"
+			begin: "\\G[ \\t]*"
+			end:   "(?=\\s*$)"
+			patterns: [include: "etc#glob"]
+		}]
+
+
+	# “Section” field, comprised of a user-supplied identifier followed by a directory
+	"legacy-section":
+		name:  "meta.field.section.man-conf"
+		begin: "^\\s*(?!#)(\\S+)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "entity.name.section.man-conf"
+		contentName: "string.unquoted.man-conf"
+		patterns: [include: "etc#glob"]
+
+
+	# Location of man(1) binary: “MANBIN /usr/bin/man”
+	manbin:
+		name:  "meta.field.manbin.man-conf"
+		begin: "^\\s*(MANBIN)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			# Executable path
+			begin: "\\G\\s+(?=\\S)"
+			end:   "(?!\\G)"
+			patterns: [include: "#path"]
+		}, include: "#unused"]
+
+
+	# Man-path automatically added to every generated $MANPATH (man-db specific)
+	"mandatory-manpath":
+		name:  "meta.field.mandatory-manpath.man-conf"
+		begin: "^\\s*(MANDATORY_MANPATH)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			name:  "meta.man-directory.man-conf"
+			begin: "\\G\\s+(?=\\S)"
+			end:   "(?!\\G)"
+			patterns: [include: "#path"]
+		}, include: "#unused"]
+
+
+	# Directives supported by mandoc(1)'s config format
+	mandoc:
+		patterns: [{
+			# Indexed manual-page path: “manpath /path/to/man”
+			name:  "meta.field.manpath.man-conf"
+			begin: "^\\s*(manpath)(?=$|\\s)[ \\t]*"
+			end:   "\\s*$"
+			beginCaptures:
+				1: name: "keyword.operator.field.man-conf"
+			contentName: "constant.other.pathname.man-conf"
+		},{
+			# Override an option's default value
+			name:  "meta.field.output.man-conf"
+			begin: "^\\s*(output)(?=$|\\s)[ \\t]*"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.operator.field.man-conf"
+			patterns: [{
+				begin: "\\G\\S+"
+				end:   "$"
+				beginCaptures:
+					0: name: "variable.output-option.man-conf"
+				patterns: [
+					{include: "#string"}
+					{include: "etc"}
+					{include: "etc#bareword"}
+				]
+			}]
+		}]
+
+
+	# Manpath-to-catdir mapping: “MANDB_MAP|MANPATH manpath-element [catdir-element]”
+	# NB: “MANPATH” is used by traditional man(1); “MANDB_MAP” is used by man-db
+	manpath:
+		name:  "meta.field.${1:/downcase}.man-conf"
+		begin: "^\\s*(MANPATH|MANDB_MAP)(?=$|\\s)[ \\t]*"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			# First argument
+			name:  "meta.manpath-element.man-conf"
+			begin: "\\G(?=\\S)"
+			end:   "(?!\\G)"
+			patterns: [include: "#path"]
+		},{
+			# Second (optional) argument
+			begin: "(?!\\G)(?=\\S)"
+			end:   "$"
+			patterns: [{
+				name:  "meta.catdir-element.man-conf"
+				begin: "\\G"
+				end:   "(?!\\G)"
+				patterns: [include: "#path"]
+			}, include: "#unused"]
+		}]
+
+
+	# PATH to MANPATH mapping
+	"manpath-map":
+		name:  "meta.field.manpath-map.man-conf"
+		begin: "^\\s*(MANPATH_MAP)(?=$|\\s)[ \\t]*"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			# First argument
+			name:  "meta.bin-directory.man-conf"
+			begin: "\\G(?=\\S)"
+			end:   "(?!\\G)"
+			patterns: [include: "#path"]
+		},{
+			# Second argument
+			begin: "(?!\\G)(?=\\S)"
+			end:   "$"
+			patterns: [{
+				name:  "meta.man-directory.man-conf"
+				begin: "\\G"
+				end:   "(?!\\G)"
+				patterns: [include: "#path"]
+			}, include: "#unused"]
+		}]
+
+
+	# Pathname argument
+	path:
+		name:  "constant.other.pathname.man-conf"
+		begin: "(?:^|\\G)(?=\\S)"
+		end:   "(?=$|\\s)"
+		patterns: [
+			{include: "#escape"}
+			{include: "etc#globSimple"}
+			{include: "etc#globSet"}
+		]
+
+
+	# Programs used by Eaton man(1); see “#define” for the man-db equivalent
+	program:
+		name: "meta.field.program-location.${1:/downcase}-path.man-conf"
+		begin: """(?x) ^\\s*
+			# Source: ‘man/src/paths.h.in’
+			( APROPOS
+			| BROWSER
+			| CAT
+			| CMP
+			| COL
+			| COMPRESS
+			| DECOMPRESS
+			| EQN
+			| GRAP
+			| HTMLPAGER
+			| JNEQN
+			| JNROFF
+			| NEQN
+			| NROFF
+			| PAGER
+			| PIC
+			| REFER
+			| TBL
+			| TROFF
+			| VGRIND
+			| WHATIS
+			) (?=$|\\s)
+		"""
+		end: "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [include: "#program-spec"]
+
+
+	# Executable path followed by zero or more arguments
+	"program-spec":
+		patterns: [{
+			name:  "meta.executable-path.man-conf"
+			begin: "\\G\\s+(?=[^-\\s])"
+			end:   "(?!\\G)"
+			patterns: [include: "#path"]
+		},{
+			match: "(?!\\G)(.+)(?=\\s*$)"
+			captures:
+				1: patterns: [
+					{include: "#string"}
+					{include: "source.opts"}
+				]
+		}]
+
+
+	# List of sections, specified using one of two syntaxes:
+	# - Eaton:  “MANSECT 1:1p:8:2:3…”
+	# - man-db: “SECTION 1 1p 8 2 3…”
+	sections:
+		name:  "meta.field.${1:/downcase}.section-list.man-conf"
+		begin: "^\\s*(MANSECT|SECTIONS?)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "keyword.operator.field.man-conf"
+		patterns: [{
+			# Whitespace-delimited list
+			begin: "(?<=N)\\G"
+			end:   "$"
+			patterns: [{
+				name: "constant.numeric.section.man-conf"
+				match: "\\S+"
+			}]
+		},{
+			# Colon-delimited list
+			begin: "\\G"
+			end:   "$"
+			patterns: [{
+				# Section name
+				name: "constant.numeric.section.man-conf"
+				match: "[^:\\s]+"
+			},{
+				# Delimiter
+				name: "meta.separator.man-conf"
+				match: ":"
+				captures:
+					0: name: "punctuation.delimiter.separator.colon.man-conf"
+			}]
+		}]
+
+
+	# Quoted strings
+	string:
+		patterns: [{
+			# "Double-quoted" string
+			name:  "string.quoted.double.man-conf"
+			begin: '"'
+			end:   '(")|([^"]*)(?=$)'
+			beginCaptures:
+				1: name: "punctuation.definition.string.start.man-conf"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.man-conf"
+				2: name: "invalid.illegal.unclosed-string.man-conf"
+			patterns: [include: "#escape"]
+		},{
+			# 'Single-quoted' string
+			name:  "string.quoted.single.man-conf"
+			begin: "'"
+			end:   "'"
+			beginCaptures:
+				1: name: "punctuation.definition.string.start.man-conf"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.man-conf"
+				2: name: "invalid.illegal.unclosed-string.man-conf"
+		}]
+
+
+	# Unexpected/superfluous argument
+	unused:
+		name: "invalid.illegal.unused-argument.man-conf"
+		match: "\\S+"

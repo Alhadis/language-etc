@@ -64,7 +64,7 @@ Supported formats
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [ ] [Hunspell dictionaries](https://github.com/hunspell/hunspell/blob/master/man/hunspell.5)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
-* [x] [`man.conf`](https://man.openbsd.org/man.conf.5)
+* [x] [Man configs](./samples/man.conf)
 * [x] [NEON](https://ne-on.org/)
 * [x] [NWScript](https://en.wikipedia.org/wiki/NWScript)
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
