@@ -1,0 +1,305 @@
+name: "Ecmarkup"
+scopeName: "text.html.ecmarkup"
+fileTypes: ["ecmarkdown", "ecmarkup", "emu", "spec.html"]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:ecmarkdown|ecmarkup)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:ecmarkdown|ecmarkup)
+	(?=$|\\s|:)
+"""
+patterns: [{
+	# Tolerate top-level list markup
+	begin: "\\A(?=\\s*(?:\\d+\\.|\\*)(?=$|\\s))"
+	end:   "(?=A)B"
+	patterns: [
+		{include: "#list"}
+		{include: "#main"}
+	]
+}, include: "#main"]
+limitLineLength: no
+maxTokensPerLine: 10000
+injections:
+	"L:(source.embedded.yaml.front-matter.ecmarkup - (comment | embedded))":
+		patterns: [include: "text.html.basic#character-reference"]
+	"L:(text.html.ecmarkup meta.tag.opaque-element - (meta.emu-alg | meta.emu-grammar))":
+		patterns: [match: "[*_`|~\\\\]"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#emu-alg"}
+			{include: "#emu-grammar"}
+			{include: "#emu-element"}
+			{include: "#metadata-block"}
+			{include: "#code-blocks"}
+			{include: "#escape"}
+			{include: "#formatting"}
+			{include: "text.html.basic"}
+		]
+
+
+	# Inhibit matching of Ecmarkup inside so-called “opaque HTML blocks”
+	"code-blocks":
+		name:  "meta.tag.opaque-element.${2:/downcase}.html.ecmarkup"
+		begin: "(?i)\\s*(<(pre|code)(?=$|\\s|>))"
+		end:   "(?i)\\s*(</\\2\\s*>)"
+		beginCaptures: 1: patterns: [include: "#tag-opening-start"]
+		endCaptures:   1: patterns: [include: "#tag-closing"]
+		patterns: [
+			{include: "#tag-opening-rest"}
+			{include: "#main"}
+		]
+
+
+	# Algorithm specification: “<emu-alg> … </emu-alg>”
+	"emu-alg":
+		name:  "meta.emu-alg.html.ecmarkup"
+		begin: "(?i)\\s*(<emu-alg(?=$|\\s|>))"
+		end:   "(?i)\\s*(</emu-alg\\s*>)"
+		beginCaptures: 1: patterns: [include: "#tag-opening-start"]
+		endCaptures:   1: patterns: [include: "#tag-closing"]
+		patterns: [
+			{include: "#tag-opening-rest"}
+
+			begin: "(?<=>)"
+			end:   "(?i)(?=\\s*(</emu-alg\\s*>))"
+			patterns: [
+				{include: "#list"}
+				{include: "#main"}
+			]
+		]
+
+
+	# Custom HTML elements without special highlighting
+	"emu-element":
+		name:  "meta.${2:/downcase}.html.ecmarkup"
+		begin: "(?i)\\s*(<(emu-[\\w][-\\w]*)(?=$|\\s|>))"
+		end:   "(?i)\\s*(</\\2\\s*>)"
+		beginCaptures: 1: patterns: [include: "#tag-opening-start"]
+		endCaptures:   1: patterns: [include: "#tag-closing"]
+		patterns: [
+			{include: "#tag-opening-rest"}
+			{include: "#tag-body"}
+		]
+
+
+	# Grammar spec, penned using Grammarkdown (see: Alhadis/language-grammars@37b0ec1)
+	"emu-grammar":
+		name:  "meta.emu-grammar.html.ecmarkup"
+		begin: "(?i)\\s*(<emu-grammar(?=$|\\s|>))"
+		end:   "(?i)\\s*(</emu-grammar\\s*>)"
+		beginCaptures: 1: patterns: [include: "#tag-opening-start"]
+		endCaptures:   1: patterns: [include: "#tag-closing"]
+		patterns: [
+			{include: "#tag-opening-rest"}
+
+			name:  "meta.grammar.ecmarkup"
+			begin: "(?<=>)"
+			end:   "(?i)(?=\\s*(</emu-grammar\\s*>))"
+			contentName: "text.embedded.grammarkdown"
+			patterns: [include: "text.grammarkdown"]
+		]
+
+
+	# Escaped formatting character
+	escape:
+		name: "constant.character.escape.ecmarkup"
+		match: "(\\\\)[*_`<|~\\\\]"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.ecmarkup"
+
+
+	# Inline formatting elements supported in paragraphs, list-items, and headers
+	formatting:
+		patterns: [{
+			# Variable: “_N_”
+			name: "variable.reference.ecmarkup"
+			match: "(?<![\\w*_`<|~])(_)((?:\\\\_|[^\\s_])++)(_)"
+			captures:
+				1: name: "punctuation.definition.variable.begin.ecmarkup"
+				2: patterns: [include: "#escape"]
+				3: name: "punctuation.definition.variable.end.ecmarkup"
+		},{
+			# Value: “*foo*”
+			name: "constant.other.value.ecmarkup"
+			match: "(?<![\\w*_`<|~])(\\*)(?=\\S)((?:\\\\\\*|[^*])++)(?<=\\S)(\\*)"
+			captures:
+				1: name: "punctuation.definition.value.begin.ecmarkup"
+				2: patterns: [include: "#escape"]
+				3: name: "punctuation.definition.value.end.ecmarkup"
+		},{
+			# Code: “`halt -p`”
+			name: "markup.raw.code.monospace.ecmarkup"
+			match: "(\\`)(?=\\S)((?:\\\\`|[^`])++)(?<=\\S)(\\`)"
+			captures:
+				1: name: "punctuation.definition.value.begin.ecmarkup"
+				2: patterns: [include: "#escape"]
+				3: name: "punctuation.definition.value.end.ecmarkup"
+		},{
+			# Spec-level constant: “~foo~”
+			name: "support.constant.spec-level.ecmarkup"
+			match: "(?<![\\w*_`<|~])(~)(?=\\S)((?:\\\\~|[^~])++)(?<=\\S)(~)"
+			captures:
+				1: name: "punctuation.definition.constant.begin.ecmarkup"
+				2: patterns: [include: "#escape"]
+				3: name: "punctuation.definition.constant.end.ecmarkup"
+		}, include: "#nonterminal"]
+
+
+	# List entry
+	list:
+		name:  "meta.list.ecmarkup"
+		begin: "^(\\s*)((\\d+\\.|\\*))(?=$|\\s)(?:\\s*(Assert(:)))?[ \\t]*"
+		end:   "(?=\\s*</(?i:emu-alg)\\s*>)|(?!\\G)^(?=\\s*(?:$|(?:\\d+\\.|\\*)(?:$|\\s)))"
+		beginCaptures:
+			2: name: "markup.list.marker.ecmarkup"
+			3: name: "punctuation.definition.list.ecmarkup"
+			4: name: "support.constant.assertion.ecmarkup"
+			5: name: "puncutation.definition.constant.ecmarkup"
+		patterns: [{
+			# List of HTML attributes to assign to list-item
+			begin: "\\G(?=\\[)"
+			end:   "(?<=\\])(?:\\s*(Assert(:)))?"
+			endCaptures:
+				1: name: "support.constant.assertion.ecmarkup"
+				2: name: "puncutation.definition.constant.ecmarkup"
+			patterns: [{
+				name:  "meta.attributes.ecmarkup"
+				begin: "\\G(\\[)"
+				end:   "(\\])"
+				beginCaptures:
+					0: name: "punctuation.definition.list.begin.ecmarkup"
+					1: name: "brackethighlighter.square"
+				endCaptures:
+					0: name: "punctuation.definition.list.end.ecmarkup"
+					1: name: "brackethighlighter.square"
+				patterns: [{
+					applyEndPatternLast: yes
+					name:  "meta.attribute.ecmarkup"
+					begin: '(\\w[-\\w]*)\\s*(=)\\s*(?=")'
+					end:   '(?!\\G)'
+					beginCaptures:
+						1: name: "entity.other.attribute-name.ecmarkup"
+						2: patterns: [include: "etc#eql"]
+					patterns: [
+						{include: "etc#strDouble"}
+						{include: "etc#comma"}
+					]
+				}]
+			}]
+		}, include: "#main"]
+
+
+	# <pre class="metadata"> … </pre>
+	"metadata-block":
+		name:  "meta.tag.block.pre.front-matter.html.ecmarkup"
+		begin: """(?ix) \\s*
+			((<)(pre)
+			(
+				\\s+[^>]*?(?<=\\s)
+				class \\s* = \\s*
+				(?:"metadata"|'metadata'|metadata)
+				(?=\\s|>) [^>]*
+			)
+			(>))
+		"""
+		end: "(?i)\\s*((</)(pre)\\s*(>))"
+		beginCaptures:
+			1: name: "meta.tag.other.html.ecmarkup"
+			2: name: "punctuation.definition.tag.begin.html.ecmarkup"
+			3: name: "entity.name.tag.block.pre.html"
+			4: patterns: [include: "text.html.basic#tag-stuff"]
+			5: name: "punctuation.definition.tag.end.html"
+		endCaptures:
+			1: name: "meta.tag.block.pre.html"
+			2: name: "punctuation.definition.tag.begin.html"
+			3: name: "entity.name.tag.block.pre.html"
+			4: name: "punctuation.definition.tag.end.html"
+		contentName: "source.embedded.yaml.front-matter.ecmarkup"
+		patterns: [include: "source.yaml"]
+
+
+	# Nonterminal: “|x| |x?| |x[p]| |x[p]?|”
+	nonterminal:
+		name: "meta.nonterminal.ecmarkup"
+		match: """(?x) (?<![\\w*_`<|~])
+			((\\|))
+			([A-Za-z0-9]+)
+			(\\[ [^\\]]* \\])?
+			(?: (\\?) | ((_)opt))?
+			((\\|))
+		"""
+		captures:
+			1: name: "punctuation.definition.nonterminal.begin.ecmarkup"
+			2: name: "brackethighlighter.tag"
+			3: name: "keyword.other.nonterminal.ecmarkup"
+			4: patterns: [include: "#nonterminal-params"]
+			5: name: "keyword.operator.optional.question-mark.ecmarkup"
+			6: name: "keyword.operator.optional.english.ecmarkup"
+			7: name: "punctuation.separator.suffix.ecmarkup"
+			8: name: "punctuation.definition.nonterminal.end.ecmarkup"
+			9: name: "brackethighlighter.tag"
+
+
+	# Stuff matched inside a nonterminal's parameters list
+	"nonterminal-params":
+		name:  "meta.parameters.ecmarkup"
+		begin: "(\\[)"
+		end:   "(\\])"
+		beginCaptures:
+			0: name: "punctuation.section.list.begin.ecmarkup"
+			1: name: "brackethighlighter.square"
+		endCaptures:
+			0: name: "punctuation.section.list.end.ecmarkup"
+			1: name: "brackethighlighter.square"
+		patterns: [
+			name: "variable.parameter.nonterminal.ecmarkup"
+			match: "\\w[-\\w]*"
+
+			{match: "\\?", name: "keyword.operator.optional.question-mark.ecmarkup"}
+			{include: "#escape"}
+			{include: "etc#comma"}
+		]
+
+
+	# Stuff matched between an opening and closing tag
+	"tag-body":
+		name:  "meta.tag-contents.html.ecmarkup"
+		begin: "(?<=>)"
+		end:   "(?=\\s*</emu-[-\\w]*\\s*>)"
+		patterns: [include: "#main"]
+
+	# <tag-name …
+	"tag-opening-start":
+		name: "meta.tag.other.html.ecmarkup"
+		match: "(?:^|\\G)(<)(\\w[-\\w]*)(?=$|\\s|>)"
+		captures:
+			1: name: "punctuation.definition.tag.begin.html.ecmarkup"
+			2: name: "entity.name.tag.other.html.ecmarkup"
+
+	#  attributes="value" …>
+	"tag-opening-rest":
+		begin: "\\G"
+		end:   "\\s*(>)"
+		endCaptures:
+			1: name: "punctuation.definition.tag.end.html.ecmarkup"
+		patterns: [include: "text.html.basic#tag-stuff"]
+
+	# … </tag>
+	"tag-closing":
+		name: "meta.tag.other.html.ecmarkup"
+		match: "(?i)(?:^|\\G)(</)(\\w[-\\w]*)\\s*(>)"
+		captures:
+			1: name: "punctuation.definition.tag.begin.html.ecmarkup"
+			2: name: "entity.name.tag.other.html.ecmarkup"
+			3: name: "punctuation.definition.tag.end.html.ecmarkup"

@@ -1,0 +1,38 @@
+|NonTerminal| `foobar` *baz* qux
+*star*s s*tars* _var_s v_ars_ `tick`s t`icks` |pipe|s p|ipes| ~tilde~s t~ildes~
+
+<!-- Comment -->
+<code class="opaque-tag">
+	1. |NotCode|
+	<emu-alg>
+		<!-- Comment -->
+		1. |Code|
+	</emu-alg>
+	<i>1. *NotCode*</i>
+</code>
+
+<emu-alg class="example">
+1. Assert: Type(_iterator_) is Object.
+1. Assert: _completion_ is a Completion Record.
+1. [class="assignment"] Let _hasReturn_ be HasProperty(_iterator_, `"return"`).
+1. ReturnIfAbrupt(_hasReturn_).
+	1. If _hasReturn_ is *true*, then
+		1. Let _innerResult_ be Invoke(_iterator_, `"return"`, ( )).
+			1. If _completion_.[[type]] is not ~throw~ and _innerResult_.[[type]] is ~throw~, then
+				1. Return _innerResult_.
+1. Return _completion_.
+	* Unordered item: *value 1*
+	* Don't run `rm -rf`
+	* Spec-level constant: ~whatever that is~
+	* [thing-one="value", thing-two="quote:\""] Unordered item
+	* |x_opt| instead of |x?| and |x[p]_opt| instead of |x[p]?|.
+</emu-alg>
+
+<emu-grammar>NonemptyClassRanges :: ClassAtom `-` ClassAtom ClassRanges</emu-grammar>
+<emu-alg class="example">
+	1. Let _A_ be CompileToCharSet of the first |ClassAtom| with argument _rer_.
+	1. Let _B_ be CompileToCharSet of the second |ClassAtom| with argument _rer_.
+	1. Let _C_ be CompileToCharSet of |ClassRanges| with argument _rer_.
+	1. Let _D_ be CharacterRangeOrUnion(_rer_, _A_, _B_).
+	1. Return the union of _D_ and _C_.
+</emu-alg>

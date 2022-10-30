@@ -16,6 +16,9 @@
 		"rc",
 		"settings"
 	],
-	"package-deps": ["language-regexp"],
+	"package-deps": [
+		"language-grammars",
+		"language-regexp"
+	],
 	"engines": {"atom": "*"}
 }
