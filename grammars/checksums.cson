@@ -19,6 +19,7 @@ fileTypes: [
 	"sha384", "sha384sum", "sha384sums", "sha384sums.txt"
 	"sha512", "sha512sum", "sha512sums", "sha512sums.txt"
 ]
+firstLineMatch: "\\Auntrusted comment: verify with \\S"
 patterns: [include: "#main"]
 
 repository:
