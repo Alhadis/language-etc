@@ -52,7 +52,7 @@ repository:
 					) \\s+ (\\S+)
 				"""
 				captures:
-					1: patterns: [include: "source.regexp"]
+					1: name: "string.regexp.opts", patterns: [include: "source.regexp"]
 			},{
 				# Equals-separated values
 				match: "\\G(=)(\\S*)"
