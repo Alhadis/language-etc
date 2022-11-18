@@ -4,7 +4,7 @@ fileTypes: [
 	"man.conf",    "man.config"
 	"man_db.conf", "man_db.config"
 	"man-db.conf", "man-db.config"
-	"manpath"
+	"manpath",     "manpath.config"
 ]
 injections:
 	"L:source.man-conf meta.tr-value string.quoted":
