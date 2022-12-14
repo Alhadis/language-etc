@@ -21,5 +21,7 @@ repository:
 
 	# Human-friendly hostname
 	host:
-		name: "string.unquoted.hostname"
+		name: "entity.name.host.domain.hosts"
 		match: "[^:\\s#][^\\s#]*"
+		captures:
+			0: patterns: [include: "etc#dot"]
