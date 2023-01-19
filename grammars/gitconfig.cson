@@ -384,7 +384,7 @@ repository:
 		},{
 			# Everything else
 			name:  "meta.variable-field.gitconfig"
-			begin: "[A-Za-z][-A-Za-z]*"
+			begin: "[0-9A-Za-z][-0-9A-Za-z]*"
 			beginCaptures:
 				0: name: "variable.parameter.assignment.gitconfig"
 			end: "(?=\\s*(?:$|#|;))"
