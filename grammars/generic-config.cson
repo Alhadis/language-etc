@@ -1,0 +1,46 @@
+# Highlighting for anything that uses “#” or “;” as comments
+name: "Generic Configuration"
+scopeName: "source.generic-config"
+fileTypes: ["/etc/*.conf"] # Dummy filetype to force inclusion in grammar-selector
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:conf(?:-(?:colon|desktop|javaprop|ppd|space|toml|unix|windows|xdefaults))?)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:conf)
+	(?=$|\\s|:)
+"""
+patterns: [include: "#comment"]
+
+repository:
+	comment:
+		patterns: [
+			{include: "#comment-semicolon"}
+			{include: "#comment-number-sign"}
+		]
+
+
+	# Comments introduced with a semicolon
+	"comment-semicolon":
+		name:  "comment.line.semicolon.generic-config"
+		begin: ";"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.generic-config"
+
+
+	# Comments introduced by a pound symbol, like this one
+	"comment-number-sign":
+		name:  "comment.line.number-sign.generic-config"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.generic-config"
