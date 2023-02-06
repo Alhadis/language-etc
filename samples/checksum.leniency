@@ -1,3 +1,5 @@
+-*- checksums -*-
+
 This file documents how whitespace is handled between programs that
 verify a list of SHA-256 checksums (typically separated by 2-spaces)
 

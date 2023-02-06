@@ -19,7 +19,26 @@ fileTypes: [
 	"sha384", "sha384sum", "sha384sums", "sha384sums.txt"
 	"sha512", "sha512sum", "sha512sums", "sha512sums.txt"
 ]
-firstLineMatch: "\\Auntrusted comment: verify with \\S"
+firstLineMatch: """(?x)
+	(?-x:\\Auntrusted comment: verify with \\S)
+	|
+	# Modeline
+	(?-im:
+		# Emacs
+		-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+			(?i:checksums?|cksums|md5|sfv)
+		(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+		
+		|
+		
+		# Vim
+		(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+		(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+		(?:filetype|ft|syntax)[ \\t]*=
+			(?i:checksums?|cksums|md5|sfv)
+		(?=$|\\s|:)
+	)
+"""
 patterns: [include: "#main"]
 
 repository:
