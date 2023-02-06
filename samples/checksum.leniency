@@ -1,0 +1,36 @@
+This file documents how whitespace is handled between programs that
+verify a list of SHA-256 checksums (typically separated by 2-spaces)
+
+shasum(1)
+	Separator must be exactly 1 space followed by either:
+
+	' ' -- Text mode
+	'*' -- Binary mode
+	'^' -- Bitwise mode (partial-byte input; Perl implementation only)
+	'U' -- "Universal newlines" mode, whatever that is
+
+sha256sum(1)
+	Separator may be either a tab or space, followed by an optional type modifier:
+
+	' ' -- Text mode
+	'*' -- Binary mode
+
+	shasum(1)'s 'U' and '^' modes are unsupported.
+
+sha256(1) (OpenBSD)
+	* Separator must be at least 1-space long
+	* Tabs are ignored as long as a space is present
+	* Type modifiers are entirely unsupported
+
+Altogether now:
+
+0000000000000000000000000000000000000000000000000000000000000000  /tmp/text
+1111111111111111111111111111111111111111111111111111111111111111 */tmp/binary
+2222222222222222222222222222222222222222222222222222222222222222 ^/tmp/binary
+3333333333333333333333333333333333333333333333333333333333333333 U/tmp/file
+4444444444444444444444444444444444444444444444444444444444444444 /tmp/text
+5555555555555555555555555555555555555555555555555555555555555555 */tmp/text
+6666666666666666666666666666666666666666666666666666666666666666	/tmp/text
+7777777777777777777777777777777777777777777777777777777777777777	*/tmp/text
+8888888888888888888888888888888888888888888888888888888888888888         /tmp/binary
+9999999999999999999999999999999999999999999999999999999999999999  	  	     /tmp/binary
