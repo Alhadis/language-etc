@@ -106,9 +106,13 @@ repository:
 					|	disable-epsv
 					|	disable
 					|	disallow-username-in-url
+					|	doh-cert-status
+					|	doh-insecure
 					|	fail-early
+					|	fail-with-body
 					|	fail
 					|	false-start
+					|	form-escape
 					|	ftp-create-dirs
 					|	ftp-pasv
 					|	ftp-pret
@@ -119,11 +123,13 @@ repository:
 					|	globoff
 					|	haproxy-protocol
 					|	head
-					|	help
+					|	http0.9
 					|	http1.0
 					|	http1.1
 					|	http2-prior-knowledge
 					|	http2
+					|	http3-only
+					|	http3
 					|	ignore-content-length
 					|	include
 					|	insecure
@@ -133,6 +139,7 @@ repository:
 					|	list-only
 					|	location-trusted
 					|	location
+					|	mail-rcpt-allowfails
 					|	manual
 					|	metalink
 					|	negotiate
@@ -141,11 +148,15 @@ repository:
 					|	next
 					|	no-alpn
 					|	no-buffer
+					|	no-clobber
 					|	no-keepalive
 					|	no-npn
+					|	no-progress-meter
 					|	no-sessionid
 					|	ntlm-wb
 					|	ntlm
+					|	parallel-immediate
+					|	parallel
 					|	path-as-is
 					|	post301
 					|	post302
@@ -158,15 +169,16 @@ repository:
 					|	proxy-negotiate
 					|	proxy-ntlm
 					|	proxy-ssl-allow-beast
+					|	proxy-ssl-auto-client-cert
 					|	proxy-tlsv1
 					|	proxytunnel
-					|	quote
 					|	raw
 					|	remote-header-name
 					|	remote-name-all
 					|	remote-name
 					|	remote-time
-					|	request-target
+					|	remove-on-error
+					|	retry-all-errors
 					|	retry-connrefused
 					|	sasl-ir
 					|	show-error
@@ -175,18 +187,18 @@ repository:
 					|	socks5-gssapi-nec
 					|	socks5-gssapi
 					|	ssl-allow-beast
+					|	ssl-auto-client-cert
 					|	ssl-no-revoke
 					|	ssl-reqd
+					|	ssl-revoke-best-effort
 					|	sslv2
 					|	sslv3
 					|	ssl
-					|	stderr
 					|	styled-output
 					|	suppress-connect-headers
 					|	tcp-fastopen
 					|	tcp-nodelay
 					|	tftp-no-options
-					|	tlspassword
 					|	tlsv1.0
 					|	tlsv1.1
 					|	tlsv1.2
@@ -213,7 +225,10 @@ repository:
 				(
 					(--)?
 					(?<optlist_urls>
-						doh-url
+						dns-ipv4-addr
+					|	dns-ipv6-addr
+					|	dns-servers
+					|	doh-url
 					|	mail-auth
 					|	mail-from
 					|	mail-rcpt
@@ -353,13 +368,13 @@ repository:
 				3: name: "constant.other.md5.checksum.curlrc", patterns: [include: "etc#esc"]
 				5: name: "constant.other.md5.checksum.curlrc"
 		},{
-			# Byte-range
+			# Ranges
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
 				(
 					(--)?
-					(?<optlist_byte_range>
+					(?<optlist_range>
 						local-port
 					|	range
 					)
@@ -390,15 +405,17 @@ repository:
 				(
 					(--)?
 					(?<optlist_kv_colon>
-						cert
+						aws-sigv4
+					|	cert
 					|	connect-to
 					|	preproxy
 					|	proxy-cert
 					|	proxy-user
-					|	proxy1\\.0
+					|	proxy1.0
 					|	proxy
 					|	resolve
-					|	socks4a?
+					|	socks4a
+					|	socks4
 					|	socks5-hostname
 					|	socks5
 					|	user
@@ -418,14 +435,15 @@ repository:
 				3: patterns: [{include: "#auth"}, {include: "etc#bareword"}]
 				5: patterns: [{include: "#auth"}, {include: "etc#bareword"}]
 		},{
-			# Filename, or generic/untyped
+			# Generic/untyped string
 			name: "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:](?=\\s)) \\s*
 				(
 					(--)?
-					(?<optlist_filename>
+					(?<optlist_string>
 						abstract-unix-socket
+					|	alt-svc
 					|	cacert
 					|	capath
 					|	cert-type
@@ -433,6 +451,7 @@ repository:
 					|	config
 					|	cookie-jar
 					|	crlfile
+					|	curves
 					|	data-ascii
 					|	data-binary
 					|	data-raw
@@ -440,17 +459,21 @@ repository:
 					|	data
 					|	delegation
 					|	dns-interface
-					|	dns-ipv4-addr
-					|	dns-ipv6-addr
-					|	dns-servers
 					|	dump-header
 					|	egd-file
 					|	engine
+					|	etag-compare
+					|	etag-save
 					|	ftp-account
 					|	ftp-alternative-to-user
 					|	ftp-method
 					|	ftp-ssl-ccc-mode
+					|	happy-eyeballs-timeout-ms
+					|	help
+					|	hostpubsha256
+					|	hsts
 					|	interface
+					|	json
 					|	key-type
 					|	key
 					|	krb
@@ -458,6 +481,7 @@ repository:
 					|	login-options
 					|	netrc-file
 					|	oauth2-bearer
+					|	output-dir
 					|	output
 					|	pass
 					|	pinnedpubkey
@@ -476,18 +500,24 @@ repository:
 					|	proxy-tlspassword
 					|	proxy-tlsuser
 					|	pubkey
+					|	quote
 					|	random-file
+					|	request-target
 					|	request
+					|	sasl-authzid
 					|	service-name
 					|	socks5-gssapi-service
+					|	stderr
 					|	tls-max
 					|	tls13-ciphers
 					|	tlsauthtype
+					|	tlspassword
 					|	tlsuser
 					|	trace-ascii
 					|	trace
 					|	unix-socket
 					|	upload-file
+					|	url-query
 					|	user-agent
 					|	write-out
 					)
@@ -523,13 +553,15 @@ repository:
 					(?<optlist_numeric>
 						connect-timeout
 					|	continue-at
+					|	create-file-mode
 					|	expect100-timeout
-					|	happy-eyeballs-timeout-ms
 					|	keepalive-time
 					|	limit-rate
 					|	max-filesize
 					|	max-redirs
 					|	max-time
+					|	parallel-max
+					|	rate
 					|	retry-delay
 					|	retry-max-time
 					|	retry
@@ -613,7 +645,7 @@ repository:
 		patterns: [{
 			# Options which take an argument
 			name:  "meta.option.short.curlrc"
-			begin: "^\\s*((-)[:#012346BGIJLMNOQRSVafghijklnpqsv]*[ACDEFHKPTUXYbcdemortuwxyz])"
+			begin: "^\\s*((-)[:#012346BGIJLMNOQRSVafghijklnpqsv]*[ACDEFHKPQTUXYbcdehmortuwxyz])"
 			end:   """(?x)
 				$
 				|
@@ -626,7 +658,7 @@ repository:
 				|
 				
 				# Byte range
-				(?<=(?#optlist_byte_range)r)
+				(?<=(?#optlist_range)r)
 				\\G (?:(?!\xA0)\\s)*
 				([-0-9,]+)
 				
@@ -677,6 +709,17 @@ repository:
 				
 				|
 				
+				# Port address
+				(?<=(?#optlist_port)P)
+				\\G (?:(?!\xA0)\\s)*
+				(?:
+					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
+					|
+					([\\S\xA0]+)
+				)
+				
+				|
+				
 				# Anything else
 				(?:
 					((")((?:[^"\\\\]|\\\\.|\xA0)*)(?:(")|$))
@@ -716,16 +759,23 @@ repository:
 				18: name: "punctuation.definition.string.end.curlrc"
 				19: patterns: [include: "#url"]
 				
-				# Anything else
+				# Port addresses
 				20: name: "string.quoted.double.curlrc"
 				21: name: "punctuation.definition.string.begin.curlrc"
-				22: patterns: [include: "etc#esc"]
+				22: name: "constant.other.port-address.curlrc", patterns: [include: "etc#esc"]
 				23: name: "punctuation.definition.string.end.curlrc"
-				24: name: "string.unquoted.curlrc"
+				24: name: "constant.other.port-address.curlrc"
+				
+				# Anything else
+				25: name: "string.quoted.double.curlrc"
+				26: name: "punctuation.definition.string.begin.curlrc"
+				27: patterns: [include: "etc#esc"]
+				28: name: "punctuation.definition.string.end.curlrc"
+				29: name: "string.unquoted.curlrc"
 		},{
 			# Options which take no arguments
 			name:  "meta.option.short.curlrc"
-			match: "^\\s*((-)(?#optlist_no_parameter)[:#012346BGIJLMNOQRSVafghijklnpqsv]+)"
+			match: "^\\s*((-)(?#optlist_no_parameter)[#012346:BGIJLMNORSVZafgijklnpqsv]+)"
 			captures:
 				1: name: "entity.short.option.name.curlrc"
 				2: name: "punctuation.definition.dash.short.option.curlrc"

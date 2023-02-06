@@ -1,12 +1,21 @@
 #!/bin/sh
 set -e
 
+#
+# update-curl-opts: Regenerate the TSV file containing every option
+# defined by the local checkout of curl(1)'s Git repository.
+#
+# TODO: Investigate whether `curl/src/tool_getparam.c` could be
+# leveraged to help ascertain type information for new options.
+#
+
 # Terminate with an error message
 die()(printf >&2 '%s\n' "$1"; exit 2)
 
 
 # Sanity checks
 root=`realpath "${0%/*}/.."`
+ducktype="$root/tools/ducktype-curl-arg.sed"
 grammar="$root/grammars/curlrc.cson"
 list="$root/samples/lists/curlrc-options.tsv"
 [ -s "$grammar" ] || die "$0: Missing grammar file: $grammar"
@@ -36,7 +45,7 @@ done
 printf '# vim: ts'='42 ft=curlrc\n' > "$list"
 
 for i in *.d; do
-	unset long short arg vars
+	unset long short arg vars type
 	vars=`sed -n "
 		/^--*/ q
 		/^\([A-Za-z]\{1,\}\): *\(.*\)/ {
@@ -67,35 +76,12 @@ for i in *.d; do
 		' | tr '[A-Z]' '[a-z]'`
 	fi
 	
-	type=`printf '%s\n' "$arg" | sed -n '
-		# Normalise input
-		s/[-@[:blank:]]//g
-		/^$/ { s/^/no_parameter/p; q; }
-		
-		# Filename-type argument
-		s/^data[|\/]\(..*\)/\1/
-		s/^directory$/dir/
-		s/^filename$/file/
-		s/^filepath/file/
-		s/^dirname$/dir/
-		s/^dirpath/dir/
-		s/^pathname/path/
-		s/^data$//; s/^path$//; s/^file$//; s/^dir$//
-		/^$/ { s/^/filename/p; q; }
-		
-		# URLs
-		s/^\(ur[li]\)s/\1/
-		s/^\(address\)es/\1/
-		s/^uri$/url/
-		s/^address$/url/
-		s/^url$//
-		/^$/ { s/^/urls/p; q; }
-		
-		# Header(s)
-		s/^header\(s\)\{0,1\}\(\/@[^[:blank:]]*\)\{0,1\}/header/
-		s/^header$//
-		/^@/ { s/^/headers/p; q; }
-	'`
+	case $long in
+		create-file-mode|tftp-blksize) type=numeric;;
+		ftp-port) type=port;;
+		cookie) type=form_data;;
+		*) type=`printf '%s\n' "$arg" | sed -nf "$ducktype"`
+	esac
 	
 	[ -z "$short" ] || {
 		short="-$short`printf '\xC2\xA0'`"
