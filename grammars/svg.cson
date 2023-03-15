@@ -29,23 +29,8 @@ firstLineMatch: """(?xi)
 injections:
 	"R:meta.attribute.d.xml.svg string":
 		patterns: [include: "#commands"]
-	
-patterns: [{
-	# Skip empty lines
-	begin: "\\A(?=[ \\t]*$)"
-	end:   "(?=\\S)"
-},{
-	# SVG drawing commands
-	name:  "meta.drawing-commands.xml.svg"
-	begin: "(?i)(?=[MLHVCSQTAZ][-\\d\\s.,MLHVCSQTAZ]*(?:$|['\"]))"
-	end:   "(?i)(?=[^-\\d\\s.,MLHVCSQTAZ])"
-	patterns: [include: "#commands"]
-},{
-	# Regular SVG file
-	begin: "(?=\\S)"
-	end:   "(?=A)B"
-	patterns: [include: "#main"]
-}]
+
+patterns: [include: "#main"]
 
 repository:
 	main:
