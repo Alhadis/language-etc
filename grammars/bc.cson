@@ -1,6 +1,6 @@
 name: "BC"
 scopeName: "source.bc"
-fileTypes: ["bc", "bc.library"]
+fileTypes: ["bc", "bc.library", "lib.b"]
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
 	# Hashbang
