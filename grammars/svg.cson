@@ -324,7 +324,7 @@ repository:
 	tag:
 		name:  "meta.tag.${2:/downcase}.xml.svg"
 		begin: "(?i)(<)([A-Za-z_:][-\\w.:]*)(?=$|\\s|/?>)"
-		end:   "(?i)(</)(\\2)\\s*(>)|(/>)"
+		end:   "(?i)(</)(\\2)(?:\\s*(>)|(?=\\s*$))|(/>)"
 		beginCaptures:
 			1: name: "punctuation.definition.tag.opening.begin.xml.svg"
 			2: patterns: [include: "#tagName"]
