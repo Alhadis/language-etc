@@ -45,6 +45,7 @@ repository:
 			{include: "#scriptTag"}
 			{include: "#styleTag"}
 			{include: "#tag"}
+			{include: "#unescapedBracket"}
 			{include: "#unmatchedTag"}
 		]
 
@@ -357,6 +358,12 @@ repository:
 			name: "entity.name.tag.localname.xml.svg"
 			match: "[A-Za-z_:][-\\w.:]*"
 		}]
+
+
+	# Unescaped angle bracket assumed to follow a multi-line tag
+	unescapedBracket:
+		match: "^\\s*(>)"
+		name: "punctuation.definition.tag.closing.end.xml.svg"
 
 
 	# Closing tag found where one wasn't expected
