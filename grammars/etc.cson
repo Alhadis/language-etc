@@ -100,6 +100,11 @@ repository:
 		name: "punctuation.delimiter.separator.property.period.dot"
 		match: "\\."
 	
+	# Dot-decimal notation: 1.2.4…
+	dotDec:
+		name: "constant.numeric.other.dot-decimal"
+		match: "(?:\\G|(?<!\\.)\\b)\\d+(?:\\.\\d+)+\\b(?!\\.)"
+	
 	# Lazy ellipsis: ‥
 	dotPair:
 		name: "keyword.operator.punctuation.dots.splat.range.spread.rest"
@@ -418,10 +423,63 @@ repository:
 	
 	# Dot-separated numbers which quack like an IP address
 	ip:
-		name:  "constant.numeric.other.ip-address"
-		match: "(?:\\d+\\.){3,}\\d+(?=\\s|$)"
+		patterns: [
+			{include: "#ipv6"}
+			{include: "#ipv4"}
+		]
+
+	# Well-formed IPv4 address
+	ipv4:
+		name: "constant.numeric.other.ip-address.v4"
+		match: """(?x) (?:\\G|^|(?<!\\.)\\b)
+			(?!\\.)
+			((?:
+				\\.?
+				(?: 25[0-5]    # 250-255
+				|   2[0-4]\\d  # 200-249
+				|   1\\d\\d    # 100-199
+				|   [1-9]?\\d  # 0-99
+				)
+			){4})
+			
+			# CIDR notation: “/[0-32]”
+			((/)(3[0-2]|[12]?\\d)\\b)?
+			
+			(?=$|\\s|(?!\\.)\\b)
+		"""
 		captures:
-			0: patterns: [include: "#dot"]
+			1: patterns: [include: "#dot"]
+			2: name: "meta.cidr-notation"
+			3: name: "punctuation.separator.network-mask.cidr"
+			4: patterns: [include: "#intNoExp"]
+
+	# IPv6 address, not necessarily well-formed
+	ipv6:
+		name: "constant.numeric.other.ip-address.v6"
+		match: """(?mix) (?:\\G|^|(?<!\\.|:))
+			(
+				:? (?:(?:\\b[A-F0-9]{1,4})?:){7} (?:[A-F0-9]{1,4}\\b)?
+				|
+				(?:\\b[A-F0-9]{1,4}:){1,7} ::
+				|
+				(?::[A-F0-9]{1,4}){1,7} ::
+			)
+			
+			# CIDR notation: “/[0-128]”
+			(
+				(/)
+				( 12[0-8]   # 120-128
+				| 1[01]\\d  # 100-119
+				| [1-9]?\\d # 0-99
+				) \\b
+			)?
+			(?=$|\\s|[^.:/\\s])
+		"""
+		captures:
+			1: patterns: [include: "#colon"]
+			2: name: "meta.cidr-notation"
+			3: name: "punctuation.separator.network-mask.cidr"
+			4: patterns: [include: "#intNoExp"]
 	
 	
 	# Colon with keyword highlighting
