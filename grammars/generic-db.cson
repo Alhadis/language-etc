@@ -22,4 +22,4 @@ repository:
 	
 	field:
 		name: "constant.other.field.generic-db"
-		match: "(?:[^#:\\s]|(?<=\\t|:)#)[^:\\t]*"
+		match: "(?:[^#:\\s]|(?<=\\t|:)#)[^:\\r\\n\\t]*"
