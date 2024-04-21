@@ -2,5 +2,8 @@
 /samples/* linguist-documentation
 *.cson     linguist-detectable
 
+# Improve syntax highlighting of unrecognised filenames
+mime.type* linguist-language=TSV
+
 # Fixture-specific behaviour
 /samples/cube.stl -text

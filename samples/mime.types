@@ -1,0 +1,12 @@
+# vim: ts=8
+# Apache-compatible MIME-type database
+
+# MIME type → extensions
+text/vnd.html+xml; charset="shift_jis"
+multipart/alternative; boundary="398cefcd54fdbc0c6a3c455f135c3097393dc2397812036a0631804b7046"
+multipart/mixed; boundary=frontier
+text/html     htm html xhtml
+
+# Extensions → MIME type
+html	text/html
+rfc	text/plain; charset=UTF-8
