@@ -1,6 +1,6 @@
 name: "Hosts file"
 scopeName: "source.hosts"
-fileTypes: ["hosts"]
+fileTypes: ["hosts", "hosts.txt"]
 patterns: [include: "#main"]
 
 repository:
