@@ -67,7 +67,10 @@ repository:
 			end:   "(?<!\\\\)(?=$)"
 			beginCaptures:
 				1: name: "keyword.operator.shell-script.gitconfig"
-			patterns: [include: "source.shell"]
+			patterns: [
+				{include: "#escapedNewline"}
+				{include: "source.shell"}
+			]
 		},{
 			# Git subcommands
 			name:  "meta.git.subcommands.gitconfig"
