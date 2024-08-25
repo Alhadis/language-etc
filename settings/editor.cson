@@ -76,6 +76,10 @@
 		tabLength: 8
 		tabType: "hard"
 
+".source.hosts .comment.line.semicolon, .meta.entry.hosts.dod":
+	editor:
+		commentStart: "; "
+
 ".source.ini.npmrc,
  .source.sexp":
 	editor:
