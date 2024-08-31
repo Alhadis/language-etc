@@ -2,6 +2,7 @@
  .source.dotenv,
  .source.gitignore,
  .source.gitattributes,
+ .source.hgignore,
  .source.inputrc,
  .source.nanorc,
  .source.neon,

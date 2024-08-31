@@ -2,16 +2,159 @@ name: ".hgignore"
 scopeName: "source.hgignore"
 fileTypes: ["hgignore"]
 patterns: [include: "#main"]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:hg-?ignore)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+		
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:hg-?ignore)
+	(?=$|\\s|:)
+"""
 
 repository:
 	main:
+		patterns: [
+			{include: "#syntaxRegexp"}
+			{include: "#syntax"}
+			{include: "#common"}
+		]
+
+	# Patterns shared between “#syntaxGlob” and “#syntaxRegexp”
+	common:
+		patterns: [
+			{include: "#comment"}
+			{include: "#typed"}
+			{include: "#import"}
+		]
+
+	# Comment line
+	comment:
+		name:  "comment.line.number-sign.hgignore"
+		begin: "(?<=\\s|^)(#)"
+		end:   "$"
+		beginCaptures:
+			1: name: "punctuation.definition.comment.hgignore"
+
+	# Import file
+	# TODO: We're blindly assuming negation works here; check if this is even supported
+	import:
 		patterns: [{
-			include: "source.regexp"
+			# Source patterns from specified list
+			name:  "meta.import.pattern-list.hgignore"
+			begin: "^\\s*(?:(!)\\s*)?((listfile0?)(:))"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+				2: name: "keyword.control.import.$3.hgignore"
+				4: patterns: [include: "etc#colon"]
+			patterns: [include: "source.gitignore#patternInnards"]
 		},{
-			name: "keyword.operator.logical.not.negation.hgignore"
-			match: "^!"
-		},{
-			match: "[^\\s$^]+"
+			# Include another ignore list
+			name:  "meta.import.hgignore-file.hgignore"
+			begin: "^\\s*(?:(!)\\s*)?((include|subinclude)(:))"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+				2: name: "keyword.control.import.$3.hgignore"
+				4: patterns: [include: "etc#colon"]
+			patterns: [include: "source.gitignore#patternInnards"]
+		}]
+		
+
+	# Logical negation operator
+	negate:
+		name: "keyword.operator.logical.not.negation.hgignore"
+		match: "!"
+
+	# Tokenised regular expression
+	regex:
+		begin: "(?:\\G|^)\\s*(?=[^\\s#])"
+		end:   "(?=\\s*(?:$|#))"
+		patterns: [include: "source.regexp"]
+		contentName: "string.regexp.hgignore"
+
+	# Switch syntax of following patterns
+	syntax:
+		begin: "^\\s*(syntax(:))\\s*(regexp|glob|rootglob)(?=\\s*$)"
+		end:   "(?=^\\s*syntax:)"
+		beginCaptures:
+			1: name: "keyword.control.syntax.hgignore"
+			2: name: "keyword.operator.assignment.hgignore"
+			3: name: "constant.language.pattern-syntax.hgignore"
+		patterns: [
+			{include: "#syntaxRegexp"}
+			{include: "#syntaxGlob"}
+		]
+
+	# Shell-style globbing patterns
+	syntaxGlob:
+		name:  "meta.scope.glob-syntax.hgignore"
+		begin: "(?<=glob)\\G"
+		end:   "(?=^\\s*syntax:)"
+		patterns: [
+			{include: "#common"}
+			
+			# Negated line
+			match: "^\\s*(!)"
 			captures:
-				0: patterns: [include: "source.gitignore#patternInnards"]
+				1: patterns: [include: "#negate"]
+			
+			{include: "source.gitignore#patternInnards"}
+		]
+
+	# Python/PCRE-flavoured regular expressions (default syntax)
+	syntaxRegexp:
+		name:  "meta.scope.regexp-syntax.hgignore"
+		begin: "(?<=regexp)\\G|\\A(?!\\s*syntax:)"
+		end:   "(?=^\\s*syntax:)"
+		patterns: [
+			{include: "#common"}
+			
+			begin: "^\\s*(?:(!)\\s*)?(?=[^\\s#])"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+			patterns: [include: "#regex"]
+		]
+
+	# Explicitly-typed pattern (see “hg help patterns”)
+	typed:
+		patterns: [{
+			# Plain old pathnames
+			name:  "meta.pattern.pathname.hgignore"
+			begin: "^\\s*(?:(!)\\s*)?((path|filepath|rootfilesin)(:))"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+				2: name: "storage.type.class.syntax.$3.hgignore"
+				4: patterns: [include: "etc#colon"]
+			patterns: [include: "source.gitignore#patternInnards"]
+		},{
+			# Globbing pattern
+			name:  "meta.pattern.glob.hgignore"
+			begin: "^\\s*(?:(!)\\s*)?((glob|rootglob)(:))"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+				2: name: "storage.type.class.syntax.$3.hgignore"
+				4: patterns: [include: "etc#colon"]
+			patterns: [include: "source.gitignore#patternInnards"]
+		},{
+			# Regular expression (Python/PCRE-flavoured)
+			name:  "meta.pattern.regexp.hgignore"
+			begin: "^\\s*(?:(!)\\s*)?((re)(:))"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: patterns: [include: "#negate"]
+				2: name: "storage.type.class.syntax.$3.hgignore"
+				4: patterns: [include: "etc#colon"]
+			patterns: [include: "#regex"]
 		}]

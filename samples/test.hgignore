@@ -1,3 +1,4 @@
+# Default syntax: regex
 !code
 code
 code/something
@@ -9,3 +10,20 @@ target/executable
 /target$
 /target/
 /target/.*\.o$
+
+syntax: glob
+code/**/*.c
+re:[[:blank:]]+[A-Za-z]{1,}$
+!code/**/keepme.c
+*.obj # Comment
+*.obj \# Not a comment
+
+syntax: regexp
+^foo/bar[A-Z]$
+^(code|src)/.+\.js
+glob:code/**/*.js
+\.DS_Store$
+
+listfile:patterns.txt # Comment
+include:path/to/test.hgignore # Comment
+subinclude:path/to/test.hgignore
