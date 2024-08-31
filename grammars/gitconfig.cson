@@ -24,6 +24,18 @@ firstLineMatch: """(?x)
 		(?i:git-?(?:config|modules))
 	(?=$|\\s|:)
 """
+injections:
+	"L:meta.alias.gitconfig source.embedded.shell,
+	 L:meta.command.gitconfig - string.quoted":
+		patterns: [include: "#escapedNewline"]
+	"L:string.quoted.double.gitconfig source.embedded.shell - string.quoted.*.shell":
+		patterns: [{
+			name:  "comment.line.number-sign.shell"
+			begin: "\\s*(?<![^\\s;\\\\|\\(&])(#)"
+			end:   '(?=")'
+			beginCaptures:
+				1: name: "punctuation.definition.comment.shell"
+		}]
 
 repository:
 	main:
@@ -31,6 +43,7 @@ repository:
 			{include: "#comments"}
 			{include: "#includeSection"}
 			{include: "#aliasSection"}
+			{include: "#diffSection"}
 			{include: "#urlSection"}
 			{include: "#section"}
 		]
@@ -43,23 +56,58 @@ repository:
 		beginCaptures:
 			1: name: "variable.parameter.assignment.gitconfig"
 			2: name: "keyword.operator.assignment.key-value.gitconfig"
-		patterns: [include: "#aliasInnards"]
+		patterns: [{
+			# Skip past blank lines
+			begin: "\\G\\s*(?=\\\\$)"
+			end:   "(?=\\s*(?!\\\\$)(?=\\S))"
+			patterns: [include: "#escapedNewline"]
+		},{
+			# Beginning of alias body
+			begin: "\\s*(?!\\\\$)(?=\\S)"
+			end:   "(?!\\G)"
+			patterns: [include: "#aliasInnards"]
+		}]
 	
 	# Embedded shell/Git commands
 	aliasInnards:
 		patterns: [{
 			# Quoted shell-script
-			name:  "meta.quoted.shell.command.gitconfig"
-			begin: '\\G\\s*(?:(")(!)|(!)("))\\s*+'
-			end:   '(?<!\\\\)(?:(")|(?=$))'
-			beginCaptures:
-				1: name: "punctuation.definition.string.begin.gitconfig"
-				2: name: "keyword.operator.shell-script.gitconfig"
-				3: name: "keyword.operator.shell-script.gitconfig"
-				4: name: "punctuation.definition.string.begin.gitconfig"
-			endCaptures:
-				1: name: "punctuation.definition.string.end.gitconfig"
-			patterns: [include: "source.shell"]
+			name:  "meta.shell.command.gitconfig"
+			begin: '\\G\\s*(?=(?:"\\s*)?!)'
+			end:   '(?<!\\\\)$'
+			patterns: [{
+				# Leading quoted region (clamped)
+				name:  "string.quoted.double.gitconfig"
+				match: '\\G(")\\s*(!)((?:[^\\\\"]|\\\\.)*+)(")'
+				captures:
+					1: name: "punctuation.definition.string.begin.gitconfig"
+					2: name: "keyword.operator.shell-script.gitconfig"
+					3: name: "source.embedded.shell", patterns: [
+						{include: "#escapes"}
+						{include: "source.shell"}
+					]
+					4: name: "punctuation.definition.string.end.gitconfig"
+			},{
+				# Leading quoted region (multi-line)
+				name:  "string.quoted.double.gitconfig"
+				begin: '\\G(")\\s*(!)'
+				end:   '(")|((?:[^\\\\"]|\\\\.)*+)$'
+				beginCaptures:
+					1: name: "punctuation.definition.string.begin.gitconfig"
+					2: name: "keyword.operator.shell-script.gitconfig"
+				endCaptures:
+					1: name: "punctuation.definition.string.end.gitconfig"
+					2: name: "invalid.illegal.syntax.unclosed-string.gitconfig"
+				contentName: "source.embedded.shell"
+				patterns: [
+					{include: "#escapes"}
+					{include: "source.shell"}
+				]
+			},{
+				# Unquoted exclamation mark
+				name: "keyword.operator.shell-script.gitconfig"
+				match: "\\G!"
+			}, include: "#cmdInnards"]
 		},{
 			# Unquoted shell-script
 			name:  "meta.unquoted.shell.command.gitconfig"
@@ -85,13 +133,28 @@ repository:
 	# [alias] - Block which defines a list of aliased commands
 	aliasSection:
 		name:  "meta.aliases.section.gitconfig"
-		begin: "(?i)(?:^|\\G)\\s*(\\\[)\\s*(alias)\\s*(\\])"
-		end:   "(?!\\G)(?=^\\s*\\[)"
+		begin: """(?xi)
+			(?:^|\\G)
+			\\s* (\\\[)  #1
+			\\s* (alias) #2
+			(?:
+				\\s+ (") ((?:[^\\\\"\\r\\n]|\\\\.)*+) (") #3-5
+				|
+				(\\.) ([-A-Za-z0-9]+) #6-7
+			)?
+			\\s* (\\]) #8
+		"""
+		end: "(?!\\G)(?=^\\s*\\[)"
 		beginCaptures:
 			0: name: "meta.section.header.gitconfig"
 			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
 			2: name: "entity.section.name.gitconfig"
-			3: name: "punctuation.definition.bracket.square.end.gitconfig"
+			3: name: "punctuation.definition.subsection.begin.gitconfig"
+			4: name: "entity.subsection.name.gitconfig", patterns: [include: "#sectionEscapes"]
+			5: name: "punctuation.definition.subsection.end.gitconfig"
+			6: patterns: [include: "#dot"]
+			7: name: "entity.subsection.name.deprecated-syntax.gitconfig"
+			8: name: "punctuation.definition.bracket.square.end.gitconfig"
 		patterns: [
 			{include: "#alias"}
 			{include: "#comments"}
@@ -99,6 +162,58 @@ repository:
 		]
 	
 	
+	# Variable containing an external command
+	cmd:
+		name:  "meta.command.gitconfig"
+		begin: "(?:^|(?<=\\])\\G)\\s*(textconv|command|driver)\\s*(=)"
+		end:   "(?<!\\\\)$|(?=#|;)"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			# Skip past blank lines
+			begin: "\\G\\s*(?=\\\\$)"
+			end:   "(?=\\s*(?!\\\\$)(?=\\S))"
+			patterns: [include: "#escapedNewline"]
+		},{
+			# Beginning of command body
+			begin: "\\s*(?!\\\\$)(?=\\S)"
+			end:   "(?!\\G)"
+			contentName: "source.embedded.shell"
+			patterns: [include: "#cmdInnards"]
+		}]
+
+	# Quoted and unquoted parts of a command-type variable string
+	cmdInnards:
+		patterns: [{
+			# Quoted region (clamped)
+			name:  "string.quoted.double.gitconfig"
+			match: '(")((?:[^\\\\"]|\\\\.)*+)(")'
+			captures:
+				1: name: "punctuation.definition.string.begin.gitconfig"
+				2: name: "source.embedded.shell", patterns: [
+					{include: "#escapes"}
+					{include: "source.shell"}
+				]
+				3: name: "punctuation.definition.string.end.gitconfig"
+		},{
+			# Quoted region (multi-line)
+			name:  "string.quoted.double.gitconfig"
+			begin: '"'
+			end:   '(")|((?:[^\\\\"]|\\\\.)*+)$'
+			beginCaptures:
+				0: name: "punctuation.definition.string.begin.gitconfig"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.gitconfig"
+				2: name: "invalid.illegal.syntax.unclosed-string.gitconfig"
+			contentName: "source.embedded.shell"
+			patterns: [
+				{include: "#escapes"}
+				{include: "source.shell"}
+			]
+		},{include: "#escapedNewline"}, {include: "source.shell"}]
+
+
 	# Commented lines beginning with `#` or `;`
 	comments:
 		patterns: [{
@@ -116,6 +231,38 @@ repository:
 			beginCaptures:
 				0: name: "punctuation.definition.comment.gitconfig"
 		}]
+
+
+	# [diff "<name>"] — Block which defines diff behaviour defined by gitattributes(5)
+	diffSection:
+		name:  "meta.diff.section.gitconfig"
+		begin: """(?xi)
+			(?:^|\\G)
+			\\s* (\\\[)  #1
+			\\s* (diff) #2
+			(?:
+				\\s+ (") ((?:[^\\\\"\\r\\n]|\\\\.)*+) (") #3-5
+				|
+				(\\.) ([-A-Za-z0-9]+) #6-7
+			)
+			\\s* (\\]) #8
+		"""
+		end: "(?!\\G)(?=^\\s*\\[)"
+		beginCaptures:
+			0: name: "meta.section.header.gitconfig"
+			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
+			2: name: "entity.section.name.gitconfig"
+			3: name: "punctuation.definition.subsection.begin.gitconfig"
+			4: name: "entity.subsection.name.gitconfig", patterns: [include: "#sectionEscapes"]
+			5: name: "punctuation.definition.subsection.end.gitconfig"
+			6: patterns: [include: "#dot"]
+			7: name: "entity.subsection.name.deprecated-syntax.gitconfig"
+			8: name: "punctuation.definition.bracket.square.end.gitconfig"
+		patterns: [
+			{include: "#cmd"}
+			{include: "#comments"}
+			{include: "#variables"}
+		]
 
 
 	# (Sub)section/variable separator
@@ -356,9 +503,9 @@ repository:
 		patterns: [{
 			# Signing key
 			name:  "meta.variable-field.gitconfig"
-			begin: "(?i)\\b(signingkey)(?=\\s|$)"
+			begin: "(?i)\\b(signingkey)\\s*(=)"
 			end:   "(?=\\s*(?:$|#|;))"
-			captures:
+			beginCaptures:
 				1: name: "variable.parameter.assignment.gitconfig"
 				2: name: "keyword.operator.assignment.key-value.gitconfig"
 			patterns: [{
@@ -378,10 +525,11 @@ repository:
 		},{
 			# Everything else
 			name:  "meta.variable-field.gitconfig"
-			begin: "[0-9A-Za-z][-0-9A-Za-z]*"
+			begin: "([0-9A-Za-z][-0-9A-Za-z]*)\\s*(=)"
+			end:   "(?=\\s*(?:$|#|;))"
 			beginCaptures:
-				0: name: "variable.parameter.assignment.gitconfig"
-			end: "(?=\\s*(?:$|#|;))"
+				1: name: "variable.parameter.assignment.gitconfig"
+				2: name: "keyword.operator.assignment.key-value.gitconfig"
 			patterns: [include: "#variableInnards"]
 		}]
 
@@ -438,10 +586,6 @@ repository:
 	# Stuff matched after a variable name
 	variableInnards:
 		patterns: [{
-			match: "\\G\\s*(=)"
-			captures:
-				1: name: "keyword.operator.assignment.key-value.gitconfig"
-		},{
 			# Boolean-ish keyword
 			name:  "constant.logical.boolean.$1.gitconfig"
 			match: "(?i)\\b(true|false|on|off|1|0|yes|no)\\b"

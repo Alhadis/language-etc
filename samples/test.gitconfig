@@ -97,3 +97,13 @@
 		quoted-unknown = "<\z>"
 		mixed-invalid-unclosed = <\">"<
 		mixed-invalid-unknown = <\z>"<\z>"<\z>
+
+	[alias]
+		single-line-quoted   = "! exec /bin/sh -c 'String'"
+		single-line-unquoted =  ! exec /bin/sh -c 'String'
+		multiline-quoted     = "! exec /bin/sh \
+			-c 'String' && \
+			true #"
+		multiline-unquoted = ! exec /bin/sh \
+			-c 'String' && \
+			true #
