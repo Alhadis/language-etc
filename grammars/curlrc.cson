@@ -96,6 +96,7 @@ repository:
 						anyauth
 					|	append
 					|	basic
+					|	ca-native
 					|	cert-status
 					|	compressed-ssh
 					|	compressed
@@ -108,6 +109,7 @@ repository:
 					|	disallow-username-in-url
 					|	doh-cert-status
 					|	doh-insecure
+					|	dump-ca-embed
 					|	fail-early
 					|	fail-with-body
 					|	fail
@@ -153,6 +155,7 @@ repository:
 					|	no-npn
 					|	no-progress-meter
 					|	no-sessionid
+					|	mptcp
 					|	ntlm-wb
 					|	ntlm
 					|	parallel-immediate
@@ -164,7 +167,9 @@ repository:
 					|	progress-bar
 					|	proxy-anyauth
 					|	proxy-basic
+					|	proxy-ca-native
 					|	proxy-digest
+					|	proxy-http2
 					|	proxy-insecure
 					|	proxy-negotiate
 					|	proxy-ntlm
@@ -182,7 +187,9 @@ repository:
 					|	retry-connrefused
 					|	sasl-ir
 					|	show-error
+					|	show-headers
 					|	silent
+					|	skip-existing
 					|	socks5-basic
 					|	socks5-gssapi-nec
 					|	socks5-gssapi
@@ -205,6 +212,7 @@ repository:
 					|	tlsv1.3
 					|	tlsv1
 					|	tr-encoding
+					|	trace-ids
 					|	trace-time
 					|	use-ascii
 					|	verbose
@@ -218,7 +226,7 @@ repository:
 				1: name: "entity.long.option.name.curlrc"
 				2: name: "punctuation.definition.dash.long.option.curlrc"
 		},{
-			# URLs
+			# URLs/IP addresses
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
 				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
@@ -229,6 +237,8 @@ repository:
 					|	dns-ipv6-addr
 					|	dns-servers
 					|	doh-url
+					|	haproxy-clientip
+					|	ipfs-gateway
 					|	mail-auth
 					|	mail-from
 					|	mail-rcpt
@@ -285,6 +295,7 @@ repository:
 					|	form-string
 					|	form
 					|	telnet-option
+					|	variable
 					)
 				)
 				(?:\\s*(=|:)|(?=\\s|$))"""
@@ -460,6 +471,7 @@ repository:
 					|	delegation
 					|	dns-interface
 					|	dump-header
+					|	ech
 					|	egd-file
 					|	engine
 					|	etag-compare
@@ -514,6 +526,7 @@ repository:
 					|	tlspassword
 					|	tlsuser
 					|	trace-ascii
+					|	trace-config
 					|	trace
 					|	unix-socket
 					|	upload-file
@@ -555,6 +568,8 @@ repository:
 					|	continue-at
 					|	create-file-mode
 					|	expect100-timeout
+					|	ip-tos
+					|	keepalive-cnt
 					|	keepalive-time
 					|	limit-rate
 					|	max-filesize
@@ -569,6 +584,7 @@ repository:
 					|	speed-time
 					|	tftp-blksize
 					|	time-cond
+					|	vlan-priority
 					)
 				) (?:\\s*(=|:)|(?=\\s|$))"""
 			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|$))|([^\\s]+))'

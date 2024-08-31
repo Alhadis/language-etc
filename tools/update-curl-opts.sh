@@ -16,6 +16,7 @@ die()(printf >&2 '%s\n' "$1"; exit 2)
 # Sanity checks
 root=`realpath "${0%/*}/.."`
 ducktype="$root/tools/ducktype-curl-arg.sed"
+extract="$root/tools/extract-headers.sed"
 grammar="$root/grammars/curlrc.cson"
 list="$root/samples/lists/curlrc-options.tsv"
 [ -s "$grammar" ] || die "$0: Missing grammar file: $grammar"
@@ -42,30 +43,18 @@ done
 
 
 # Header of list
-printf '# vim: ts'='42 ft=curlrc\n' > "$list"
+printf '# vim: ts'='42 ft=curlrc\n'
 
-for i in *.d; do
+# Determine which file extension is being used by option-description files
+if find . -type f -name '*.d' -maxdepth 1 | grep -q .;
+	then ext='d'
+	else ext='md'
+fi
+
+for i in [!_]*."$ext"; do
 	unset long short arg vars type
-	vars=`sed -n "
-		/^--*/ q
-		/^\([A-Za-z]\{1,\}\): *\(.*\)/ {
-			h
-			s//\2/
-			x
-			s//\1/
-			y/[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/[abcdefghijklmnopqrstuvwxyz]/
-			s/: *//
-			s/$/='/
-			x
-			s/^<\(.*\)>$/\1/
-			s/'/'\x5C\x5C''/g
-			s/$/';/
-			s/\n//
-			G
-			s/^\(.*\)\n\(.*\)/\2\1/
-			p
-		}
-	" "$i"`
+	vars=`sed -nf "$extract" "$i"`
+	[ -n "$vars" ] || continue
 	eval "$vars"
 	
 	if [ "$arg" ]; then
@@ -88,5 +77,5 @@ for i in *.d; do
 		[ "$arg" ] || short="${short#*t}"
 	}
 	[ -z "$long"  ] || long="--$long"
-	printf '%s\t%s\t%s\t# %s\n' "$short" "$long" "$arg" "$type" >> "$list"
+	printf '%s\t%s\t%s\t# %s\n' "$short" "$long" "$arg" "$type"
 done

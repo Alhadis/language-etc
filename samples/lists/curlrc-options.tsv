@@ -1,20 +1,21 @@
 # vim: ts=42 ft=curlrc
 	--abstract-unix-socket	path	# string
-	--alt-svc	file-name	# string
+	--alt-svc	filename	# string
 	--anyauth		# no_parameter
 -a 	--append		# no_parameter
-	--aws-sigv4	provider1[:provider2[:region[:service]]]	# kv_colon
+	--aws-sigv4	provider1[:prvdr2[:reg[:srv]]]	# kv_colon
 	--basic		# no_parameter
+	--ca-native		# no_parameter
 	--cacert	file	# string
 	--capath	dir	# string
 	--cert-status		# no_parameter
 	--cert-type	type	# string
 -E 	--cert	certificate[:password]	# kv_colon
-	--ciphers	list-of-ciphers	# string
+	--ciphers	list	# string
 	--compressed-ssh		# no_parameter
 	--compressed		# no_parameter
 -K 	--config	file	# string
-	--connect-timeout	fractional-seconds	# numeric
+	--connect-timeout	seconds	# numeric
 	--connect-to	host1:port1:host2:port2	# kv_colon
 -C 	--continue-at	offset	# numeric
 -c 	--cookie-jar	filename	# string
@@ -23,7 +24,7 @@
 	--create-file-mode	mode	# numeric
 	--crlf		# no_parameter
 	--crlfile	file	# string
-	--curves	algorithm-list	# string
+	--curves	list	# string
 	--data-ascii	data	# string
 	--data-binary	data	# string
 	--data-raw	data	# string
@@ -42,7 +43,9 @@
 	--doh-cert-status		# no_parameter
 	--doh-insecure		# no_parameter
 	--doh-url	url	# urls
+	--dump-ca-embed		# no_parameter
 -D 	--dump-header	filename	# string
+	--ech	config	# string
 	--egd-file	file	# string
 	--engine	name	# string
 	--etag-compare	file	# string
@@ -68,14 +71,15 @@
 	--ftp-ssl-control		# no_parameter
 -G 	--get		# no_parameter
 -g 	--globoff		# no_parameter
-	--happy-eyeballs-timeout-ms	milliseconds	# string
+	--happy-eyeballs-timeout-ms	ms	# string
+	--haproxy-clientip	ip	# string
 	--haproxy-protocol		# no_parameter
 -I 	--head		# no_parameter
 -H 	--header	header/@file	# headers
--h 	--help	category	# string
+-h 	--help	subject	# string
 	--hostpubmd5	md5	# md5
 	--hostpubsha256	sha256	# string
-	--hsts	file-name	# string
+	--hsts	filename	# string
 	--http0.9		# no_parameter
 -0 	--http1.0		# no_parameter
 	--http1.1		# no_parameter
@@ -87,10 +91,13 @@
 -i 	--include		# no_parameter
 -k 	--insecure		# no_parameter
 	--interface	name	# string
+	--ip-tos	string	# string
+	--ipfs-gateway	url	# urls
 -4 	--ipv4		# no_parameter
 -6 	--ipv6		# no_parameter
 	--json	data	# string
 -j 	--junk-session-cookies		# no_parameter
+	--keepalive-cnt	integer	# string
 	--keepalive-time	seconds	# numeric
 	--key-type	type	# string
 	--key	key	# string
@@ -98,7 +105,7 @@
 	--libcurl	file	# string
 	--limit-rate	speed	# numeric
 -l 	--list-only		# no_parameter
-	--local-port	num/range	# range
+	--local-port	range	# range
 	--location-trusted		# no_parameter
 -L 	--location		# no_parameter
 	--login-options	options	# string
@@ -109,8 +116,9 @@
 -M 	--manual		# no_parameter
 	--max-filesize	bytes	# numeric
 	--max-redirs	num	# numeric
--m 	--max-time	fractional-seconds	# numeric
+-m 	--max-time	seconds	# numeric
 	--metalink		# no_parameter
+	--mptcp		# no_parameter
 	--negotiate		# no_parameter
 	--netrc-file	filename	# string
 	--netrc-optional		# no_parameter
@@ -145,6 +153,7 @@
 	--proto	protocols	# protocols
 	--proxy-anyauth		# no_parameter
 	--proxy-basic		# no_parameter
+	--proxy-ca-native		# no_parameter
 	--proxy-cacert	file	# string
 	--proxy-capath	dir	# string
 	--proxy-cert-type	type	# string
@@ -153,6 +162,7 @@
 	--proxy-crlfile	file	# string
 	--proxy-digest		# no_parameter
 	--proxy-header	header/@file	# headers
+	--proxy-http2		# no_parameter
 	--proxy-insecure		# no_parameter
 	--proxy-key-type	type	# string
 	--proxy-key	key	# string
@@ -163,7 +173,7 @@
 	--proxy-service-name	name	# string
 	--proxy-ssl-allow-beast		# no_parameter
 	--proxy-ssl-auto-client-cert		# no_parameter
-	--proxy-tls13-ciphers	ciphersuite-list	# string
+	--proxy-tls13-ciphers	list	# string
 	--proxy-tlsauthtype	type	# string
 	--proxy-tlspassword	string	# string
 	--proxy-tlsuser	name	# string
@@ -186,7 +196,7 @@
 	--remove-on-error		# no_parameter
 	--request-target	path	# string
 -X 	--request	method	# string
-	--resolve	[+]host:port:addr[,addr]...	# kv_colon
+	--resolve	[+]host:port:addr,addr]...	# kv_colon
 	--retry-all-errors		# no_parameter
 	--retry-connrefused		# no_parameter
 	--retry-delay	seconds	# numeric
@@ -196,7 +206,9 @@
 	--sasl-ir		# no_parameter
 	--service-name	name	# string
 -S 	--show-error		# no_parameter
+-i 	--show-headers		# no_parameter
 -s 	--silent		# no_parameter
+	--skip-existing		# no_parameter
 	--socks4	host[:port]	# kv_colon
 	--socks4a	host[:port]	# kv_colon
 	--socks5-basic		# no_parameter
@@ -225,7 +237,7 @@
 	--tftp-no-options		# no_parameter
 -z 	--time-cond	time	# numeric
 	--tls-max	version	# string
-	--tls13-ciphers	ciphersuite-list	# string
+	--tls13-ciphers	list	# string
 	--tlsauthtype	type	# string
 	--tlspassword	string	# string
 	--tlsuser	name	# string
@@ -236,6 +248,8 @@
 -1 	--tlsv1		# no_parameter
 	--tr-encoding		# no_parameter
 	--trace-ascii	file	# string
+	--trace-config	string	# string
+	--trace-ids		# no_parameter
 	--trace-time		# no_parameter
 	--trace	file	# string
 	--unix-socket	path	# string
@@ -245,7 +259,9 @@
 -B 	--use-ascii		# no_parameter
 -A 	--user-agent	name	# string
 -u 	--user	user:password	# kv_colon
+	--variable	[%]name=text/@file	# form_data
 -v 	--verbose		# no_parameter
 -V 	--version		# no_parameter
+	--vlan-priority	priority	# string
 -w 	--write-out	format	# string
 	--xattr		# no_parameter
