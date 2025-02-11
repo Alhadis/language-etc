@@ -6,6 +6,7 @@ fileTypes: [
 	"cross_rubies"
 	"flowers"
 	"shells"
+	"tab"
 	"tsv"
 
 	# MIME-type databases (TODO: Move to dedicated grammar)
