@@ -71,6 +71,13 @@
 			"‹›"
 		]
 
+".source.calendar":
+	editor:
+		commentStart: "/*"
+		commentEnd:   "*/"
+		tabLength: 16
+		tabType: "hard"
+
 ".source.hosts":
 	editor:
 		commentStart: "# "

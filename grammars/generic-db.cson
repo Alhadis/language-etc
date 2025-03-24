@@ -5,6 +5,7 @@ fileTypes: [
 	"birthtoken"
 	"cross_rubies"
 	"flowers"
+	"locale.alias"
 	"shells"
 	"tab"
 	"tsv"

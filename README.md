@@ -50,6 +50,7 @@ Supported formats
 * [x] [`bc(1)`](http://man.openbsd.org/bc.1)
 * [x] [`hosts`](https://en.wikipedia.org/wiki/Hosts_(file))
 * [x] [2-Dimensional Array](https://web.archive.org/web/20090220073348/nwn.bioware.com/developers/Bioware_Aurora_2DA_Format.pdf)
+* [x] [`calendar(1)` lists](https://man.openbsd.org/calendar.1)
 * [x] [Checksum lists](https://en.wikipedia.org/wiki/sha1sum)
 * [x] [`CODEOWNERS`](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)

@@ -1,0 +1,33 @@
+/** vim: ts=13
+ * Syntax examples taken from calendar(1) man page.
+ */
+
+LANG=C
+Easter=Ostern
+
+#include <calendar.usholiday>
+#include <calendar.birthday>
+
+March 19	First line
+	/* Comment */
+	Second line
+	
+	Last line /* Embedded comment
+	*/(empty/comment-only lines are ignored). /* Trailing comment */
+
+March Wed-4	What?
+
+6/15	June 15 (if ambiguous, will default to month/day).
+Jun. 15	June 15.
+15 June	June 15.
+Thursday	Every Thursday.
+June	Every June 1st.
+15 *	15th of every month.
+
+May Sun+0	second Sunday in May (Muttertag)
+04/SunLast	last Sunday in April,
+	/* Are embedded comments supported? */
+	summer time in Europe
+Easter	Easter
+Ostern-2	Good Friday (2 days before Easter)
+Paskha	Orthodox Easter
