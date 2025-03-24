@@ -196,7 +196,7 @@
 	--remove-on-error		# no_parameter
 	--request-target	path	# string
 -X 	--request	method	# string
-	--resolve	[+]host:port:addr,addr]...	# kv_colon
+	--resolve	[+]host:port:addr[,addr]...	# kv_colon
 	--retry-all-errors		# no_parameter
 	--retry-connrefused		# no_parameter
 	--retry-delay	seconds	# numeric
@@ -224,6 +224,7 @@
 	--ssl-no-revoke		# no_parameter
 	--ssl-reqd		# no_parameter
 	--ssl-revoke-best-effort		# no_parameter
+	--ssl-sessions	filename	# string
 	--ssl		# no_parameter
 -2 	--sslv2		# no_parameter
 -3 	--sslv3		# no_parameter
@@ -236,6 +237,7 @@
 	--tftp-blksize	value	# numeric
 	--tftp-no-options		# no_parameter
 -z 	--time-cond	time	# numeric
+	--tls-earlydata		# no_parameter
 	--tls-max	version	# string
 	--tls13-ciphers	list	# string
 	--tlsauthtype	type	# string
@@ -254,8 +256,9 @@
 	--trace	file	# string
 	--unix-socket	path	# string
 -T 	--upload-file	file	# string
+	--upload-flags	flags	# string
 	--url-query	data	# string
-	--url	url	# urls
+	--url	url/file	# string
 -B 	--use-ascii		# no_parameter
 -A 	--user-agent	name	# string
 -u 	--user	user:password	# kv_colon

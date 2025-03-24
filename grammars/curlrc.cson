@@ -211,6 +211,7 @@ repository:
 					|	tlsv1.2
 					|	tlsv1.3
 					|	tlsv1
+					|	tls-earlydata
 					|	tr-encoding
 					|	trace-ids
 					|	trace-time
@@ -519,6 +520,7 @@ repository:
 					|	sasl-authzid
 					|	service-name
 					|	socks5-gssapi-service
+					|	ssl-sessions
 					|	stderr
 					|	tls-max
 					|	tls13-ciphers
@@ -530,6 +532,7 @@ repository:
 					|	trace
 					|	unix-socket
 					|	upload-file
+					|	upload-flags
 					|	url-query
 					|	user-agent
 					|	write-out
