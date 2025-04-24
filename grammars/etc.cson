@@ -62,6 +62,11 @@ repository:
 		name:  "constant.logical.bool.boolean.${1:/downcase}"
 		match: "\\b(true|false|TRUE|FALSE)\\b"
 
+	# As above, but with common boolean synonyms
+	boolish:
+		name:  "constant.logical.bool.boolean.${1:/downcase}"
+		match: "(?i)\\b(true|false|yes|no|on|off)\\b"
+
 	# Unpaired bracket/brace/parenthesis
 	bracket:
 		patterns: [

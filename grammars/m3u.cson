@@ -1,0 +1,276 @@
+name: "M3U Playlist"
+scopeName: "source.m3u"
+mimeType: "application/vnd.apple.mpegurl"
+fileTypes: ["m3u", "m3u8", "m3up", "m4u"]
+firstLineMatch: """(?x)
+	# File signature or leading “#EXTINF:” field
+	\\A \uFEFF? EXT(?:M3U8?(?:$|\\s)|INF:\\s*-?\\d)
+	|
+
+	# Modeline
+	(?-im:
+		# Emacs
+		-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+			m3u
+		(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+
+		|
+
+		# Vim
+		(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+		(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+		(?:filetype|ft|syntax)[ \\t]*=
+			hlsplaylist
+		(?=$|\\s|:)
+	)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#mediaSpec"}
+		]
+
+
+	# Named attribute field: “key=value”
+	attr:
+		name:  "meta.attribute.m3u"
+		begin: "([^\\s=\"',]+)\\s*(=)\\s*(?=[^\\s,])"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "entity.other.attribute-name.m3u"
+			2: name: "keyword.operator.assignment.separator.key-value.m3u"
+		patterns: [{
+			# Double-quoted string
+			name:  "string.quoted.double.m3u"
+			begin: '\\G"'
+			end:   '(")|([^"]+)$'
+			beginCaptures:
+				0: name: "punctuation.definition.string.begin.m3u"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.m3u"
+				2: name: "invalid.illegal.syntax.unclosed-string.m3u"
+		},{
+			# Single-quoted string (non-standard, but possibly in-use)
+			name:  "string.quoted.single.m3u"
+			begin: "\\G'"
+			end:   "(')|([^']+)$"
+			beginCaptures:
+				0: name: "punctuation.definition.string.begin.m3u"
+			endCaptures:
+				1: name: "punctuation.definition.string.end.m3u"
+				2: name: "invalid.illegal.syntax.unclosed-string.m3u"
+		},{
+			# Treat anything else as an unquoted value
+			match: "\\G[^\\s\"',][^\\s,]*"
+			captures:
+				0: patterns: [include: "#unquoted"]
+		}]
+
+
+	# One or more attributes (potentially) separated by commas
+	attrList:
+		patterns: [
+			{include: "etc#comma"}
+			{include: "#attr"}
+		]
+
+
+	# Comment line, usually containing extended information
+	comment:
+		begin: "(?:\\A\uFEFF?|^)(\\s+)?(?=#)"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.m3u"
+		patterns: [{
+			# File header, typically (but not necessarily) expected on first line
+			name:  "comment.line.number-sign.directive.file-header.m3u"
+			match: "\\G(#)(EXTM3U8?)(?=$|\\s)(\\s+[^\\r\\n]*)?$"
+			captures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.control.start.file.m3u"
+				3: patterns: [include: "#attrList"]
+		},{
+			# Track information: “seconds[ additional=fields][,title]”
+			name:  "comment.line.number-sign.directive.extinf.m3u"
+			begin: "\\G(#)(EXTINF)(:)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.extinf.m3u"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [{
+				# Initial parameter: media length in seconds (possibly fractional)
+				begin: "\\G\\s*([-+]?\\d+(?:\\.\\d+)?)"
+				end:   "(?=,|\\s*$)"
+				beginCaptures:
+					1: name: "constant.numeric.track-length.m3u"
+				patterns: [include: "#attr"]
+			},{
+				# Title string
+				contentName: "markup.list.title.m3u"
+				begin: "\\s*(,)[ \\t]*"
+				end:   "(?=\\s*$)"
+				beginCaptures:
+					1: name: "punctuation.separator.title.m3u"
+			}]
+		},{
+			# Size of media file (in bytes)
+			name:  "comment.line.number-sign.directive.extbyt.m3u"
+			begin: "\\G(#)(EXTBYT)(:)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.extbyt.m3u"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [
+				{include: "#hex"}
+				{include: "etc#num"}
+			]
+		},{
+			# Other non-HLS directives assumed to be freeform text
+			name:  "comment.line.number-sign.directive.${2:/downcase}.m3u"
+			begin: "\\G(#)(PLAYLIST|EXT(?:[A-Z]+))(?:(:)|(?=\\s*$))"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.${2:/downcase}.m3u"
+				3: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.directive.m3u"
+		},{
+			# HLS fields that comprise multiple named subfields (see RFC 8216)
+			name:  "comment.line.number-sign.directive.${2:/downcase}.hls.m3u"
+			begin: """(?x)\\G(\\#)
+				(EXT-X-
+					(?: CONTENT-STEERING
+					|   DATERANGE
+					|   DEFINE
+					|   I-FRAME-STREAM-INF
+					|   KEY
+					|   MAP
+					|   MEDIA
+					|   PART-INF
+					|   PART
+					|   PRELOAD-HINT
+					|   RENDITION-REPORT
+					|   SERVER-CONTROL
+					|   SESSION-DATA
+					|   SESSION-KEY
+					|   SKIP
+					|   START
+					|   STREAM-INF
+					)
+				)(:)"""
+			end: "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.${2:/downcase}.m3u"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [include: "#attrList"]
+		},{
+			# HLS directive for specifying byte-ranges
+			name:  "comment.line.number-sign.directive.byterange.hls.m3u"
+			begin: "\\G(#)(EXT-X-BYTERANGE)(:)[ \\t]*"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.byterange.m3u"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [{
+				name:  "meta.byte-range.m3u"
+				match: "\\G(\\d+)(?:(@)(\\d+))?"
+				captures:
+					1: name: "constant.numeric.integer.range-length.m3u"
+					2: name: "punctuation.separator.range.m3u"
+					3: name: "constant.numeric.integer.offset.m3u"
+			}]
+		},{
+			# Other HLS fields
+			name:  "comment.line.number-sign.directive.${2:/downcase}.hls.m3u"
+			begin: "\\G(#)(EXT-X(?:-[A-Z0-9]+)++)(?:(:)|(?=\\s*$))"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.${2:/downcase}.m3u"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [include: "#unquoted"]
+		},{
+			# Ostensibly ordinary comment
+			name:  "comment.line.number-sign.m3u"
+			begin: "\\G#"
+			end:   "$"
+			beginCaptures:
+				0: name: "punctuation.definition.comment.m3u"
+		}]
+
+
+	# Possibly-signed hexadecimal value
+	hex:
+		name: "constant.numeric.integer.int.hexadecimal.hex.m3u"
+		match: "(?i)[-+]?0x[0-9A-F]+"
+		
+
+	# Media item(s) to enqueue
+	mediaSpec:
+		contentName: "meta.media-source.m3u"
+		begin: "(?:\\A\uFEFF?|^)(\\s+)?(?=[^\\s#])"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.m3u"
+		patterns: [
+			{include: "#url"}
+			{include: "#path"}
+		]
+
+
+	# Local filesystem path (either relative or absolute)
+	path:
+		name: "constant.other.reference.link.underline.file.path.m3u"
+		match: "[^\\s:][^\\r\\n]*(?=\\s*$)"
+		captures:
+			0: patterns: [include: "#urlEncoded"]
+
+
+	# Screen resolution expressed in the form “1024x768”
+	resolution:
+		name:  "meta.screen-resolution.m3u"
+		match: "(?:^|\\G|(?<=\\s))(\\d+)(x)(\\d+)(?=$|\\s)"
+		captures:
+			1: name: "constant.numeric.integer.width.m3u"
+			2: name: "punctuation.separator.dimensions.m3u"
+			3: name: "constant.numeric.integer.height.m3u"
+
+
+	# Generic highlighting fallback for ambiguously-typed attributes
+	unquoted:
+		patterns: [
+			{include: "#resolution"}
+			{include: "#hex"}
+			{include: "etc#boolish"}
+			{include: "etc#num"}
+			{include: "etc#bareword"}
+		]
+
+
+	# URL
+	url:
+		name:  "constant.other.reference.link.underline.${1:/downcase}.m3u"
+		match: """(?xi)\\b
+			((?=[A-Z])\\w+(?:[-+.]\\w+)*+) # URI scheme
+			://                            # Separator
+			[^#?\\s"]*                     # Pathname
+			(?:\\?[^\\s"#]*)?              # Query variable(s)
+			(?:\\#[^\\s"]*)?               # Fragment identifier
+		"""
+		captures:
+			0: patterns: [include: "#urlEncoded"]
+
+
+	# URL-encoded character
+	urlEncoded:
+		name: "constant.character.escape.url-encoded.m3u"
+		match: "(%)[0-9A-F]{2}"
+		captures:
+			1: name: "punctuation.definition.escape.m3u"

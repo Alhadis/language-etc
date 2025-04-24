@@ -4,6 +4,7 @@
  .source.gitattributes,
  .source.hgignore,
  .source.inputrc,
+ .source.m3u,
  .source.nanorc,
  .source.neon,
  .source.opts,
