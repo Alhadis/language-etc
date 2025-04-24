@@ -64,7 +64,7 @@ repository:
 		end:   "(?!\\G)"
 		patterns: [include: "source.c"]
 
-	# Locale-related overrides like “LANG=…” and 
+	# Locale-related overrides like “LANG=…”
 	setting:
 		name:  "meta.assignment.setting.calendar"
 		begin: "^([A-Za-z]\\w*)(=)"
@@ -98,7 +98,7 @@ repository:
 	# Date entries
 	date:
 		name:  "meta.date.calendar"
-		begin: "^(?=\\S)(?![A-Za-z]\\w+=|/\\*)"
+		begin: "^ *(?=\\S)(?![A-Za-z]\\w+=|/\\*)"
 		end:   "(?!\\G)(?=^)(?!\\t)"
 		patterns: [{
 			# Date/period description itself
@@ -131,8 +131,11 @@ repository:
 			match: "(?<=\\S)\\s*\\*"
 		},{
 			# Special event names; hardcoded into calendar(1)
-			name: "constant.language.date.special-event.${1:/downcase}.calendar"
-			match: "(?i)(Easter|Ostern|Paskha|Pesach)"
+			match: "(?i)(Easter|Ostern|Paskha|Pesach)(([-+])\\d+)?"
+			captures:
+				1: name: "constant.language.date.special-event.${1:/downcase}.calendar"
+				2: name: "keyword.operator.offset-specifier.numeric.calendar"
+				3: name: "punctuation.definition.offset.calendar"
 		},{
 			# English month names
 			match: """(?xi)
