@@ -19,6 +19,19 @@ tools/curl/.git: tools/curl
 
 
 
+# Update torrc(5) format specification
+torrc: samples/torrc_format.txt tools/tor.asciidoc
+
+TOR_HOST = https://gitlab.torproject.org/tpo/core/tor/-/
+
+samples/torrc_format.txt:
+	case `uname` in Darwin) flags=' --xattr';; *) unset flags;; esac; \
+	wget $${flags} --no-config -O "$@" "${TOR_HOST}raw/HEAD/doc/$(@F)?inline=false"
+
+tools/tor.asciidoc:
+	curl -Lsq "${TOR_HOST}raw/HEAD/doc/man/tor.1.txt?inline=false" > $@
+
+
 # Nuke untracked files and build artefacts
 clean:
 	rm -rf tools/curl

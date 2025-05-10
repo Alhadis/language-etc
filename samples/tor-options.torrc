@@ -1,0 +1,332 @@
+# Unitless numbers
+AddressDisableIPv6 1
+AllowNonRFC953Hostnames 2
+AssumeReachableIPv6 3
+AssumeReachable 4
+AuthDirHasIPv6Connectivity 5
+AuthDirListBadExits 6
+AuthDirListMiddleOnly 7
+AuthDirMaxServersPerAddr 8
+AuthDirPinKeys 9
+AuthDirRejectRequestsUnderLoad 10
+AuthDirSharedRandomness 11
+AuthDirTestEd25519LinkKeys 12
+AuthDirTestReachability 13
+AuthoritativeDirectory 14
+AutomapHostsOnResolve 15
+AvoidDiskWrites 16
+BridgeAuthoritativeDir 17
+BridgeRecordUsageByCountry 18
+BridgeRelay 19
+CacheDirectoryGroupReadable 20
+CellStatistics 21
+CircuitBuildTimeout 22
+CircuitPadding 23
+CircuitPriorityHalflife 24
+CircuitStreamTimeout 25
+CircuitsAvailableTimeout 26
+ClientBootstrapConsensusAuthorityDownloadInitialDelay 27
+ClientBootstrapConsensusAuthorityOnlyDownloadInitialDelay 28
+ClientBootstrapConsensusFallbackDownloadInitialDelay 29
+ClientBootstrapConsensusMaxInProgressTries 30
+ClientDNSRejectInternalAddresses 31
+ClientOnly 32
+ClientPreferIPv6DirPort 33
+ClientPreferIPv6ORPort 34
+ClientRejectInternalAddresses 35
+ClientUseIPv4 36
+ClientUseIPv6 37
+CompiledProofOfWorkHash 38
+ConfluxEnabled 39
+ConnDirectionStatistics 40
+ConnLimit 41
+ConnectionPadding 42
+ConstrainedSockets 43
+ControlPortFileGroupReadable 44
+ControlSocketsGroupWritable 45
+CookieAuthFileGroupReadable 46
+CookieAuthentication 47
+CountPrivateBandwidth 48
+DataDirectoryGroupReadable 49
+DirAllowPrivateAddresses 50
+DirAuthorityFallbackRate 51
+DirCache 52
+DirReqStatistics 53
+DisableAllSwap 54
+DisableDebuggerAttachment 55
+DisableNetwork 56
+DisableOOSCheck 57
+DoSCircuitCreationBurst 58
+DoSCircuitCreationDefenseType 59
+DoSCircuitCreationEnabled 60
+DoSCircuitCreationMinConnections 61
+DoSCircuitCreationRate 62
+DoSConnectionConnectBurst 63
+DoSConnectionConnectRate 64
+DoSConnectionDefenseType 65
+DoSConnectionEnabled 66
+DoSConnectionMaxConcurrentCount 67
+DoSRefuseSingleHopClientRendezvous 68
+DoSStreamCreationBurst 69
+DoSStreamCreationDefenseType 70
+DoSStreamCreationEnabled 71
+DoSStreamCreationRate 72
+DormantCanceledByStartup 73
+DormantOnFirstStartup 74
+DormantTimeoutDisabledByIdleStreams 75
+DormantTimeoutEnabled 76
+DownloadExtraInfo 77
+EnforceDistinctSubnets 78
+EntryStatistics 79
+ExitPolicyRejectLocalInterfaces 80
+ExitPolicyRejectPrivate 81
+ExitPortStatistics 82
+ExitRelay 83
+ExtORPortCookieAuthFileGroupReadable 84
+ExtendAllowPrivateAddresses 85
+ExtendByEd25519ID 86
+ExtraInfoStatistics 87
+FascistFirewall 88
+FetchDirInfoEarly 89
+FetchDirInfoExtraEarly 90
+FetchHidServDescriptors 91
+FetchServerDescriptors 92
+FetchUselessDescriptors 93
+GeoIPExcludeUnknown 94
+HardwareAccel 95
+HiddenServiceAllowUnknownPorts 96
+HiddenServiceDirGroupReadable 97
+HiddenServiceEnableIntroDoSBurstPerSec 98
+HiddenServiceEnableIntroDoSDefense 99
+HiddenServiceEnableIntroDoSRatePerSec 100
+HiddenServiceMaxStreamsCloseCircuit 101
+HiddenServiceMaxStreams 102
+HiddenServiceNonAnonymousMode 103
+HiddenServiceNumIntroductionPoints 104
+HiddenServiceOnionBalanceInstance 105
+HiddenServicePoWDefensesEnabled 106
+HiddenServicePoWQueueBurst 107
+HiddenServicePoWQueueRate 108
+HiddenServiceSingleHopMode 109
+HiddenServiceStatistics 110
+HiddenServiceVersion 3
+IPv6Exit 112
+KISTSockBufSizeFactor 113
+KeepBindCapabilities 114
+KeepalivePeriod 115
+KeyDirectoryGroupReadable 116
+LearnCircuitBuildTimeout 117
+LogMessageDomains 118
+LogTimeGranularity 119
+MainloopStats 120
+MaxCircuitDirtiness 121
+MaxClientCircuitsPending 122
+MinMeasuredBWsForAuthToIgnoreAdvertised 123
+NewCircuitPeriod 124
+NoExec 125
+NumCPUs 126
+NumDirectoryGuards 127
+NumEntryGuards 128
+NumPrimaryGuards 129
+OfflineMasterKey 130
+OverloadStatistics 131
+PaddingStatistics 132
+PathBiasScaleThreshold 133
+PathBiasScaleUseThreshold 134
+PathsNeededToBuildCircuits 135
+ProtocolWarnings 136
+PublishHidServDescriptors 137
+PublishServerDescriptor v3
+ReducedCircuitPadding 139
+ReducedConnectionPadding 140
+ReducedExitPolicy 141
+ReevaluateExitPolicy 142
+RefuseUnknownExits 143
+RunAsDaemon 144
+SafeLogging relay
+SafeSocks 146
+Sandbox 147
+ServerDNSAllowBrokenConfig 148
+ServerDNSAllowNonRFC953Hostnames 149
+ServerDNSDetectHijacking 150
+ServerDNSRandomizeCase 151
+ServerDNSSearchDomains 152
+ShutdownWaitLength 153
+SocksTimeout 154
+StrictNodes 155
+TestSocks 156
+TestingBridgeBootstrapDownloadInitialDelay 157
+TestingBridgeDownloadInitialDelay 158
+TestingClientConsensusDownloadInitialDelay 159
+TestingClientDownloadInitialDelay 160
+TestingDirAuthVoteExitIsStrict 161
+TestingDirAuthVoteGuardIsStrict 162
+TestingDirAuthVoteHSDirIsStrict 163
+TestingEnableCellStatsEvent 164
+TestingEnableConnBwEvent 165
+TestingServerConsensusDownloadInitialDelay 166
+TestingServerDownloadInitialDelay 167
+TestingTorNetwork 168
+TrackHostExitsExpire 169
+TruncateLogFile 170
+UnixSocksGroupWritable 171
+UpdateBridgesFromAuthority 172
+UseBridges 173
+UseDefaultFallbackDirs 174
+UseEntryGuards 175
+UseGuardFraction 176
+UseMicrodescriptors 177
+V3AuthNIntervalsValid 178
+V3AuthUseLegacyKey 179
+V3AuthoritativeDirectory 180
+VanguardsLiteEnabled auto
+VersioningAuthoritativeDirectory 182
+__OwningControllerProcess 183
+
+# Concrete/unitful(?) numbers (XXX: https://english.stackexchange.com/a/470947)
+AccountingMax 512 bytes
+AuthDirFastGuarantee 50 MBytes
+AuthDirGuardBWGuarantee 1024 KBytes
+AuthDirVoteGuardGuaranteeTimeKnown 60 seconds
+AuthDirVoteStableGuaranteeMTBF 5 Minutes
+AuthDirVoteStableGuaranteeMinUptime 3 weeks
+BandwidthBurst 1.5 TBytes
+BandwidthRate 31.4 GBytes
+ConstrainedSockSize 10 KBytes
+DoSCircuitCreationDefenseTimePeriod 5 hours
+DoSConnectionConnectDefenseTimePeriod 2 seconds
+DormantClientTimeout 4 days
+GuardLifetime 7 months
+HeartbeatPeriod 2 weeks
+KISTSchedRunInterval 500 msec
+MaxAdvertisedBandwidth 20 TBits
+MaxConsensusAgeForDiffs 12 Hours
+MaxMemInQueues 900 MBYTES
+MaxOnionQueueDelay 150 MSEC
+MaxUnparseableDescSizeToLog 2 GBytes
+MinUptimeHidServDirectoryV2 3 days
+PerConnBWBurst 2 bytes
+PerConnBWRate 30 kbytes
+RelayBandwidthBurst 50 KBits
+RelayBandwidthRate 256 bytes
+RephistTrackTime 12 weeks
+SSLKeyLifetime 72 weeks
+SigningKeyLifetime 1 days
+TestingAuthDirTimeToLearnReachability 0 minutes
+TestingAuthKeyLifetime 2 days
+TestingClientMaxIntervalWithoutRequest 10 minutes
+TestingDirConnectionMaxStall 5 minutes
+TestingLinkCertLifetime 2 days
+TestingMinExitFlagThreshold 0 Kbytes
+TestingMinFastFlagThreshold 0 KBytes
+TestingMinTimeToReportBandwidth 1 day
+TestingSigningKeySlop 3 hours
+TestingV3AuthInitialDistDelay 5 minutes
+TestingV3AuthInitialVoteDelay 5 minutes
+TestingV3AuthInitialVotingInterval 30 minutes
+TestingV3AuthVotingStartOffset 0 seconds
+TokenBucketRefillInterval 200 msec
+V3AuthDistDelay 1 hour
+V3AuthVoteDelay 1 second
+V3AuthVotingInterval 2 hours
+
+# Ports lists
+WarnPlaintextPorts 23,109,110
+RejectPlaintextPorts 143,80
+FirewallPorts 80,443
+LongLivedPorts 21,22,706,1863,5050,5190,\
+5222,5223,6523,6667,6697,8300
+
+# Logging settings
+Log [mm,dos]notice-err info stderr
+Log [*]err  file /var/logs/tor-errors.log
+Log notice  file /var/logs/tor-notices.log
+Log debug   file /var/logs/tor-debug.log
+Log info    stdout
+
+# Filename/system paths
+AccelDir /dev/null
+CacheDirectory ~/.cache/tor
+ClientOnionAuthDir /var/lib/tor/onion_auth/
+ControlPortWriteToFile /tmp/control-port-file
+ControlSocket 0
+CookieAuthFile /run/tor/control.authcookie
+DataDirectory ~/.tor
+DirPortFrontPage /usr/local/etc/tor/tor-exit-notice.html
+ExtORPortCookieAuthFile /dev/null
+GeoIPFile geoip/geoip
+GeoIPv6File geoip/geoip6
+GuardfractionFile /dev/null
+HiddenServiceDir /usr/local/var/lib/tor/hidden_service/
+KeyDirectory ~/.tor/keys
+PidFile /var/run/tor/tor.pid
+ServerDNSResolvConfFile /tmp/crypt/conf/resolv.conf
+V3BandwidthsFile ../torflowauthority/v3bw
+
+# Credentials
+AccelName nonexistent_chartreuse_accelerator
+User Alhadis
+Nickname N/A
+ContactInfo John Gardner <gardnerjohng AT gmail dot com>
+BridgePassword Y~p(2fo0'794R3Liz0OG[~{]@0
+Socks5ProxyPassword 3W}?*g!9n]"4g^63wK}*}.31i]
+Socks5ProxyUsername Random_Password_Generator
+
+# Nodes and addresses
+ExcludeNodes ABCD1234CDEF5678ABCD1234CDEF5678ABCD1234, {cc}, 255.254.0.0/8
+MapAddress www.example.com www.example.com.torserver.exit
+Address     10.0.0.1
+HTTPProxy   127.0.0.1:80
+HTTPSProxy  127.0.0.1:8080
+Socks4Proxy 127.0.0.1:1080
+Socks5Proxy 127.0.0.1:1080
+VirtualAddrNetworkIPv6 127.192.0.0/10
+VirtualAddrNetworkIPv6 [FE80::]/10
+AuthDirVoteGuard 10.0.0.1
+EntryNodes {??},{US},{CA},{GB},{AU},{NZ},{ZA}
+ExcludeExitNodes 10.0.0.1
+ExitNodes 10.0.0.1, {AU}
+HSLayer2Nodes ABCD1234CDEF5678ABCD1234CDEF5678ABCD1234, {cc}, 255.254.0.0/8
+HSLayer3Nodes ABCD1234CDEF5678ABCD1234CDEF5678ABCD1234, {cc}, 255.254.0.0/8
+HiddenServicePort 80 unix:/var/run/nginx.sock
+MiddleNodes 172.0.0.1, 173.0.0.2
+NodeFamily {GB},{US},{RU},{ua},{by},{CN},{fr},{au},{ca},{nz},{??}
+OutboundBindAddressExit ::1
+OutboundBindAddressOR 127.0.0.0/8
+OutboundBindAddressPT ::1
+OutboundBindAddress   ::1
+TestingDirAuthVoteGuard *
+TestingDirAuthVoteHSDir *
+TestingDirAuthVoteExit \
+57FA77DC022317B091080048D71330B81CBE8098,\
+5A1A2EAF66E9C6C44951C1FC3515E260FF6DBCDA,\
+E6794E917E1DBE329CDF2F8D21248BE519BA21D5,\
+BCF17D263B9E8AFEADEC48FA8CD1C48D5CF4CC06,\
+E717DEE902AFC53D8A5BC5C96743A2CB7AF1151D,\
+7DBB73728EBACCB80B1ED8846FDD83F5207B0B64
+
+# Other
+Schedulers KISTLite
+Schedulers Vanilla
+FamilyId wweKJrJxUDs1EdtFFHCDtvVgTKftOC/crUl1mYJv830
+SyslogIdentityTag onehoponion
+MinimalAcceptedServerVersion 0.4.7.0-alpha-dev
+RecommendedVersions 0.3.5.10,0.4.1.9,0.4.2.7
+RecommendedClientVersions 0.3.5.10,0.4.1.9,0.4.2.7,0.4.3.3-alpha,0.4.3.4-rc,0.4.3.5,0.4.4.1-alpha
+RecommendedServerVersions 0.3.5.10,0.4.1.9,0.4.2.7,0.4.3.3-alpha,0.4.3.4-rc,0.4.3.5,0.4.4.1-alpha
+BridgeDistribution telegram
+
+# Parameter lists
+ConsensusParams cc_alg=2 wombat=7
+ServerTransportOptions obfs45 shared-secret=bridgepasswd cache=/var/lib/tor/cache
+
+# Accounting
+AccountingStart day 05:15
+AccountingStart month 10 00:15
+
+# Policies
+DirPolicy reject 128.66.1.1/32, accept *:*
+ExitPolicy accept *:80,reject *:*
+MetricsPortPolicy accept 127.0.0.1
+MetricsPortPolicy accept [::1]
+SocksPolicy accept6 [C000::]/3:*

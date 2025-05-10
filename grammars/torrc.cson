@@ -1,0 +1,984 @@
+# Source: https://gitlab.torproject.org/tpo/core/tor/-/blob/9c27f56/doc/torrc_format.txt
+name: "Tor Configuration"
+scopeName: "source.torrc"
+fileTypes: [
+	"torrc"
+	"torrc_defaults"
+	"torrc-defaults"
+	"torrc.defaults"
+	"torrc.minimal.in"
+	"torrc.minimal.in-staging"
+	"torrc.sample"
+	"torrc.sample.in"
+	"torrc_format.txt"
+]
+injectionSelector: "source.embedded.torrc"
+injections:
+	"L:source.torrc source.embedded.abnf meta.ruleset":
+		patterns: [{
+			name:  "string.comment.freeform-rule-specifier.abnf"
+			match: "(?<==)\\s+(Any character except.+)"
+		}]
+
+	# Uncommon setting formats that don't merit their own entry within “#entry”
+	"L:source.torrc meta.entry.controlsocket.torrc":
+		patterns: [{
+			match: "(?i)(?<=ControlSocket)\\s+(0)(?=\\s*(?:$|#))"
+			captures:
+				1: name: "constant.numeric.disable-option.torrc"
+		}]
+	"L:source.torrc meta.entry.schedulers.torrc":
+		patterns: [{
+			match: "(?i)(?<=Schedulers)\\s+(?!\\s*,\\s*)((?:\\s*(?:,\\s*)?(?:KISTLite|KIST|Vanilla))++)(?=\\s*(?:$|#))"
+			captures: 1: patterns: [{
+				name: "constant.language.scheduler-type.torrc"
+				match: "\\w+"
+			}, include: "etc#comma"]
+		}]
+	"L:source.torrc meta.entry.accountingstart.torrc":
+		patterns: [{
+			match: "(?i)(?<=AccountingStart)\\s+(day|week|month)(?:\\s+(\\d{1,2}))?\\s+((?:\\d{2}(:)\\d{2}))(?=\\s*(?:$|#))"
+			captures:
+				1: patterns: [include: "#unit"]
+				2: name: "constant.numeric.day-of-month.torrc"
+				3: name: "constant.numeric.time.torrc"
+				4: name: "punctuation.separator.time.torrc"
+		}]
+
+patterns: [{
+	begin: "\\A(?=[ \\t]*$|This document)"
+	end:   "(?=\\S)"
+	applyEndPatternLast: yes
+	patterns: [{
+		# Enable improved highlighting for torrc(5)'s only formal specification
+		name:  "meta.document.torrc-spec"
+		begin: "^(?=This document specifies the current format and semantics of the torrc)"
+		end:   "(?=A)B"
+		patterns: [{
+			# Enable ABNF highlighting for syntax reference
+			name:  "meta.section.file-syntax.torrc-spec"
+			begin: "(?i)^(\\s*)((1\\.)\\s+File\\s+Syntax)[ \\t]*$"
+			end:   "(?=^(?:(?!\\s)|\\1)(?:\\d+\\.)+\\s+)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indentation.torrc-spec"
+				2: name: "markup.heading.1.numbered.torrc-spec"
+				3: name: "constant.numeric.section-number.torrc-spec"
+			contentName: "source.embedded.abnf"
+			patterns: [include: "source.abnf"]
+		},{
+			# Syntax examples, and the reason we're highlighting “torrc_format.txt”
+			name:  "meta.section.syntax-examples.torrc-spec"
+			begin: "(?i)^(\\s*)(((?:\\d+\\.){2})\\s+Syntax\\s+examples)[ \\t]*$"
+			end:   "(?=A)B"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indentation.torrc-spec"
+				2: name: "markup.heading.2.numbered.torrc-spec"
+				3: name: "constant.numeric.section-number.torrc-spec"
+			patterns: [include: "source.torrc#main"]
+			contentName: "source.embedded.torrc"
+		},{
+			# Other sections of no particular relevance
+			name:  "meta.section.other.torrc-spec"
+			begin: "(?i)^(\\s*)((\\d+\\.)\\s+(?!Syntax\\s+examples\\s*$)\\S.*)[ \\t]*$"
+			end:   "(?=^(?:(?!\\s)|\\1)(?:\\d+\\.)+\\s+)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indentation.torrc-spec"
+				2: name: "markup.heading.1.numbered.torrc-spec"
+				3: name: "constant.numeric.section-number.torrc-spec"
+			contentName: "text.embedded.plain" # COMBAK: Unsatisfied with embedded scope(s)
+			patterns: [include: "text.plain"]
+		}]
+	}]
+}, include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#include"}
+			{include: "#entry"}
+		]
+
+	# Something approximating what Tor expects by way of an address/host identifier in configs
+	address:
+		patterns: [{
+			# IP address or hostname followed by another IP address or port number
+			name: "meta.address.torrc"
+			match: """(?ix)
+				(?:
+					# “hostname:…”
+					([^\\\[\\\]\\s:#,]+) (:)
+					|
+					# No first part, just match anything that quacks like an IP addy
+					(?=\\\[)
+				)
+				
+				# DRY and TextMate-friendly hack to assert balanced but optional brackets
+				(?:
+					# If an opening bracket follows, require an accompanying closing bracket 
+					(?= \\\[ [^\\[\\]\\s,\\#]*+ \\\])
+					|
+					# Otherwise, avoid matching unbalanced brackets
+					(?!\\\[)
+				)
+				
+				(\\\[)?
+				(?: (\\d{1,3}(?:\\.\\d{1,3})+)     # IPv4 address
+				|   (:*[0-9A-F]+(?::+[0-9A-F]*)*+) # IPv6 address
+				|   (\\d+)                         # Port?
+				)
+				(\\\])?
+				(?=\\s|,|$|\\#)
+			"""
+			captures:
+				1: patterns: [include: "source.hosts#modern"]
+				2: patterns: [include: "etc#colon"]
+				3: name: "punctuation.definition.address.begin.torrc"
+				4: patterns: [include: "etc#ipv4"]
+				5: patterns: [include: "etc#ipv6"]
+				6: patterns: [include: "#port"]
+				7: name: "punctuation.definition.address.end.torrc"
+		},{
+			# Bit-count following a bracketed IPv6 address: “[IPv6Address]/bits”
+			match: "(\\[)([^\\[\\]]+)(\\])((/)(\\d+))"
+			captures:
+				1: name: "punctuation.definition.ipv6-address.begin.torrc"
+				2: patterns: [include: "etc#ipv6"]
+				3: name: "punctuation.definition.ipv6-address.end.torrc"
+				
+				# Following scopes are intended to match those of “etc#ipv6”:
+				4: name: "meta.cidr-notation"
+				5: name: "keyword.operator.assignment.cidr"
+				6: patterns: [include: "etc#intNoExp"]
+		}]
+
+	# Universal IP address match: “*[:*]”, identical to ‘0.0.0.0/0’ and ‘::/0’
+	anyIP:
+		match: "\\*[46]?(?::\\*)?"
+		captures: 0: patterns: [{
+			name: "keyword.operator.wildcard.match-ipv$1.torrc"
+			match: "\\*(\\d)"
+		},{
+			name: "keyword.operator.wildcard.match-all.torrc"
+			match: "\\*"
+		}, include: "etc#colon"]
+
+	# Bracketed 2-letter country code: “{AU}, {??}”
+	cc:
+		name: "constant.language.country-code.${2:/downcase}.torrc"
+		match: "(\\{)(?:([A-Za-z]{2})|(\\?\\?))(\\})"
+		captures:
+			1: name: "punctuation.definition.country-code.begin.torrc"
+			3: name: "constant.character.escape.wildcard.match-any.torrc"
+			4: name: "punctuation.definition.country-code.end.torrc"
+
+	# Comment lines
+	comment:
+		name:  "comment.line.number-sign.torrc"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.torrc"
+
+	# Embedded comment within a multi-line entry that snarfs up newlines
+	commentEmbedded:
+		contentName: "comment.line.number-sign.embedded.torrc"
+		begin: "[ \\t]*(?=#)"
+		end:   "(?!\\G)^"
+		patterns: [{
+			name: "punctuation.definition.comment.torrc"
+			match: "\\G#"
+		}]
+
+	# Individual setting assignments
+	entry:
+		name:  "meta.entry.${3:/downcase/asciify}.torrc"
+		begin: "^\\s*(?:(/)|(\\+))?((?:[^\\s#\\0\\\\]|\\\\(?!$))++)"
+		end:   "(?!\\G)"
+		beginCaptures:
+			1: name: "keyword.operator.flag.clear-value.torrc"
+			2: name: "keyword.operator.flag.append-value.torrc"
+			3: name: "variable.assignment.entry.torrc"
+		patterns: [{
+			# Numerically-typed settings
+			name: "meta.numeric-setting.torrc"
+			begin: """(?ix)
+				# Unitless
+				(?<= AddressDisableIPv6
+				| AllowNonRFC953Hostnames
+				| AssumeReachableIPv6
+				| AssumeReachable
+				| AuthDirHasIPv6Connectivity
+				| AuthDirListBadExits
+				| AuthDirListMiddleOnly
+				| AuthDirMaxServersPerAddr
+				| AuthDirPinKeys
+				| AuthDirRejectRequestsUnderLoad
+				| AuthDirSharedRandomness
+				| AuthDirTestEd25519LinkKeys
+				| AuthDirTestReachability
+				| AuthoritativeDirectory
+				| AutomapHostsOnResolve
+				| AvoidDiskWrites
+				| BridgeAuthoritativeDir
+				| BridgeRecordUsageByCountry
+				| BridgeRelay
+				| CacheDirectoryGroupReadable
+				| CellStatistics
+				| CircuitBuildTimeout
+				| CircuitPadding
+				| CircuitPriorityHalflife
+				| CircuitStreamTimeout
+				| CircuitsAvailableTimeout
+				| ClientBootstrapConsensusAuthorityDownloadInitialDelay
+				| ClientBootstrapConsensusAuthorityOnlyDownloadInitialDelay
+				| ClientBootstrapConsensusFallbackDownloadInitialDelay
+				| ClientBootstrapConsensusMaxInProgressTries
+				| ClientDNSRejectInternalAddresses
+				| ClientOnly
+				| ClientPreferIPv6DirPort
+				| ClientPreferIPv6ORPort
+				| ClientRejectInternalAddresses
+				| ClientUseIPv4
+				| ClientUseIPv6
+				| CompiledProofOfWorkHash
+				| ConfluxEnabled
+				| ConnDirectionStatistics
+				| ConnLimit
+				| ConnectionPadding
+				| ConstrainedSockets
+				| ControlPortFileGroupReadable
+				| ControlSocketsGroupWritable
+				| CookieAuthFileGroupReadable
+				| CookieAuthentication
+				| CountPrivateBandwidth
+				| DataDirectoryGroupReadable
+				| DirAllowPrivateAddresses
+				| DirAuthorityFallbackRate
+				| DirCache
+				| DirReqStatistics
+				| DisableAllSwap
+				| DisableDebuggerAttachment
+				| DisableNetwork
+				| DisableOOSCheck
+				| DoSCircuitCreationBurst
+				| DoSCircuitCreationDefenseType
+				| DoSCircuitCreationEnabled
+				| DoSCircuitCreationMinConnections
+				| DoSCircuitCreationRate
+				| DoSConnectionConnectBurst
+				| DoSConnectionConnectRate
+				| DoSConnectionDefenseType
+				| DoSConnectionEnabled
+				| DoSConnectionMaxConcurrentCount
+				| DoSRefuseSingleHopClientRendezvous
+				| DoSStreamCreationBurst
+				| DoSStreamCreationDefenseType
+				| DoSStreamCreationEnabled
+				| DoSStreamCreationRate
+				| DormantCanceledByStartup
+				| DormantOnFirstStartup
+				| DormantTimeoutDisabledByIdleStreams
+				| DormantTimeoutEnabled
+				| DownloadExtraInfo
+				| EnforceDistinctSubnets
+				| EntryStatistics
+				| ExitPolicyRejectLocalInterfaces
+				| ExitPolicyRejectPrivate
+				| ExitPortStatistics
+				| ExitRelay
+				| ExtORPortCookieAuthFileGroupReadable
+				| ExtendAllowPrivateAddresses
+				| ExtendByEd25519ID
+				| ExtraInfoStatistics
+				| FascistFirewall
+				| FetchDirInfoEarly
+				| FetchDirInfoExtraEarly
+				| FetchHidServDescriptors
+				| FetchServerDescriptors
+				| FetchUselessDescriptors
+				| GeoIPExcludeUnknown
+				| HardwareAccel
+				| HiddenServiceAllowUnknownPorts
+				| HiddenServiceDirGroupReadable
+				| HiddenServiceEnableIntroDoSBurstPerSec
+				| HiddenServiceEnableIntroDoSDefense
+				| HiddenServiceEnableIntroDoSRatePerSec
+				| HiddenServiceMaxStreamsCloseCircuit
+				| HiddenServiceMaxStreams
+				| HiddenServiceNonAnonymousMode
+				| HiddenServiceNumIntroductionPoints
+				| HiddenServiceOnionBalanceInstance
+				| HiddenServicePoWDefensesEnabled
+				| HiddenServicePoWQueueBurst
+				| HiddenServicePoWQueueRate
+				| HiddenServiceSingleHopMode
+				| HiddenServiceStatistics
+				| HiddenServiceVersion
+				| IPv6Exit
+				| KISTSockBufSizeFactor
+				| KeepBindCapabilities
+				| KeepalivePeriod
+				| KeyDirectoryGroupReadable
+				| LearnCircuitBuildTimeout
+				| LogMessageDomains
+				| LogTimeGranularity
+				| MainloopStats
+				| MaxCircuitDirtiness
+				| MaxClientCircuitsPending
+				| MinMeasuredBWsForAuthToIgnoreAdvertised
+				| NewCircuitPeriod
+				| NoExec
+				| NumCPUs
+				| NumDirectoryGuards
+				| NumEntryGuards
+				| NumPrimaryGuards
+				| OfflineMasterKey
+				| OverloadStatistics
+				| PaddingStatistics
+				| PathBiasScaleThreshold
+				| PathBiasScaleUseThreshold
+				| PathsNeededToBuildCircuits
+				| ProtocolWarnings
+				| PublishHidServDescriptors
+				| PublishServerDescriptor
+				| ReducedCircuitPadding
+				| ReducedConnectionPadding
+				| ReducedExitPolicy
+				| ReevaluateExitPolicy
+				| RefuseUnknownExits
+				| RunAsDaemon
+				| SafeLogging
+				| SafeSocks
+				| Sandbox
+				| ServerDNSAllowBrokenConfig
+				| ServerDNSAllowNonRFC953Hostnames
+				| ServerDNSDetectHijacking
+				| ServerDNSRandomizeCase
+				| ServerDNSSearchDomains
+				| ShutdownWaitLength
+				| SocksTimeout
+				| StrictNodes
+				| TestSocks
+				| TestingBridgeBootstrapDownloadInitialDelay
+				| TestingBridgeDownloadInitialDelay
+				| TestingClientConsensusDownloadInitialDelay
+				| TestingClientDownloadInitialDelay
+				| TestingDirAuthVoteExitIsStrict
+				| TestingDirAuthVoteGuardIsStrict
+				| TestingDirAuthVoteHSDirIsStrict
+				| TestingEnableCellStatsEvent
+				| TestingEnableConnBwEvent
+				| TestingServerConsensusDownloadInitialDelay
+				| TestingServerDownloadInitialDelay
+				| TestingTorNetwork
+				| TrackHostExitsExpire
+				| TruncateLogFile
+				| UnixSocksGroupWritable
+				| UpdateBridgesFromAuthority
+				| UseBridges
+				| UseDefaultFallbackDirs
+				| UseEntryGuards
+				| UseGuardFraction
+				| UseMicrodescriptors
+				| V3AuthNIntervalsValid
+				| V3AuthUseLegacyKey
+				| V3AuthoritativeDirectory
+				| VanguardsLiteEnabled
+				| VersioningAuthoritativeDirectory
+				| __OwningControllerProcess
+
+				# Units in use
+				| AccountingMax
+				| AuthDirFastGuarantee
+				| AuthDirGuardBWGuarantee
+				| AuthDirVoteGuardGuaranteeTimeKnown
+				| AuthDirVoteStableGuaranteeMTBF
+				| AuthDirVoteStableGuaranteeMinUptime
+				| BandwidthBurst
+				| BandwidthRate
+				| ConstrainedSockSize
+				| DoSCircuitCreationDefenseTimePeriod
+				| DoSConnectionConnectDefenseTimePeriod
+				| DormantClientTimeout
+				| GuardLifetime
+				| HeartbeatPeriod
+				| KISTSchedRunInterval
+				| MaxAdvertisedBandwidth
+				| MaxConsensusAgeForDiffs
+				| MaxMemInQueues
+				| MaxOnionQueueDelay
+				| MaxUnparseableDescSizeToLog
+				| MinUptimeHidServDirectoryV2
+				| PerConnBWBurst
+				| PerConnBWRate
+				| RelayBandwidthBurst
+				| RelayBandwidthRate
+				| RephistTrackTime
+				| SSLKeyLifetime
+				| SigningKeyLifetime
+				| TestingAuthDirTimeToLearnReachability
+				| TestingAuthKeyLifetime
+				| TestingClientMaxIntervalWithoutRequest
+				| TestingDirConnectionMaxStall
+				| TestingLinkCertLifetime
+				| TestingMinExitFlagThreshold
+				| TestingMinFastFlagThreshold
+				| TestingMinTimeToReportBandwidth
+				| TestingSigningKeySlop
+				| TestingV3AuthInitialDistDelay
+				| TestingV3AuthInitialVoteDelay
+				| TestingV3AuthInitialVotingInterval
+				| TestingV3AuthVotingStartOffset
+				| TokenBucketRefillInterval
+				| V3AuthDistDelay
+				| V3AuthVoteDelay
+				| V3AuthVotingInterval
+
+				# Ports lists
+				| FirewallPorts
+				| LongLivedPorts
+				| RejectPlaintextPorts
+				| WarnPlaintextPorts
+				) \\G """
+			end: "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryNumeric"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryNumeric"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryNumeric"}
+				]
+			}]
+		},{
+			# Logging-specific options
+			begin: "(?i)(?<=[/+\\s]Log|^Log)\\G"
+			end:   "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryLogging"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryLogging"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryLogging"}
+				]
+			}]
+		},{
+			# Filename/path-typed settings
+			begin: """(?ix)
+				(?<= AccelDir
+				| CacheDirectory
+				| ClientOnionAuthDir
+				| ControlPortWriteToFile
+				| ControlSocket
+				| CookieAuthFile
+				| DataDirectory
+				| DirPortFrontPage
+				| ExtORPortCookieAuthFile
+				| GeoIPFile
+				| GeoIPv6File
+				| GuardfractionFile
+				| HiddenServiceDir
+				| KeyDirectory
+				| PidFile
+				| ServerDNSResolvConfFile
+				| V3BandwidthsFile
+				) \\G"""
+			end: "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryFile"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryFile"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryFile"}
+				]
+			}]
+		},{
+			# Nodes and/or addresses list
+			begin: """(?ix)
+				(?<= AuthDirVoteGuard
+				| EntryNodes
+				| ExcludeExitNodes
+				| ExcludeNodes
+				| ExitNodes
+				| HSLayer2Nodes
+				| HSLayer3Nodes
+				| HTTPProxy
+				| HTTPSProxy
+				| HiddenServicePort
+				| MapAddress
+				| MiddleNodes
+				| NodeFamily
+				| OutboundBindAddressExit
+				| OutboundBindAddressOR
+				| OutboundBindAddressPT
+				| OutboundBindAddress
+				| Socks4Proxy | SOCKS4Proxy    # FIXME; Remove different casing once issue with
+				| Socks5Proxy | SOCKS5Proxy    # scoped modifiers in lookbehinds is worked out.
+				| TestingDirAuthVoteExit
+				| TestingDirAuthVoteGuard
+				| TestingDirAuthVoteHSDir
+				| VirtualAddrNetworkIPv6
+				) \\G"""
+			end: "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryNode"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryNode"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryNode"}
+				]
+			}]
+		},{
+			# Policy lists: “<accept|reject> [address]/[mask]:[port]”
+			# FIXME: Scoped modifiers aren't affecting contents of lookbehinds; why the hell not?
+			begin: "(?i)(?<=DirPolicy|ExitPolicy|MetricsPortPolicy|SocksPolicy|SOCKSPolicy)\\G"
+			end:   "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryPolicies"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryPolicies"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryPolicies"}
+				]
+			}]
+		},{
+			# List of arbitrary `key=value` fields
+			begin: "(?i)(?<=ConsensusParams|ServerTransportOptions)\\G"
+			end:   "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryParams"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryParams"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryParams"}
+				]
+			}]
+		},{
+			# Version string list
+			begin: """(?ix)
+				(?<= MinimalAcceptedServerVersion
+				| RecommendedClientVersions
+				| RecommendedServerVersions
+				| RecommendedVersions
+				) \\G"""
+			end: "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryVersions"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryVersions"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryVersions"}
+				]
+			}]
+		},{
+			# Catchall for any generically-typed option, or one we don't recognise
+			begin: "\\G"
+			end:   "(?!\\G)"
+			patterns: [{
+				# Single-line entry with trailing comment
+				begin: '\\G(?=(?:\\s+(?:[^"#\\s]+|"(?:[^\\\\"]|\\\\.)*+"))++\\s*#)'
+				end:   "(?=\\s*#)"
+				contentName: "meta.value.torrc"
+				patterns: [include: "#entryGeneric"]
+			},{
+				# Potentially multi-line entry
+				begin: "\\G(?:\\s*(\\\\$\\r?\\n?)|[ \\t]+|(?=$|#))"
+				end:   "(\\G\\s+((?=\\S)(?!#)[^\\\\\\n#\\0]+))(?=\\s*(?:$|#))|(?=\\s*$)"
+				beginCaptures:
+					1: patterns: [include: "#esc"]
+				endCaptures:
+					1: name: "meta.value.torrc"
+					2: patterns: [include: "#entryGeneric"]
+				contentName: "meta.value.torrc"
+				patterns: [
+					{include: "#commentEmbedded"}
+					{include: "#esc"}
+					{include: "#entryGeneric"}
+				]
+			}]
+		}]
+	
+	# Unquoted filename or system path
+	entryFile:
+		name:  "string.other.link.filename.torrc"
+		begin: "(?=[^#\\s])"
+		end:   "(?=\\s*(?:$|#))"
+	
+	# Stuff matched inside generic option values
+	entryGeneric:
+		patterns: [
+			{include: "#typed"}
+			{include: "#address"}
+			{include: "etc#ip"}
+			{include: "#num"}
+			{include: "#str"}
+			{include: "#portSuffix"}
+			{include: "etc#comma"}
+			{include: "#anyIP"}
+			{include: "#unq"}
+		]
+
+	# Stuff matched inside “Log” settings
+	entryLogging:
+		patterns: [{
+			# [domain…]minSeverity[-maxSeverity]
+			name: "meta.log-selector.torrc"
+			match: """(?ix)
+				((\\[)((?:~?(?:[a-z]+|\\*)(?:,|(?=\\])))*+)(\\]))?
+				((?!-)(?:(?:debug|err|info|notice|warn)-?){1,2}(?<!-))
+				(?=$|\\s)
+			"""
+			captures:
+				1: name: "meta.domain-list.torrc"
+				2: name: "punctuation.section.begin.domains.torrc"
+				4: name: "punctuation.section.end.domains.torrc"
+				3: patterns: [
+					{match: "[A-Za-z]+", name: "entity.name.domain.torrc"}
+					{match: "\\*",       name: "keyword.operator.wildcard.match-all.torrc"}
+					{match: "~",         name: "keyword.operator.logical.negation.negate.torrc"}
+					{include: "etc#comma"}
+				]
+				5: name: "meta.severity-levels.torrc", patterns: [{
+					name:  "constant.language.severity-level.torrc"
+					match: "(?i)debug|err|info|notice|warn"
+				},{
+					name: "punctuation.separator.dash.torrc"
+					match: "-"
+				}]
+		},{
+			# Standard I/O streams
+			name:  "keyword.operator.log-destination.$1.torrc"
+			match: "(?i)(?<=\\s|^|\\G)\\b(stderr|stdout|syslog)\\b(?=$|\\s|#)"
+		},{
+			# “file [FILENAME…]”
+			name:  "meta.log-file.torrc"
+			begin: "(?i)(?<=\\s|^|\\G)(file)(?=\\s|$|#)[ \\t]*"
+			end:   "(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: name: "keyword.operator.log-destination.filename.torrc"
+			contentName: "string.other.link.filename.torrc"
+		}]
+
+	# Node and address specifiers
+	entryNode:
+		patterns: [
+			{include: "#cc"}
+			{include: "#port"}
+			{
+				# Unix domain socket: “unix:…”
+				match: "(?i)(?<=\\s|^|\\G|,)(unix)(:)((?:[^\\r\\n#\\s\\\\]|\\\\.)++)"
+				captures:
+					1: name: "storage.type.domain.unix.torrc"
+					2: patterns: [include: "etc#kolon"]
+					3: name: "string.other.link.filename.torrc"
+			},{
+				# Lone wildcard symbol: “*”
+				name: "keyword.operator.wildcard.match-all.torrc"
+				match: "(?<=\\s|^|\\G|,)\\*(?=\\s|,|$|#)"
+			}
+			{include: "#address"}
+			{include: "etc#comma"}
+			{include: "etc#ipv6"}
+			{include: "source.hosts#modern"}
+		]
+
+	# Stuff matched inside numerically-typed settings
+	entryNumeric:
+		patterns: [
+			# Highlight special keywords used by some certain settings, just to reduce clutter
+			name:  "constant.language.other.$1.torrc"
+			match: "(?i)(?<=\\s|^|\\G)\\b(auto|bridge|relay|v3)\\b(?=$|\\s|#)"
+
+			{include: "etc#comma"}
+			{include: "#typed"}
+			{include: "#unit"}
+			{include: "#num"}
+			
+			# Highlight everything else as an error
+			name:  "invalid.illegal.syntax.non-numeric.torrc"
+			match: "(?:[^#\\s\\d,]|(?<!\\d),(?!\\d))++"
+		]
+
+	# A named “key=value” pair matched within a setting argument
+	entryParams:
+		patterns: [{
+			# “key=…”
+			name:  "meta.parameter.torrc"
+			begin: "(?<=\\s|^|\\G|,)([^\\s#=]+)(=)"
+			end:   "(?=$|\\s|,|#)"
+			beginCaptures:
+				1: name: "entity.name.parameter.torrc"
+				2: patterns: [include: "etc#eql"]
+			contentName: "meta.parameter-value.torrc"
+			patterns: [
+				{include: "#typed"}
+				{match: "\\G[^\\s,#]+", name: "string.unquoted.torrc"}
+			]
+		},{
+			# Assume any standalone barewords hold meaning to the setting
+			name: "constant.language.parameter.niladic.torrc"
+			match: "(?<=\\s|^|\\G|,)[^\\s#=,]+(?=$|\\s|,|#)"
+		}, include: "etc#comma"]
+
+	# Policy specification documented in tor(1) § “ExitPolicy”
+	entryPolicies:
+		patterns: [
+			name:  "meta.policy.${2:/downcase}.torrc"
+			match: "(?i)(?<=\\s|^|\\G|,)((accept|reject)6?)(?=$|\\s|#|,)"
+			captures:
+				1: name: "keyword.control.policy-action.torrc"
+			
+			{include: "etc#comma"}
+			{include: "#address"}
+			{include: "etc#ip"}
+			{include: "etc#colon"}
+			{include: "etc#globSimple"}
+		]
+
+	# Comma-separated list of version strings
+	entryVersions:
+		patterns: [
+			{include: "#version"}
+			{include: "etc#comma"}
+		]
+
+	# Escaped newline
+	esc:
+		name: "constant.character.escape.newline.torrc"
+		match: "((\\\\))$\\r?\\n?"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.torrc"
+			2: name: "sublimelinter.gutter-mark.torrc"
+
+	# Special “%include” directives for importing other Tor configuration files
+	include:
+		name:  "meta.preprocessor.include.torrc"
+		begin: "(?i)^\\s*((%)include)(?=$|\\s|#)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "keyword.control.directive.include.torrc"
+			2: name: "punctuation.definition.directive.torrc"
+		patterns: [{
+			# Quoted filename
+			name:  "string.quoted.double.include.filename.torrc"
+			begin: '\\G"'
+			end:   '"|(?=$)'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.torrc"
+			endCaptures:   0: name: "punctuation.definition.string.end.torrc"
+			contentName: "constant.other.reference.link.include.torrc"
+			patterns: [
+				{include: "#strEsc"}
+				{include: "etc#globSimple"}
+			]
+		},{
+			# Unquoted filename
+			name:  "string.unquoted.include.filename.torrc"
+			begin: '\\G(?=[^"\\s#\\\\])'
+			end:   "(?=\\s*(?:$|#))"
+			patterns: [{
+				name: "constant.other.reference.link.include.torrc"
+				match: '(?:[^"\\r\\n#\\\\]|\\\\.)++'
+				captures:
+					0: patterns: [include: "etc#globSimple"]
+			}, include: "#esc"]
+		}]
+
+	# Plain-old numbers
+	num:
+		patterns: [{
+			# Hexadecimal value
+			name: "constant.numeric.integer.int.hexadecimal.hex.torrc"
+			match: "(?i)(?:(?<=\\s|^|\\G|,)[-+]|\\b)0x[A-F0-9]+\\b"
+		},{
+			# Floating-point value
+			name: "constant.numeric.float.real.decimal.dec.torrc"
+			match: "(?:(?<=\\s|^|\\G|,)[-+]|\\b)\\d*\\.\\d+\\b"
+		},{
+			# Integer value
+			name: "constant.numeric.integer.int.decimal.dec.torrc"
+			match: "(?:(?<=\\s|^|\\G|,)[-+]|\\b)\\d+(?!\\.)\\b"
+		}]
+
+	# Lone port number
+	port:
+		patterns: [
+			{include: "#portLone"}
+			{include: "#portSuffix"}
+		]
+	
+	# Port number surrounded by whitespace or list delimiters
+	portLone:
+		name: "constant.numeric.integer.port-number.torrc"
+		match: "(?<=\\s|^|\\G|,)\\d+(?=\\s|$|,|#)"
+
+	# Port number affixed to an IP address: “127.0.0.1:1337”
+	portSuffix:
+		match: "(?:(?<=\\d:)|(?<=\\d)(:))(\\d+)(?=\\s|$|,|#)"
+		captures:
+			1: patterns: [include: "etc#colon"]
+			2: name: "constant.numeric.integer.port-number.torrc"
+
+	# Double-quoted string
+	str:
+		name:  "string.quoted.double.torrc"
+		begin: '"'
+		end:   '(")|((?:[^\\\\"]|\\\\.)*)$'
+		beginCaptures:
+			0: name: "punctuation.definition.string.begin.torrc"
+		endCaptures:
+			1: name: "punctuation.definition.string.end.torrc"
+			2: name: "invalid.illegal.syntax.unclosed-string.torrc"
+		patterns: [include: "#strEsc"]
+
+	# Escape sequences recognised only inside quoted values
+	strEsc:
+		patterns: [{
+			# Single-character escape
+			name: "constant.character.escape.simple.torrc"
+			match: "(\\\\)[nrt\\\\'\"]"
+		},{
+			# Hexadecimal codepoint: \x00…\xFF
+			name: "constant.character.escape.codepoint.hexadecimal.torrc"
+			match: "(\\\\)x[A-Fa-f0-9]{2}"
+		},{
+			# Octal codepoint: \000…\777
+			name: "constant.character.escape.codepoint.octal.torrc"
+			match: "(\\\\)([0-7]{1,3})"
+		}]
+
+	# Numeric values expressed as a quantity using some unit of measurement
+	typed:
+		patterns: [{
+			# Duration value, expressed as “𝑁 (seconds|minutes|hours|days|weeks)”
+			name: "meta.duration.torrc"
+			match: "(?i)(?:^|\\G|(?<=\\s))([-+]?(?:0[xX][A-F0-9]+|\\d+(?:\\.\\d+)?))\\s+((?:second|minute|hour|day|week)s?)(?=$|\\s|#)"
+			captures:
+				1: patterns: [include: "#num"]
+				2: patterns: [include: "#unit"]
+		},{
+			# Storage size, expressed in some variation of bytes
+			name: "meta.data-size.torrc"
+			match: "(?i)(?:^|\\G|(?<=\\s))([-+]?(?:0[xX][A-F0-9]+|\\d+(?:\\.\\d+)?))\\s+([KMGT]?(?:Bytes|Bits))(?=$|\\s|#)"
+			captures:
+				1: patterns: [include: "#num"]
+				2: patterns: [include: "#unit"]
+		}]
+
+	# Units of measurement, matched case-insensitively
+	unit:
+		match: "(?i)(?<=\\s|^|\\G)\\b(?:(([KMGT]?(?:Bit|Byte|B))s?)|((msec|second|minute|hour|day|week|month)s?))\\b(?=$|\\s|#)"
+		captures:
+			1: name: "constant.language.unit.data.${2:/downcase}.torrc"
+			3: name: "constant.language.unit.temporal.${4:/downcase}.torrc"
+
+	# Unquoted string
+	unq:
+		name:  "string.unquoted.torrc"
+		begin: "[^\\s\\0#]"
+		end:   "(?=\\s*(?:\\\\?$|#))"
+
+	# Tor version string
+	version:
+		name:  "constant.other.version-string.torrc"
+		match: "(?i)(?<=\\s|^|\\G|,)(\\d+(?:\\.\\d+)*)(?:(-)(?!-)[-A-Z]+)?(?=$|,|\\s|#)"
+		captures:
+			1: patterns: [include: "etc#dot"]
+			2: patterns: [include: "etc#dash"]

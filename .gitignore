@@ -19,3 +19,5 @@ package-lock.json
 
 # Project-specific
 /tools/curl
+/tools/tor.asciidoc
+/tools/tor-options.xml

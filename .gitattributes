@@ -5,5 +5,8 @@
 # Improve syntax highlighting of unrecognised filenames
 mime.type* linguist-language=TSV
 
+# … or filenames we've chosen to highlight for dumb reasons
+torrc_format.txt linguist-language=torrc
+
 # Fixture-specific behaviour
 /samples/cube.stl -text

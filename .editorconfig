@@ -12,6 +12,9 @@ trim_trailing_whitespace = false
 [samples/mime.types*]
 tab_width = 8
 
+[torrc_format.txt]
+trim_trailing_whitespace = false
+
 [curlrc-options.tsv]
 indent_style = tab
 indent_size  = 32

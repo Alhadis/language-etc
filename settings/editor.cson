@@ -11,6 +11,7 @@
  .source.record-jar,
  .source.sieve,
  .source.shellcheckrc,
+ .source.torrc,
  .source.wgetrc":
 	editor:
 		commentStart: "# "
