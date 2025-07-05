@@ -115,7 +115,7 @@ repository:
 			1: name: "keyword.control.flow.${1:/downcase}.sieve"
 		patterns: [
 			{include: "#test"}
-			{include: "#comment"}
+			{include: "#comments"}
 			{include: "#block"}
 		]
 	

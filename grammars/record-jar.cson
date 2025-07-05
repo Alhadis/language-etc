@@ -88,7 +88,7 @@ repository:
 			patterns: [
 				{include: "#string"}
 				{include: "etc#comma"}
-				{include: "#lineContinuation"}
+				{include: "#escape"}
 			]
 		},{
 			# Anything else
@@ -96,7 +96,7 @@ repository:
 			end:   "(?=^)(?! |\\t)"
 			contentName: "string.unquoted.record-jar"
 			patterns: [include: "#escape"]
-		}, include: "#comment"]
+		}, include: "etc#commentHash"]
 
 
 	# "Double-quoted" or 'single-quoted' string

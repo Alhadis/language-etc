@@ -213,8 +213,8 @@ repository:
 		name:  "meta.interval.odin-ehr"
 		begin: "\\|"
 		end:   "\\|"
-		beginCaptures: 0: name: "punctuation.definition.interval.begin.odin─ehr"
-		endCaptures:   0: name: "punctuation.definition.interval.end.odin─ehr"
+		beginCaptures: 0: name: "punctuation.definition.interval.begin.odin-ehr"
+		endCaptures:   0: name: "punctuation.definition.interval.end.odin-ehr"
 		patterns: [
 			
 			# Workaround to stop `etc#num` matching |0..5| as `0.0 0.5`

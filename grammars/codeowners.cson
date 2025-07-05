@@ -25,7 +25,7 @@ repository:
 			match: "[^\\[\\]\\\\*?#/\\s]+"
 		]
 		patterns: [
-			{include: "#comment"}
+			{include: "etc#comment"}
 			
 			# Actual owners list
 			begin: "\\s"
