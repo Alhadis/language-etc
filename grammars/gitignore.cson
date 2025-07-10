@@ -78,10 +78,10 @@ repository:
 	# Comment line
 	comment:
 		name:  "comment.line.number-sign.gitignore"
-		begin: "#"
+		begin: "^\\s*(#)"
 		end:   "$"
 		beginCaptures:
-			0: name: "punctuation.definition.comment.gitignore"
+			1: name: "punctuation.definition.comment.gitignore"
 	
 	# CVS-specific syntax header
 	cvsSyntax:
