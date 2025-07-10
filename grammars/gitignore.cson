@@ -27,6 +27,7 @@ fileTypes: [
 	
 	# Almost-compatible formats (syntax doesn't conflict with Git)
 	"bazaar/ignore"
+	"breezy/ignore"
 	"bzrignore"
 	"cpyskip.txt"
 	"cvsignore"
