@@ -169,6 +169,7 @@
 		tabType: "soft"
 
 ".text.savane,
+ .text.jira,
  .text.youtube":
 	editor:
 		softWrap: true

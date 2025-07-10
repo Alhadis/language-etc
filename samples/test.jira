@@ -1,0 +1,34 @@
+h1. Pathological test cases for JIRA markup
+bq. This would be easier if Atlassian bothered to open-source this component…
+
+Text*Text*Text
+Text*{*}Bold{*}
+Text {*}Bold{*}_Text
+Text {*}Bold{*}_Italic_
+
+Text_Text_Text
+Text__Italic__Text
+Text___Italic___Text
+Text_{_}Italic{_}_Text
+
+??citation??
+{??}citation{??}
+Text??Text??Text
+
+Text-Normal-Text
+Text--Deleted--Text
+Text{-}Deleted{-}Text
+Text{-}Deleted- Text
+Text -Deleted-_Text
+
+Text---  (Nothing)
+A ---- Z (Nothing)
+A --- Z  (Em dash)
+A -- Z   (En dash)
+
+Line\\Break
+Single\\\\Line
+Single\\\*Line*
+
+
+[http://jira.atlassian.com/?]Etc ] ]

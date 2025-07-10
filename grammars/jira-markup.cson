@@ -1,0 +1,443 @@
+# JIRA's text formatting notation, still used for marking-up issue comments.
+# Reference: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
+name: "JIRA Markup"
+scopeName: "text.jira"
+fileTypes: ["jira", "jira-markup"] # Bogus filetype
+limitLineLength: no
+patterns: [include: "#main"]
+injections:
+	"text.jira meta.macro.code text.embedded.html":     patterns: [include: "text.html.basic"]
+	"text.jira meta.macro.code text.embedded.roff":     patterns: [include: "text.roff"]
+	"text.jira meta.macro.code text.embedded.svg":      patterns: [include: "text.xml.svg"]
+	"text.jira meta.macro.code text.embedded.xml":      patterns: [include: "text.xml"]
+	"text.jira meta.macro.code text.embedded.xsl":      patterns: [include: "text.xml.xsl"]
+	"text.jira meta.macro.code source.embedded.js":     patterns: [include: "source.js"]
+	"text.jira meta.macro.code source.embedded.shell":  patterns: [include: "source.shell"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#escape"}
+			{include: "#breaks"}
+			{include: "#directives"}
+			{include: "#lists"}
+			{include: "#table"}
+			{include: "#macros"}
+			{include: "#links"}
+			{include: "#attachments"}
+			{include: "#emoticons"}
+			{include: "#textEffects"}
+		]
+
+
+	# File attachment
+	attachments:
+		patterns: [{
+			# !spaceKey:pageTitle^attachment.ext!
+			name:  "meta.attachment.jira"
+			match: "(!)([a-zA-Z0-9]{1,255})(:)([^!\\s]+)(\\^)([^!|]*[^\\s!|][^!|]*)((\\|)[^!]*)?(!)"
+			captures:
+				1: name: "punctuation.definition.attachment.begin.jira"
+				2: name: "entity.other.space-key.jira"
+				3: patterns: [include: "etc#colon"]
+				4: name: "entity.name.page-title.jira"
+				5: name: "punctuation.separator.attachment.jira"
+				6: name: "constant.other.reference.link.file-attachment.jira"
+				7: name: "punctuation.definition.attachment.begin.jira"
+		},{
+			# !filename.ext!
+			name:  "meta.attachment.jira"
+			match: "(!)([^!|]*[^\\s!|][^!|]*)((\\|)([^!]*))?(!)"
+			captures:
+				1: name: "punctuation.definition.attachment.begin.jira"
+				2: name: "constant.other.reference.link.file-attachment.jira"
+				3: name: "meta.properties.jira"
+				4: name: "punctuation.separator.properties.jira"
+				5: patterns: [include: "#attachmentProperties"]
+				6: name: "punctuation.definition.attachment.end.jira"
+		}]
+
+
+	# Comma-delimited list of file attachment attributes
+	attachmentProperties:
+		patterns: [{
+			# “key=value” pairs
+			name:  "meta.property.${1:/downcase}.jira"
+			match: "([-\\w]+)\\s*(=)\\s*((?:[^\\\\,\\s]|\\\\.)++)"
+			captures:
+				1: name: "entity.other.attribute-name"
+				2: patterns: [include: "etc#eql"]
+				3: name: "constant.other.attribute-value.jira"
+		},{
+			# Unnamed/implicit parameter; only “thumbnail” appears to be used
+			match: "(?:\\G|^|(?<=\\|))\\s*([^\\s|{}=!,]+)(?=\\s*(?:$|[|}!,]))"
+			captures:
+				1: name: "constant.other.attribute-value.jira"
+		}, include: "etc#comma"]
+
+
+	# Logical text breaks
+	breaks:
+		patterns: [{
+			# Forced line-break; may appear anywhere within a line
+			name: "constant.character.line-break.jira"
+			match: "(?<!\\\\)\\\\{2}(?!\\\\)"
+		},{
+			# Horizontal rule (section divider)
+			name: "markup.divider.jira"
+			match: "(?:^|\\G)\\s*(-{4})[ \\t]*$"
+			captures:
+				1: name: "punctuation.definition.divider.jira"
+		},{
+			# Em dash (U+2014)
+			name: "constant.character.em-dash.jira"
+			match: "(?:\\B(?<!-)|(?<=_))---(?:\\B(?!-)|(?=_))"
+		},{
+			# En dash (U+2013)
+			name: "constant.character.en-dash.jira"
+			match: "(?:\\B(?<!-)|(?<=_))--(?:\\B(?!-)|(?=_))"
+		}]
+
+
+	# Single-line command directives separated from their contents by “. ”
+	directives:
+		patterns: [{
+			# bq. Block-quoted paragraph, expressed on a single line.
+			name:  "markup.quote.block.single-line.jira"
+			begin: "^(bq(\\.)) +"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "entity.name.tag.quote.jira"
+				2: name: "punctuation.definition.quote.jira"
+			patterns: [include: "#textEffects"]
+		},{
+			# h1. Heading text with level numbered 1–6
+			name:  "markup.heading.$2.jira"
+			begin: "^(h([1-6])(\\.)) +"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "entity.name.tag.heading.jira"
+				3: name: "punctuation.definition.heading.jira"
+			patterns: [include: "#textEffects"]
+		}]
+
+
+	# Keywords to insert emoji-like graphics
+	emoticons:
+		name: "constant.language.emoticon.jira"
+		match: ":-?[()PpD]|;-?\\)|(\\()(?:[-yni/x!+?]|on|off|\\*[rgby]?|flag|flagoff)(\\))"
+		captures:
+			1: name: "punctuation.definition.emoticon.begin.jira"
+			2: name: "punctuation.definition.emoticon.end.jira"
+
+
+	# Escaped meta-character
+	escape:
+		name: "constant.character.escape.jira"
+		match: "(\\\\)[-*_?+^~{}:;()]"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.jira"
+
+
+	# Various hyperlink constructs
+	links:
+		patterns: [{
+			# [~username]
+			name:  "markup.link.username.jira"
+			match: "(\\[)([^|]*\\|)?(~)([^~\\]]*)\\s*(\\])"
+			captures:
+				1: name: "punctuation.definition.link.begin.jira"
+				2: name: "invalid.unimplemented.jira", patterns: [include: "#linkDescription"]
+				3: name: "punctuation.definition.username.jira"
+				4: name: "constant.other.reference.link.username.jira"
+				5: name: "punctuation.definition.link.end.jira"
+		},{
+			# [#anchor]
+			name: "markup.link.anchor.jira"
+			match: "(\\[)([^|]*\\|)?(#)([^#\\]]*)\\s*(\\])"
+			captures:
+				1: name: "punctuation.definition.link.begin.jira"
+				2: patterns: [include: "#linkDescription"]
+				3: name: "punctuation.definition.anchor.jira"
+				4: name: "constant.other.reference.link.anchor.jira"
+				5: name: "punctuation.definition.link.end.jira"
+		},{
+			# [^attachment.ext]
+			name: "markup.link.file-attachment.jira"
+			match: "(\\[)([^|]*\\|)?(\\^)([^^\\]]*)\\s*(\\])"
+			captures:
+				1: name: "punctuation.definition.link.begin.jira"
+				2: patterns: [include: "#linkDescription"]
+				3: name: "punctuation.definition.filename.jira"
+				4: name: "constant.other.reference.link.filename.jira"
+				5: name: "punctuation.definition.link.end.jira"
+		},{
+			# Every other link
+			name:  "markup.link.jira"
+			begin: "(\\[)([^|]*\\|)?(?!#|~)(?=.*?[^\\\\]\\])"
+			end:   "\\s*(\\])"
+			beginCaptures:
+				1: name: "punctuation.definition.link.begin.jira"
+				2: patterns: [include: "#linkDescription"]
+			endCaptures:
+				1: name: "punctuation.definition.link.end.jira"
+			patterns: [include: "etc#url"]
+		}]
+
+
+	# Markup permitted inside a link description: “[(+) *Bold*|…]”
+	linkDescription:
+		match: "(?:^|\\G)([^|]*)(\\|)"
+		captures:
+			2: name: "punctuation.terminator.string.jira"
+			1: name: "string.other.description.jira", patterns: [
+				{include: "#escape"}
+				{include: "#breaks"}
+				{include: "#emoticons"}
+				{include: "#textEffects"}
+			]
+
+
+	# List blocks
+	lists:
+		patterns: [{
+			# Unnumbered lists (bullet-points or dashes)
+			name:  "markup.list.unnumbered.jira"
+			begin: "(?=^\\s*([-*#]*[-*])[ \\t]+)"
+			end:   "(?!\\G)"
+			patterns: [include: "#listItem"]
+		},{
+			# Numbered list
+			name:  "markup.list.numbered.jira"
+			begin: "(?=^\\s*([-*#]*#)[ \\t]+)"
+			end:   "(?!\\G)"
+			patterns: [include: "#listItem"]
+		}]
+
+	listItem:
+		begin: "\\G\\s*(?:(([-*#]*[-*]))|(([-*#]*#)))[ \\t]+"
+		end:   "(?!\\G)(?=^\\s*(?:\\1[ \\t]|(?!\\1[-*#]*[ \\t])[-*#]+[ \\t])|^[ \\t]*$)"
+		beginCaptures:
+			1: name: "keyword.operator.list.unnumbered.marker.jira"
+			2: name: "punctuation.definition.list.unordered.jira"
+			3: name: "keyword.operator.list.numbered.marker.jira"
+			4: name: "punctuation.definition.list.ordered.jira"
+		patterns: [include: "#main"]
+
+
+	# Various language constructs enclosed by curly brackets
+	macros:
+		patterns: [{
+			# Bookmark anchor definition: “{anchor:…}”
+			name:  "meta.macro.anchor.jira"
+			match: "(?i)({)(anchor)((:)\\s*((?:[^\\\\{}]|\\\\.)*+))\\s*(})"
+			captures:
+				0: name: "meta.tag.macro.self-closing.jira"
+				1: name: "punctuation.definition.tag.self-closing.begin.jira"
+				2: name: "entity.name.tag.macro.jira"
+				3: name: "meta.parameters.jira"
+				4: name: "punctuation.separator.parameters.jira"
+				5: name: "constant.other.reference.link.anchor.jira"
+				6: name: "punctuation.definition.tag.self-closing.end.jira"
+		},{
+			# Preformatted block with suppressed highlighting
+			name:  "meta.macro.noformat.jira"
+			begin: "(?i)(?={(noformat))({noformat(?::\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 2: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			contentName: "markup.raw.literal.jira"
+		},{
+			# {quote}Block-quote{quote}
+			name:  "meta.macro.quote.jira"
+			begin: "(?i)(?={(quote))({quote(?::\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 2: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			contentName: "markup.quote.block.multi-line.jira"
+			patterns: [include: "#main"]
+		},{
+			# Syntax highlighted code-block: Markup languages (grammars whose scopeNames begin with “text.”)
+			name:  "meta.macro.code.${2:/downcase}.jira"
+			begin: "(?i)(?={(code):\\s*(?!java\\b)(html|roff|rtf|stt|svg|vtt|xml|xsl)\\s*(?:$|[|=}]))({code(?::\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 3: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			contentName: "text.embedded.${2:/downcase}"
+		},{
+			# Syntax highlighted code-block: Programming languages (grammars whose scopeNames begin with “source.”)
+			name:  "meta.macro.code.${2:/downcase}.jira"
+			begin: "(?i)(?={(code):\\s*(?!java\\b)([-\\w]+(?:\\.[-\\w]+)*)\\s*(?:$|[|=}]))({code(?::\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 3: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			contentName: "source.embedded.${2:/downcase}"
+		},{
+			# Syntax highlighted code-block: Java (default)
+			name:  "meta.macro.code.java.jira"
+			begin: "(?i)(?={(code))({code(?:(?=:\\s*java\\s*(?:$|[|=}])|:\\s*[^\\s|{}=]+\\s*=)|(?!:\\s*[^\\s|{}=]+\\s*(?:$|\\|)))(:\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 2: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			contentName: "source.embedded.java"
+			patterns: [include: "source.java"]
+		},{
+			# Paired “{macro}…{macro}” blocks, possibly with parameters: “{macro:param1=Value 1|param2=Value 2}…{macro}”
+			name:  "meta.macro.${1:/downcase}.jira"
+			begin: "(?={([a-zA-Z]+))({[a-zA-Z]+(?::\\s*(?:[^\\\\{}]|\\\\.)*+)?})"
+			end:   "{\\1}"
+			beginCaptures: 2: patterns: [include: "#macroTagOpen"]
+			endCaptures:   0: patterns: [include: "#macroTagClose"]
+			patterns: [include: "#main"]
+		}]
+
+	# Stuff matched inside a tokenised opening macro-tag
+	macroTagOpen:
+		name: "meta.tag.macro.opening.jira"
+		begin: "(?:\\G|^)({)([a-zA-Z]+)(?:(:)|(?=}))"
+		end:   "}"
+		beginCaptures:
+			1: name: "punctuation.definition.tag.opening.begin.jira"
+			2: name: "entity.name.tag.macro.jira"
+			3: name: "punctuation.separator.parameters.jira"
+		endCaptures:
+			0: name: "punctuation.definition.tag.opening.end.jira"
+		contentName: "meta.parameters.jira"
+		patterns: [{
+			# Unnamed/implicit parameter; seemingly used by “{color}” macro only
+			match: "(?:\\G|^|(?<=\\|))\\s*([^\\s|{}=]+)(?=\\s*(?:$|[|}]))"
+			captures:
+				1: name: "constant.other.attribute-value.jira"
+		},{
+			# Named “key=value” pair
+			name:  "meta.parameter.${1:/downcase/asciify}.jira"
+			begin: "(?:\\G|^|(?<=\\|))\\s*([^\\s|{}=]+)[ \\t]*"
+			end:   "(?!\\G)"
+			beginCaptures:
+				1: name: "entity.other.attribute-name.jira"
+			applyEndPatternLast: yes
+			patterns: [{
+				# … = Attribute value
+				contentName: "string.unquoted.attribute.jira"
+				begin: "\\G\\s*(=)[ \\t]*"
+				end:   "(?=\\s*(?:$|[|{}]))"
+				beginCaptures:
+					1: patterns: [include: "etc#eql"]
+			}]
+		},{
+			# Parameter separator
+			name: "punctuation.delimiter.pipe.parameters.jira"
+			match: "\\|"
+		}]
+
+	# Stuff matched inside a tokenised closing macro-tag
+	macroTagClose:
+		name: "meta.tag.macro.closing.jira"
+		match: "({)(.+)(})"
+		captures:
+			1: name: "punctuation.definition.tag.closing.begin.jira"
+			2: name: "entity.name.tag.macro.jira"
+			3: name: "punctuation.definition.tag.closing.end.jira"
+
+
+	# The usual plethora of text-formatting styles
+	textEffects:
+		patterns: [{
+			# *Bold*, {*}Bold{*}
+			name: "markup.bold.emphasis.strong.jira"
+			match: "((?:\\B|(?<=_))\\*|{\\*})(?=[^\\s*])(.+?)(?<=\\S)(\\*(?:\\B|(?=_))|{\\*})"
+			captures:
+				1: name: "punctuation.definition.markup.bold.begin.jira"
+				3: name: "punctuation.definition.markup.bold.end.jira"
+				2: patterns: [include: "#textEffects"]
+		},{
+			# _Italic_, {_}Italic{_}
+			name: "markup.italic.emphasis.jira"
+			match: "((?:\\b|(?<=_))_|{_})(?=[^\\s_])(.+?)(?<=\\S)(_(?:\\b|(?=_))|{_})"
+			captures:
+				1: name: "punctuation.definition.markup.italic.begin.jira"
+				3: name: "punctuation.definition.markup.italic.end.jira"
+				2: patterns: [include: "#textEffects"]
+		},{
+			# ??citation??, {??}citation{??}
+			name: "markup.quote.citation.jira"
+			match: "((?:\\B|(?<=_))\\?\\?|{\\?\\?})(?=[^\\s?])(.+?)(?<=\\S)(\\?\\?(?:\\B|(?=_))|{\\?\\?})"
+			captures:
+				1: name: "punctuation.section.quote.begin.jira"
+				3: name: "punctuation.section.quote.end.jira"
+				2: patterns: [include: "#textEffects"]
+		},{
+			# -Deletion-, {-}Deletion{-}
+			name: "markup.deleted.jira"
+			match: "((?:\\B|(?<=_))-|{-})(?=[^\\s-])(.+?)(?<=\\S)(-(?:\\B|(?=_))|{-})"
+			captures:
+				1: name: "punctuation.definition.deleted.begin.jira"
+				3: name: "punctuation.definition.deleted.end.jira"
+				2: patterns: [include: "#textEffects"]
+		},{
+			# +Insertion+, {+}Insertion{+}
+			name: "markup.inserted.jira"
+			match: "((?:\\B|(?<=_))\\+|{\\+})(?=[^\\s+])(.+?)(?<=\\S)(\\+(?:\\B|(?=_))|{\\+})"
+			captures:
+				1: name: "punctuation.definition.inserted.begin.jira"
+				3: name: "punctuation.definition.inserted.end.jira"
+				2: patterns: [include: "#textEffects"]
+		},{
+			# ^Superscript^, {^}Superscript{^}
+			name:  "markup.superscript.jira"
+			match: "((?:\\B|(?<=_))\\^|{\\^})(?=[^\\s^])(.+?)(?<=\\S)(\\^(?:\\B|(?=_))|{\\^})"
+			captures:
+				1: name: "punctuation.definition.markup.begin.jira"
+				3: name: "punctuation.definition.markup.end.jira"
+				2: name: "string.unquoted.markup.jira", patterns: [include: "#textEffects"]
+		},{
+			# ~Subscript~, {~}Subscript{~}
+			name:  "markup.subscript.jira"
+			match: "((?:\\B|(?<=_))~|{~})(?=[^\\s~])(.+?)(?<=\\S)(~(?:\\B|(?=_))|{~})"
+			captures:
+				1: name: "punctuation.definition.markup.begin.jira"
+				3: name: "punctuation.definition.markup.end.jira"
+				2: name: "string.unquoted.markup.jira", patterns: [include: "#textEffects"]
+		},{
+			# {{Monospace}}
+			name:  "markup.raw.code.monospace.jira"
+			begin: "{{"
+			end:   "}}"
+			beginCaptures: 0: name: "punctuation.definition.markup.monospace.begin.jira"
+			endCaptures:   0: name: "punctuation.definition.markup.monospace.end.jira"
+			patterns: [include: "#textEffects"]
+		}]
+
+
+	# Table blocks
+	table:
+		name:  "markup.table.jira"
+		begin: "(?=^\\s*\\|{1,2}(?:[^|]*\\|{1,2})+)"
+		end:   "(?!\\G)"
+		patterns: [{
+			name:  "markup.table-row.jira"
+			begin: "^\\s*(?=\\|)"
+			end:   "(\\|{1,2})[ \\t]*$"
+			endCaptures:
+				1: name: "punctuation.definition.table.divider.jira"
+			patterns: [
+				{include: "#tableHeader"}
+				{include: "#tableCell"}
+			]
+		}]
+
+	# || Column name
+	tableHeader:
+		name:  "markup.table-header.jira"
+		match: "(\\|\\|)([^|]*)"
+		captures:
+			1: name: "punctuation.definition.table.divider.jira"
+			2: name: "entity.name.column.jira", patterns: [include: "#main"]
+
+	# | Data cell
+	tableCell:
+		name:  "markup.table-cell.jira"
+		match: "(\\|)(?!\\|)([^|]*)"
+		captures:
+			1: name: "punctuation.definition.table.divider.jira"
+			2: name: "string.unquoted.jira", patterns: [include: "#main"]

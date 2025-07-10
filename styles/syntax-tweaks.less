@@ -120,6 +120,32 @@
 			color: #a074c4;
 		}
 	}
+	atom-text-editor[data-grammar="text jira"]{
+		.syntax--punctuation.syntax--jira,
+		.syntax--constant.syntax--character{
+			font-variant-ligatures: none !important;
+		}
+		.syntax--entity.syntax--name.syntax--tag.syntax--macro.syntax--jira{
+			color: #8dc149;
+		}
+		.syntax--punctuation.syntax--definition.syntax--tag.syntax--jira{
+			color: #4d5a5e;
+		}
+		.syntax--string.syntax--other.syntax--description.syntax--jira{
+			color: #9ac4d7;
+		}
+		.syntax--markup.syntax--raw.syntax--jira{
+			color: #519aba;
+		}
+		.syntax--markup.syntax--italic.syntax--jira,
+		.syntax--markup.syntax--bold.syntax--jira{
+			color: #cbcb41;
+			& > .syntax--punctuation.syntax--definition.syntax--begin,
+			& > .syntax--punctuation.syntax--definition.syntax--end{
+				opacity: 0.5;
+			}
+		}
+	}
 	atom-text-editor[data-grammar="text youtube"]{
 		.syntax--markup{
 			&.syntax--italic,

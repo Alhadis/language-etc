@@ -66,6 +66,7 @@ Supported formats
 * [x] [Less history files](https://greenwoodsoftware.com/less/)
 * [x] [Host databases](https://en.wikipedia.org/wiki/Hosts_(file))
 * [ ] [Hunspell dictionaries](https://github.com/hunspell/hunspell/blob/master/man/hunspell.5)
+* [x] [JIRA Markup](https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all)
 * [x] [M3U playlists](https://en.wikipedia.org/wiki/M3U)
 * [x] [M4/Autotools](http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf)
 * [x] [Man configs](./samples/man.conf)
