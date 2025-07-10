@@ -104,7 +104,7 @@ repository:
 		patterns: [{
 			# bq. Block-quoted paragraph, expressed on a single line.
 			name:  "markup.quote.block.single-line.jira"
-			begin: "^(bq(\\.)) +"
+			begin: "^(bq(\\.))[ \\t]+"
 			end:   "(?=\\s*$)"
 			beginCaptures:
 				1: name: "entity.name.tag.quote.jira"
@@ -113,7 +113,7 @@ repository:
 		},{
 			# h1. Heading text with level numbered 1–6
 			name:  "markup.heading.$2.jira"
-			begin: "^(h([1-6])(\\.)) +"
+			begin: "^(h([1-6])(\\.))[ \\t]+"
 			end:   "(?=\\s*$)"
 			beginCaptures:
 				1: name: "entity.name.tag.heading.jira"
