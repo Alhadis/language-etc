@@ -1,0 +1,80 @@
+# Reference: https://github.com/publicsuffix/list/wiki/Format#format
+name: "Public Suffix List"
+scopeName: "source.psl"
+fileTypes: ["public_suffix_list.dat"]
+patterns: [{
+	# Subsections of file demarcated with special comments: “===BEGIN/END … DOMAINS===”
+	name:  "meta.section.${4:/downcase}-domains.psl"
+	begin: "^(//) +(===)(BEGIN +([A-Z]+) +DOMAINS)(===)(?=\\s*$)"
+	end:   "^(//) +(===)(END +\\4 +DOMAINS)(===)(?=\\s*$)|(?=^// +===(?:BEGIN|END) +[A-Z]+ +DOMAINS===\\s*$)"
+	beginCaptures:
+		0: name: "comment.line.double-slash.psl"
+		1: name: "punctuation.definition.comment.psl"
+		2: name: "keyword.operator.directive.marker.begin.psl"
+		3: name: "keyword.control.section.begin.psl"
+		5: name: "keyword.operator.directive.marker.end.psl"
+	endCaptures:
+		0: name: "comment.line.double-slash.psl"
+		1: name: "punctuation.definition.comment.psl"
+		2: name: "keyword.operator.directive.marker.begin.psl"
+		3: name: "keyword.control.section.end.psl"
+		4: name: "keyword.operator.directive.marker.end.psl"
+	patterns: [include: "#main"]
+}, include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comments"}
+			{include: "#rule"}
+			{include: "#trailingBlanks"}
+		]
+
+
+	# Comment lines
+	comments:
+		name:  "comment.line.double-slash.psl"
+		begin: "^//[ \\t]*"
+		end:   "(?=[ \\t]*$)"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.psl"
+		patterns: [{
+			# Metadata fields
+			begin: "\\G((VERSION|COMMIT)(:)) +(?=\\S)"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "storage.type.${2:/downcase}.psl"
+				3: name: "punctuation.definition.metadata.tag.psl"
+			contentName: "support.constant.${2:/downcase}.psl"
+		}]
+
+
+	# Suffix specification
+	rule:
+		name:  "meta.rule.psl"
+		begin: "^(!)?(?=\\S)(?!//)"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "keyword.operator.logical.not.negation.psl"
+		patterns: [{
+			# Dot-separated label list: “gov.co.uk”
+			name: "entity.name.domain.label.psl"
+			match: "\\G(\\*\\.)?(?!\\.)((?:\\.?[^\\s.]+)+)(?=$|\\s)"
+			captures:
+				1: patterns: [{include: "etc#globSimple"}, {include: "etc#dot"}]
+				2: patterns: [include: "etc#dot"]
+		},{
+			# Anything after the first whitespace character on a line (inclusive) is ignored
+			contentName: "comment.line.ignored.psl"
+			begin: "[ \\t]+(?:((//))|(?=\\S))"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "comment.line.double-slash.psl"
+				2: name: "punctuation.definition.comment.psl"
+		}]
+
+
+	# Highlight trailing whitespace as an error
+	trailingBlanks:
+		name: "invalid.illegal.whitespace.trailing.psl"
+		match: "[ \\t]+$"

@@ -12,6 +12,9 @@ trim_trailing_whitespace = false
 [samples/mime.types*]
 tab_width = 8
 
+[public_suffix_list.dat]
+trim_trailing_whitespace = true
+
 [torrc_format.txt]
 trim_trailing_whitespace = false
 

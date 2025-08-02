@@ -100,7 +100,8 @@
 		commentStart: "; "
 		tabType: "soft"
 
-".source.smpl":
+".source.psl,
+ .source.smpl":
 	editor:
 		commentStart: "// "
 
