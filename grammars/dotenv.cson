@@ -55,14 +55,6 @@ injections:
 				2: patterns: [include: "source.shell"]
 				3: name: "punctuation.section.embedded.end.dotenv"
 		}]
-	"source.dotenv meta.field.rhs string.unquoted":
-		patterns: [{
-			name:  "comment.line.number-sign.inline.dotenv"
-			begin: "(?<=\\S)[ \\t]+(#)"
-			end:   "(?=$)"
-			captures:
-				1: name: "punctuation.definition.comment.dotenv"
-		}]
 
 repository:
 	main:
@@ -73,18 +65,12 @@ repository:
 
 	# Comments
 	comment:
-		begin: "^([ \\t]*)(?=#)"
-		end:   "(?!\\G)"
+		name:  "comment.line.number-sign.dotenv"
+		begin: "#"
+		end:   "$"
 		beginCaptures:
-			1: name: "punctuation.whitespace.leading.comment.dotenv"
-		patterns: [{
-			name:  "comment.line.number-sign.dotenv"
-			begin: "\\G(#)"
-			end:   "$"
-			beginCaptures:
-				1: name: "punctuation.definition.comment.dotenv"
-		}]
-		
+			0: name: "punctuation.definition.comment.dotenv"
+
 
 	# Shell-like variable assignments, except with more generous whitespace handling
 	field:
@@ -103,15 +89,15 @@ repository:
 			name: "punctuation.whitespace.trailing.empty-value.dotenv"
 			match: "\\G[ \\t]+$"
 		},{
-			# DOUBLE_QUOTED = "Foo\nBar"
-			begin: "\\G[ \\t]*(?=(\"|')(?:[^\\\\\"']|(?!\\1)[\"']|\\\\.)*+\\1$)"
+			# QUOTED_STRING = "Foo\nBar"
+			begin: "\\G[ \\t]*(?=[\"'`])"
 			end:   "(?!\\G)"
 			patterns: [include: "#strings"]
 		},{
 			# UNQUOTED = Literally anything that doesn't start with a quote
 			contentName: "string.unquoted.field.dotenv"
-			begin: "\\G[ \\t]*(?!\"|')(?=\\S)"
-			end:   "([ \\t]*)$"
+			begin: "\\G[ \\t]*(?!\"|')(?=[^#\\s])"
+			end:   "([ \\t]*)(?=$|#)"
 			endCaptures:
 				1: name: "punctuation.whitespace.trailing.dotenv"
 		}]
@@ -119,38 +105,62 @@ repository:
 
 	# Impartially-quoted values (i.e., no trailing whitespace after terminating quote)
 	strings:
+		patterns: [
+			{include: "#stringDoubleQuoted"}
+			{include: "#stringSingleQuoted"}
+			{include: "#stringBackticks"}
+		]
+
+
+	# "Double-quoted"
+	stringDoubleQuoted:
+		name:  "string.quoted.double.dotenv"
+		begin: '\\G"'
+		end:   '"'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
+		endCaptures:   0: name: "punctuation.definition.string.end.dotenv"
 		patterns: [{
-			# "Double-quoted"
-			name:  "string.quoted.double.dotenv"
-			begin: '\\G"'
-			end:   '"'
-			beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
-			endCaptures:   0: name: "punctuation.definition.string.env.dotenv"
-			patterns: [{
-				# Embedded newline
-				name: "constant.character.escape.newline.dotenv"
-				match: "(\\\\)n"
-				captures:
-					1: name: "punctuation.definition.escape.backslash.dotenv"
-			},{
-				# Literal double-quote
-				name: "constant.character.escape.quote.dotenv"
-				match: '(\\\\)"'
-				captures:
-					1: name: "punctuation.definition.escape.backslash.dotenv"
-			}]
+			# Embedded newline
+			name: "constant.character.escape.newline.dotenv"
+			match: "(\\\\)n"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dotenv"
 		},{
-			# 'Single-quoted string'
-			name:  "string.quoted.single.dotenv"
-			begin: "\\G'"
-			end:   "'"
-			beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
-			endCaptures:   0: name: "punctuation.definition.string.env.dotenv"
-			patterns: [{
-				# Literal single-quote
-				name: "constant.character.escape.quote.dotenv"
-				match: "(\\\\)'"
-				captures:
-					1: name: "punctuation.definition.escape.backslash.dotenv"
-			}]
+			# Literal double-quote
+			name: "constant.character.escape.quote.dotenv"
+			match: '(\\\\)"'
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dotenv"
+		}]
+
+
+	# 'Single-quoted string'
+	stringSingleQuoted:
+		name:  "string.quoted.single.dotenv"
+		begin: "\\G'"
+		end:   "'"
+		beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
+		endCaptures:   0: name: "punctuation.definition.string.end.dotenv"
+		patterns: [{
+			# Literal single-quote
+			name: "constant.character.escape.quote.dotenv"
+			match: "(\\\\)'"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dotenv"
+		}]
+
+
+	# `Backticked string` (analogous to single-quotes)
+	stringBackticks:
+		name:  "string.quoted.backticks.dotenv"
+		begin: "\\G`"
+		end:   "`"
+		beginCaptures: 0: name: "punctuation.definition.string.begin.dotenv"
+		endCaptures:   0: name: "punctuation.definition.string.end.dotenv"
+		patterns: [{
+			# Literal backtick
+			name: "constant.character.escape.quote.dotenv"
+			match: "(\\\\)`"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.dotenv"
 		}]
