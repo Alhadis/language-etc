@@ -114,6 +114,7 @@ repository:
 					|	fail-with-body
 					|	fail
 					|	false-start
+					|	follow
 					|	form-escape
 					|	ftp-create-dirs
 					|	ftp-pasv
@@ -158,6 +159,7 @@ repository:
 					|	mptcp
 					|	ntlm-wb
 					|	ntlm
+					|	out-null
 					|	parallel-immediate
 					|	parallel
 					|	path-as-is
@@ -519,6 +521,7 @@ repository:
 					|	request
 					|	sasl-authzid
 					|	service-name
+					|	sigalgs
 					|	socks5-gssapi-service
 					|	ssl-sessions
 					|	stderr
@@ -578,6 +581,7 @@ repository:
 					|	max-filesize
 					|	max-redirs
 					|	max-time
+					|	parallel-max-host
 					|	parallel-max
 					|	rate
 					|	retry-delay

@@ -55,6 +55,7 @@
 	--fail-with-body		# no_parameter
 -f 	--fail		# no_parameter
 	--false-start		# no_parameter
+	--follow		# no_parameter
 	--form-escape		# no_parameter
 	--form-string	name=string	# form_data
 -F 	--form	name=content	# form_data
@@ -135,9 +136,11 @@
 	--ntlm-wb		# no_parameter
 	--ntlm		# no_parameter
 	--oauth2-bearer	token	# string
+	--out-null		# no_parameter
 	--output-dir	dir	# string
 -o 	--output	file	# string
 	--parallel-immediate		# no_parameter
+	--parallel-max-host	num	# numeric
 	--parallel-max	num	# numeric
 -Z 	--parallel		# no_parameter
 	--pass	phrase	# string
@@ -207,6 +210,7 @@
 	--service-name	name	# string
 -S 	--show-error		# no_parameter
 -i 	--show-headers		# no_parameter
+	--sigalgs	list	# string
 -s 	--silent		# no_parameter
 	--skip-existing		# no_parameter
 	--socks4	host[:port]	# kv_colon
