@@ -66,7 +66,7 @@ repository:
 			match: "(?i)[MLHVCSQTAZ]"
 		},{
 			name: "constant.numeric.number.xml.svg"
-			match: "-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)"
+			match: "-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[Ee][-+]?\\d+)?"
 		},{
 			name: "punctuation.separator.coordinates.comma.xml.svg"
 			match: ","
