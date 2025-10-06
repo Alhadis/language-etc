@@ -6,7 +6,7 @@ firstLineMatch: """(?x)
 
 	# Emacs modeline
 	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
-		(?i:conf(?:-(?:colon|desktop|javaprop|ppd|space|toml|unix|windows|xdefaults))?)
+		(?i:conf(?:-(?:colon|desktop|javaprop|ppd|space|toml|unix|windows))?)
 	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
 	
 	|
