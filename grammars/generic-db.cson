@@ -7,8 +7,6 @@ fileTypes: [
 	"flowers"
 	"locale.alias"
 	"shells"
-	"tab"
-	"tsv"
 
 	# MIME-type databases (TODO: Move to dedicated grammar)
 	"mime.types"
