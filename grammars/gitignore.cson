@@ -8,6 +8,7 @@ fileTypes: [
 	"gitignore_global"
 	"gitignore.global"
 	"sparse-checkout"
+	"removed-files"
 	
 	# Mutually-compatible formats
 	"alexignore"

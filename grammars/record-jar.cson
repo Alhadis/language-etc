@@ -3,6 +3,8 @@ scopeName: "source.record-jar"
 fileTypes: [
 	"language-subtag-registry"
 	"language-subtag-registry.txt"
+	"language-tag-extensions-registry"
+	"language-tag-extensions-registry.txt"
 	"nametable"
 	"nametable.txt"
 ]
