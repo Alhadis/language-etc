@@ -14,6 +14,19 @@ module.exports = {
 			default: false,
 			order: 1,
 		},
+		linkScopes: {
+			order: 2,
+			type: "array",
+			items: {type: "string"},
+			title: "Hyperlink scopes",
+			description: "Scope selectors for tokens whose contents can be opened by the `link:open` command.",
+			default: [
+				"constant.other.reference.link",
+				"markup.link",
+				"markup.underline.link",
+				"string.other.link",
+			],
+		},
 	},
 	
 	/**
@@ -52,11 +65,32 @@ module.exports = {
 		for(const {cursor} of editor.getSelectionsOrderedByBufferPosition()){
 			const position = cursor.getBufferPosition();
 			const token    = editor.tokenizedBuffer.tokenForPosition(position);
+			const links    = atom.config.get("language-etc.linkScopes");
 			
 			// Open ShellCheck's wiki entry for the error-code under the cursor
 			if(token && token.scopes.includes("markup.underline.link.error-code.shellcheckrc")){
 				const {shell} = require("electron");
 				shell.openExternal("https://www.shellcheck.net/wiki/" + token.value.toUpperCase());
+				event.stopImmediatePropagation();
+			}
+			
+			// Well-formed URLs not scoped by `language-hyperlink`
+			else if(links.some(scope => token.matchesScopeSelector(scope))){
+				const {fileURLToPath, parse} = require("url");
+				const url = parse(token.value);
+				switch(url.protocol){
+					case "http:":
+					case "https:": {
+						const {shell} = require("electron");
+						shell.openExternal(url.href);
+						break;
+					}
+					case "file:":
+						atom.workspace.open(fileURLToPath(url.href));
+						break;
+					default:
+						continue;
+				}
 				event.stopImmediatePropagation();
 			}
 		}
