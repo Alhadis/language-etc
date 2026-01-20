@@ -55,6 +55,8 @@ Supported formats
 * [x] [`CODEOWNERS`](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners)
 * [x] [Coccinelle/SmPL](http://coccinelle.lip6.fr/docs/index.html)
 * [ ] [Connection Control Language](https://en.wikipedia.org/wiki/Softmodem "/Library/Modem Scripts/*.ccl")
+* [x] [CPAN mirror configuration](https://github.com/briandfoy/cpanpm/blob/f28144917/MIRRORED.BY)
+* [x] [CPAN `MANIFEST.SKIP` lists](https://metacpan.org/pod/ExtUtils::Manifest#MANIFEST.SKIP)
 * [x] [`dc(1)`](http://man.openbsd.org/dc.1)
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)

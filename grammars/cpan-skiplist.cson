@@ -1,0 +1,19 @@
+# “MANIFEST.SKIP” files, used by ExtUtils::MakeMaker(3) and documented in ExtUtils::Manifest(3).
+name: "CPAN manifest skip-list"
+scopeName: "source.cpan-skiplist"
+fileTypes: ["MANIFEST.SKIP"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#pattern"}
+		]
+
+	# Regular expression matching filenames to exclude from distribution
+	pattern:
+		name:  "string.regexp.filename-pattern.cpan-skiplist"
+		begin: "^(?=[^\\s#])"
+		end:   "(?=\\s*$|\\s+(?=#))"
+		patterns: [include: "source.regexp"]

@@ -1,0 +1,212 @@
+name: "CPAN Mirror Configuration"
+scopeName: "source.cpan-mirror"
+fileTypes: ["MIRRORED.BY"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#domain"}
+		]
+
+
+	# Approximate connection speed in bytes-per-second
+	bandwidth:
+		name:  "meta.field.bandwidth.cpan-mirror"
+		begin: "^\\s*(dst_bandwidth)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			# "1.25 MB/s"
+			match: '\\G(")(\\d+(?:\\.\\d+)?)\\s+(?i:([KMGTPEZY]B)(/)([mn]?s))(")(?=$|\\s)'
+			captures:
+				1: name: "punctuation.definition.value.begin.cpan-mirror"
+				2: patterns: [include: "etc#num"]
+				3: name: "keyword.other.unit.bytesize.cpan-mirror"
+				4: name: "punctuation.separator.slash.units.cpan-mirror"
+				5: name: "keyword.other.unit.time.cpan-mirror"
+				6: name: "punctuation.definition.value.end.cpan-mirror"
+		}]
+
+
+	# Contact e-mail
+	contact:
+		name:  "meta.field.contact.cpan-mirror"
+		begin: "^\\s*(dst_contact)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [
+			{include: "etc#emailQuoted"}
+			{include: "etc#strDouble"}
+		]
+
+
+	# Mirror host
+	domain:
+		name:  "meta.mirror.cpan-mirror"
+		begin: "^([-\\w]+(?:\\.[-\\w]+)*+)(:)[ \\t]*$"
+		end:   "^(?!\\G)(?=\\S)"
+		beginCaptures:
+			1: name: "entity.name.domain.cpan-mirror"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [include: "#fields"]
+
+
+	# Supported fields within a domain block
+	fields:
+		patterns: [
+			{include: "#frequency"}
+			{include: "#location"}
+			{include: "#timezone"}
+			{include: "#bandwidth"}
+			{include: "#contact"}
+			{include: "#loadBalancing"}
+			{include: "#org"}
+			{include: "#urls"}
+			{include: "#other"}
+		]
+
+
+	# Mirror update frequency
+	frequency:
+		name:  "meta.field.frequency.cpan-mirror"
+		begin: "^\\s*(frequency)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			name: "constant.language.frequency.cpan-mirror"
+			match: '(")(?:daily|twice daily|instant|\\d+[dh])(")'
+			captures:
+				1: name: "punctuation.definition.value.begin.cpan-mirror"
+				2: name: "punctuation.definition.value.end.cpan-mirror"
+		}]
+
+
+	# Boolean setting to enable/disable load-balancing
+	loadBalancing:
+		name:  "meta.field.loadbal.cpan-mirror"
+		begin: "^\\s*(dst_loadbal)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			name: "constant.language.boolean.cpan-mirror"
+			match: '\\G(")(?:(Y)|(N))(")(?=$|\\s)'
+			captures:
+				1: name: "punctuation.definition.value.begin.cpan-mirror"
+				2: name: "constant.language.boolean.true.cpan-mirror"
+				3: name: "constant.language.boolean.false.cpan-mirror"
+				4: name: "punctuation.definition.value.end.cpan-mirror"
+		}]
+
+
+	# Local location: “city, [area,] country, continent (latitude longitude)”
+	location:
+		name:  "meta.field.location.cpan-mirror"
+		begin: "^\\s*(dst_location)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			begin: '\\G\\s*(?=")'
+			end:   "(?!\\G)"
+			patterns: [{
+				name:  "constant.location-spec.cpan-mirror"
+				begin: '\\G"'
+				end:   '(")|([^"]*)(?=\\s*$)'
+				beginCaptures:
+					0: name: "punctuation.definition.value.begin.cpan-mirror"
+				endCaptures:
+					1: name: "punctuation.definition.value.end.cpan-mirror"
+					2: name: "invalid.illegal.unclosed-string.cpan-mirror"
+				patterns: [include: "#locationInnards"]
+			}]
+		}]
+
+
+	# The individual components of a location spec, matched inside a tokenised string
+	locationInnards:
+		begin: """(?x)\\G
+			\\s*    ((?=\\S)[^,]+) \\s* (,)    # City
+			(?:\\s* ((?=\\S)[^,]+) \\s* (,))?  # Area (Optional)
+			\\s*    ((?=\\S)[^,]+) \\s* (,)    # Country
+			\\s*    (Africa|Asia|Europe|Global|(?:North|South)\\s+America|Oceania) # Continent
+			\\s*    (?=\\()
+		"""
+		end: "(?<=\\))|(?=\\s*$)"
+		beginCaptures:
+			1: name: "constant.language.location.city.cpan-mirror"
+			3: name: "constant.language.location.area.cpan-mirror"
+			5: name: "constant.language.location.country.cpan-mirror"
+			7: name: "constant.language.location.continent.cpan-mirror"
+			2: patterns: [include: "etc#comma"]
+			4: patterns: [include: "etc#comma"]
+			6: patterns: [include: "etc#comma"]
+		patterns: [{
+			name:  "meta.geolocation.cpan-mirror"
+			begin: "\\G\\("
+			end:   "\\)|(?=\\s*$)"
+			beginCaptures: 0: name: "punctuation.section.parenthesis.round.bracket.begin.cpan-mirror"
+			endCaptures:   0: name: "punctuation.section.parenthesis.round.bracket.end.cpan-mirror"
+			patterns: [
+				{include: "etc#num"}
+				{include: "etc#comma"}
+			]
+		}]
+
+
+	# Organisation name
+	org:
+		name:  "meta.field.organisation.cpan-mirror"
+		begin: "^\\s*(dst_organisation)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [include: "etc#strDouble"]
+
+
+	# Any field we don't recognise
+	other:
+		name:  "meta.field.other.cpan-mirror"
+		begin: "^\\s*(\\w+)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [include: "etc#strDouble"]
+
+
+	# Timezone offset: “±n[.dd]”
+	timezone:
+		name:  "meta.field.timezone.cpan-mirror"
+		begin: "^\\s*(dst_timezone)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			2: patterns: [include: "etc#eql"]
+		patterns: [{
+			match: "\\G\\s*([-+]?\\d+(?:\\.\\d+)?)(?=$|\\s)"
+			captures:
+				1: name: "constant.numeric.timezone-offset.cpan-mirror"
+		}]
+
+
+	# URL-typed fields
+	urls:
+		name:  "meta.field.$2-url.cpan-mirror"
+		begin: "^\\s*(dst_(ftp|http|rsync|src))\\s*(=)[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.field.cpan-mirror"
+			3: patterns: [include: "etc#eql"]
+		patterns: [include: "etc#url"]

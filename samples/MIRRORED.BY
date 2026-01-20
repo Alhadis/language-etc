@@ -1,0 +1,48 @@
+# Last updated Wed Apr 14 21:34:43 2021 (UTC)
+# 
+# Explanation of the syntax:
+# 
+# your.domain.name:
+# frequency        = "daily|twice daily" or like "1d|24h|12h|8h|6h"
+#                    or "instant" if you use "instant mirroring"
+# dst_ftp          = "ftp://your.host.name:/CPAN/mirror/directory/"
+# dst_http         = "http://your.host.name:/CPAN/mirror/directory/"
+# dst_rsync        = "rsync://your.host.name/CPAN/"
+# dst_location     = "city, (area,)? country, continent (lat long)"
+# dst_organisation = "full organisation name"
+# dst_timezone     = "[+-]n(.dd)?"
+# dst_bandwidth    = "Approximate connection speed in Mb/s"
+# dst_contact      = "email.address.to.contact@for.this.mirror"
+# dst_src          = "host.that.you.mirror.from"
+# dst_loadbal      = "Y" or "N" Join the DNS load balancing pool for ftp.cpan.org
+# 
+# Notes:
+# - This file is UTF-8 encoded.
+# - dst_location :
+#   - The "(lat long)" is required. It is the latitude and longtitude
+#     in degrees.minutes_IN_DECIMAL (45 minutes = 0.75) ; North and East
+#     are positive.
+#     To find your location, use the yellow button on the CPAN map :
+#       http://mirrors.cpan.org/map.html
+#   - The "area" is optional. It is the state (United States), county,
+#     prefecture, district etc.
+#   - The continent is : Africa, Asia, Europe, North America,
+#     Oceania or South America.
+# - dst_organisation :
+#   - The language is usually "native (english)" but for example
+#     in Canada, well, is native English or French?
+# - The contact email address is obfuscated.
+
+www.cpan.org:
+	frequency        = "instant"
+	dst_http         = "http://www.cpan.org/"
+	dst_location     = "Melbourne, Victoria, Australia, Oceania (0 0)"
+	dst_organisation = "Global CPAN CDN"
+	dst_timezone     = +11.00
+	dst_bandwidth    = "100.0 Gb/s"
+	dst_contact      = "perl.org)cpan"
+	dst_src          = "rsync://cpan-rsync.perl.org/CPAN/"
+	dst_loadbal      = "Y"
+	unknown_field    = "Fallback highlighting for unrecognised field"
+
+# dst_dst          = "http://www.cpan.org/"

@@ -1,7 +1,7 @@
 # Highlighting for anything that uses “#” or “;” as comments
 name: "Generic Configuration"
 scopeName: "source.generic-config"
-fileTypes: ["/etc/*.conf"] # Dummy filetype to force inclusion in grammar-selector
+fileTypes: ["MANIFEST"]
 firstLineMatch: """(?x)
 
 	# Emacs modeline

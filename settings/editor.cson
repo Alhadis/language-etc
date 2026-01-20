@@ -1,4 +1,6 @@
-".source.curlrc,
+".source.cpan-mirror,
+ .source.cpan-skiplist,
+ .source.curlrc,
  .source.dotenv,
  .source.gitignore,
  .source.gitattributes,
