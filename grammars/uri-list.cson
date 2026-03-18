@@ -1,0 +1,49 @@
+# Provisional URI list, as specified by RFC 2483
+name: "URI List"
+scopeName: "source.uri-list"
+macTypeCode: "URIs"
+mimeType: "text/uri-list"
+fileTypes: ["uris", "uri"]
+firstLineLength: """(?x)
+	# Modeline
+	(?-im:
+		# Emacs
+		-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+			(?i:ur[il]s?(?:-?list)?)
+		(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+		
+		|
+		
+		# Vim
+		(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+		(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+		(?:filetype|ft|syntax)[ \\t]*=
+			(?i:ur[il]s?(?:-?list)?)
+		(?=$|\\s|:)
+	)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "etc#url"}
+			{include: "#uri"}
+		]
+
+	# Comment-lines
+	comment:
+		name:  "comment.line.number-sign.uri-list"
+		begin: "^#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.uri-list"
+
+	# Generic URI
+	uri:
+		name:  "constant.other.reference.link.underline.${1:/downcase}.url"
+		begin: "([A-Za-z][-A-Za-z+.]*)(:)"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			2: name: "punctuation.separator.delimiter.scheme.url"

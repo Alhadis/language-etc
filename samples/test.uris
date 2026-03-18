@@ -1,0 +1,32 @@
+# urn:isbn:0-201-08372-8
+http://www.huh.org/books/foo.html
+http://www.huh.org/books/foo.pdf
+ftp://ftp.foo.org/books/foo.txt
+mailto:john.doe@example.com,jane.doe@example.com?subject=Spam&cc=&body=%20
+
+# Data URIs (RFC 2397)
+data:,
+data:text/html;charset=UTF-8;filename=foo.html,%26%23x2122;
+data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAEALAAAAAABAAEAAAIBTAA7
+
+# Geolocations
+geo:37.786971,-122.399677,14;u=35
+geo:37.786971,-122.399677;crs=Moon-2011;u=35
+geo:323482,4306480;crs=epsg32618;u=20
+geo:0,0?q=37.422,-122.084(Google+Maps+Syntax)
+geo:37.422,-122.084(Google+Maps+Syntax)
+geo:37.422,-122.084?z=14&(Google+Maps+Syntax)
+
+# Tag URIs (RFC 4151)
+tag:example.com,2004:1234
+tag:example.com,2004-01:1234
+tag:example.com,2004-01-01:1234
+tag:example.com,2000-05-15:example
+tag:timothy@hpl.hp.com,2001:web/externalHome
+tag:sandro@w3.org,2004-05:Sandro
+tag:my-ids.com,2001-09-15:TimKindberg:presentations:UBath2004-05-19
+tag:blogger.com,1999:blog-555
+tag:yaml.org,2002:int#section1
+
+tel:+61260565455
+urn:isbn:0-201-08372-8
