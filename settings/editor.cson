@@ -177,3 +177,9 @@
  .text.youtube":
 	editor:
 		softWrap: true
+
+".text.mac-tts":
+	editor:
+		softWrap: true
+		commentStart: "[[cmnt "
+		commentEnd:   "]]"

@@ -1,0 +1,299 @@
+# Input text for macOS's legacy speech synthesiser
+# https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html
+name: "macOS Speech Synthesis Input"
+scopeName: "text.mac-tts"
+fileTypes: ["mac-tts"] # Bogus filetype
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#inputMode"}
+			{include: "#commandBlock"}
+		]
+
+
+	# Shared rule for tokenising square brackets
+	brackets:
+		patterns: [{
+			# Opening delimiters for an embedded speech command
+			name: "punctuation.section.command.begin.mac-tts"
+			match: "\\[\\["
+			captures:
+				0: name: "sublimelinter.gutter-mark"
+		},{
+			# Closing delimiters for aforementioned command
+			name: "punctuation.section.command.end.mac-tts"
+			match: "\\]\\]"
+			captures:
+				0: name: "sublimelinter.gutter-mark"
+		},{
+			# Opening bracket for one or more TUNE declarations
+			name: "punctuation.section.command.begin.bracket.curly.tune.mac-tts"
+			match: "{"
+			captures:
+				0: name: "sublimelinter.gutter-mark"
+		},{
+			# Closing bracket for the previously-mentioned syntax
+			name: "punctuation.section.command.end.bracket.curly.tune.mac-tts"
+			match: "}"
+			captures:
+				0: name: "sublimelinter.gutter-mark"
+		}]
+
+
+	# Embedded speech command(s): “[[cmd1 …; cmd2 …]]”
+	commandBlock:
+		name:  "meta.command-block.mac-tts"
+		begin: "\\[\\[(?=[a-z]{4}(?:$|;|\\s|\\]\\]))"
+		end:   "\\]\\]"
+		beginCaptures: 0: patterns: [include: "#brackets"]
+		endCaptures:   0: patterns: [include: "#brackets"]
+		patterns: [include: "#commands"]
+
+
+	# Individual command: “[[cmd1 arg1 … argN]]”
+	commands:
+		name:  "meta.command.$1.mac-tts"
+		begin: "(?:\\G|(?<=;)\\s*)([a-z]{4})(?=$|;|\\s|\\]\\])"
+		end:   "(?!\\G)(?:\\s*(;)|(?=\\s*\\]\\]))"
+		beginCaptures:
+			1: name: "entity.name.tag.command.mac-tts"
+		endCaptures:
+			1: patterns: [include: "#semicolon"]
+		patterns: [{
+			# “[cmnt Stuff to ignore as user commentary]”
+			begin: "\\G(?<=cmnt)[ \\t]*"
+			end:   "(?=\\s*(?:;|\\]\\]))"
+			contentName: "comment.block.command.mac-tts"
+		},{
+			# Word/number-speaking mode
+			begin: "\\G(?<=char|nmbr)[ \\t]*"
+			end:   "(?=\\s*(?:;|\\]\\]))"
+			patterns: [{
+				begin: "\\G"
+				end:   "(?:\\s*(?<=\\s|\\G|^)(NORM|LTRL))?(?=\\s*(?:;|\\]\\]))"
+				endCaptures:
+					1: name: "constant.language.speaking-mode.mac-tts"
+			}, include: "#invalidParameter"]
+		},{
+			# Word context 
+			begin: "\\G(?<=ctxt)[ \\t]*"
+			end:   "(?=\\s*(?:;|\\]\\]))"
+			patterns: [{
+				begin: "\\G"
+				end:   "(?:\\s*(?<=\\s|\\G|^)(WSKP|WORD|NORM|TSKP|TEXT))?(?=\\s*(?:;|\\]\\]))"
+				endCaptures:
+					1: name: "constant.language.word-context.mac-tts"
+			}, include: "#invalidParameter"]
+		},{
+			# Switch embedded command delimiters (“[[” and “]]” by default)
+			begin: "\\G(?<=dlim)[ \\t]*"
+			end:   "(?=\\s*(?:;|\\]\\]))"
+			patterns: [{
+				begin: "\\s*((?:[^\\s;\\]]|\\](?!\\]))+)"
+				end:   "(?:(?<=^)\\s*|\\s+)((?:[^\\s;\\]]|\\](?!\\]))+)|(?=\\s*(?:;|\\]\\]))"
+				beginCaptures: 1: name: "string.unquoted.delimiter-string.opening.mac-tts"
+				endCaptures:   1: name: "string.unquoted.delimiter-string.closing.mac-tts"
+			}]
+		},{
+			# Emphasis
+			applyEndPatternLast: yes
+			begin: "\\G(?<=emph)[ \\t]*"
+			end:   "(?!\\G)"
+			patterns: [{
+				begin: "\\G"
+				end:   "[-+]|(?=\\s*(?:;|\\]\\]))"
+				endCaptures:
+					0: name: "keyword.operator.adjustment-direction.mac-tts"
+			}]
+		},{
+			# Pitch, tempo, and volume
+			applyEndPatternLast: yes
+			begin: "\\G(?<=pbas|pmod|rate|volm)[ \\t]*"
+			end:   "(?!\\G)"
+			patterns: [{
+				begin: "\\G"
+				end: "([-+]?)(\\d*\\.\\d+|\\d+)|(?=\\s*(?:;|\\]\\]))"
+				endCaptures:
+					1: name: "keyword.operator.relative-offset.mac-tts"
+					2: name: "constant.numeric.float.decimal.mac-tts"
+			}]
+		},{
+			# Commands which take a single 32-bit value as their parameter
+			applyEndPatternLast: yes
+			begin: "\\G(?<=rset|slnc|sync|vers)[ \\t]*"
+			end:   "(?!\\G)"
+			patterns: [{
+				begin: "\\G"
+				end:   """(?x)
+					\\s*
+					(?: (0x[0-9A-Fa-f]+|\\d*\\.\\d+|\\d+)\\b
+					|   ([!-~]{4})
+					|   ((?:[^\\s;\\]]|\\](?!\\]))+)
+					)(?=$|\\s|;|\\]\\])
+					|
+					(?=\\s*(?:;|\\]\\]))
+				"""
+				endCaptures:
+					1: patterns: [include: "#numbers"]
+					2: name: "entity.name.ostype.four-cc.mac-tts"
+					3: patterns: [include: "#invalidParameter"]
+			}]
+		},{
+			# Synthesiser-specific speech commands
+			applyEndPatternLast: yes
+			begin: "\\G(?<=xtnd)[ \\t]*"
+			end:   "(?=;|\\]\\])"
+			patterns: [
+				# Initial parameter is an <OSType>
+				begin: "\\G"
+				end:   "\\s*([!-~]{4})(?=$|\\s|;|\\]\\])"
+				endCaptures:
+					1: name: "entity.name.ostype.four-cc.mac-tts"
+
+				# Remaining arguments are application-defined
+				{include: "#numbers"}
+				name:  "variable.extension.synthesiser-specific.mac-tts"
+				match: "(?:[^\\s;\\]]|\\](?!\\]))+"
+			]
+		}]
+
+
+	# Command for switching input-processing mode
+	inputMode:
+		patterns: [{
+			# Switch to phoneme mode: “[[inpt PHON]]”
+			begin: "(\\[\\[)((inpt)\\s+(PHON))(?:\\s*(;)\\s*)?(\\]\\])"
+			end:   "(?=\\[\\[inpt\\s+(?:TEXT|PHON|TUNE\\]\\]))"
+			contentName: "meta.phoneme-input.mac-tts"
+			beginCaptures:
+				0: name: "meta.command-block.mac-tts"
+				1: patterns: [include: "#brackets"]
+				2: name: "meta.command.inpt.mac-tts"
+				3: name: "entity.name.tag.command.mac-tts"
+				4: name: "constant.language.input-mode.mac-tts"
+				5: patterns: [include: "#semicolon"]
+				6: patterns: [include: "#brackets"]
+			patterns: [
+				{include: "#main"}
+				{include: "#phonemes"}
+			]
+		},{
+			# TUNE input-processing mode (advanced pitch contour control)
+			begin: "(\\[\\[)((inpt)\\s+(TUNE))(?:\\s*(;)\\s*)?(\\]\\])"
+			end:   "(?=\\[\\[inpt\\s+(?:TEXT|PHON|TUNE\\]\\]))"
+			contentName: "meta.tune-input.mac-tts"
+			beginCaptures:
+				0: name: "meta.command-block.mac-tts"
+				1: patterns: [include: "#brackets"]
+				2: name: "meta.command.inpt.mac-tts"
+				3: name: "entity.name.tag.command.mac-tts"
+				4: name: "constant.language.input-mode.mac-tts"
+				5: patterns: [include: "#semicolon"]
+				6: patterns: [include: "#brackets"]
+			patterns: [
+				{include: "#main"}
+				{include: "#phonemes"}
+				{include: "#tune"}
+			]
+		},{
+			# Switch back to the default textual mode
+			name:  "meta.command-block.mac-tts"
+			match: "(\\[\\[)((inpt)\\s+(TEXT))(?:\\s*(;)\\s*)?(\\]\\])"
+			captures:
+				1: patterns: [include: "#brackets"]
+				2: name: "meta.command.inpt.mac-tts"
+				3: name: "entity.name.tag.command.mac-tts"
+				4: name: "constant.language.input-mode.mac-tts"
+				5: patterns: [include: "#semicolon"]
+				6: patterns: [include: "#brackets"]
+		}]
+
+
+	# Error highlighting for invalid parameters, or ones found where they aren't expected
+	invalidParameter:
+		match: "\\s*((?:[^\\s;\\]]|\\](?!\\]))+)"
+		captures:
+			1: name:"invalid.illegal.bad-parameter.mac-tts"
+
+
+	# Numeric literals of varying notations
+	numbers:
+		patterns: [{
+			# Hexadecimal integer
+			name: "constant.numeric.integer.hexadecimal.mac-tts"
+			match: "\\b0x[0-9A-Fa-f]+\\b"
+		},{
+			# Decimal integer
+			match: "([-+])?(\\d+\\b(?!\\.))"
+			captures:
+				1: name: "keyword.operator.arithmetic.mac-tts"
+				2: name: "constant.numeric.integer.decimal.mac-tts"
+		},{
+			# Decimal float
+			match: "([-+]?)(\\d*\\.\\d+\\b)"
+			captures:
+				1: name: "keyword.operator.arithmetic.mac-tts"
+				2: name: "constant.numeric.float.decimal.mac-tts"
+		}]
+
+
+	# Input processed in phoneme mode
+	phonemes:
+		patterns: [{
+			# macOS's crude substitute for IPA symbols
+			name: "keyword.other.phoneme.mac-tts"
+			match: "AA|AE|AO|AW|AX|AY|EH|EN|EY|IH|IX|IY|OW|OY|UH|UW|UX|[@%CDJNSTZbdfghklmnprstvwyz]"
+		},{
+			# Prosodic controls (modifier prefixes for individual phonemes)
+			name: "storage.modifier.prosodic-control.mac-tts"
+			match: "[12=~_+]"
+		}]
+
+
+	# Command separator
+	semicolon:
+		name: "punctuation.terminator.statement.mac-tts"
+		match: ";"
+		captures:
+			0: name: "sublimelinter.gutter-mark"
+
+
+	# TUNE syntax
+	tune:
+		name:  "meta.attribute-list.tune.mac-tts"
+		begin: "{"
+		end:   "}"
+		beginCaptures: 0: patterns: [include: "#brackets"]
+		endCaptures:   0: patterns: [include: "#brackets"]
+		patterns: [{
+			# Duration parameter, supposedly always listed first
+			name:  "meta.attribute.duration.tune.mac-tts"
+			begin: "D(?=$|[\\d\\s}]|\\.\\d)"
+			end:   "\\s*(;)|(?=\\s*(?:$|}))"
+			beginCaptures:
+				0: name: "variable.attribute.tune.mac-tts"
+			endCaptures:
+				1: patterns: [include: "#semicolon"]
+			patterns: [include: "#numbers"]
+		},{
+			# Pitch attributes
+			name:  "meta.attribute.pitch.tune.mac-tts"
+			begin: "P(?=$|[\\d\\s}]|\\.\\d)"
+			end:   "\\s*(;)|(?=\\s*(?:$|}))"
+			beginCaptures:
+				0: name: "variable.attribute.tune.mac-tts"
+			endCaptures:
+				1: patterns: [include: "#semicolon"]
+			patterns: [{
+				# Individual pitch specifications: [hertz]:[percentile-position-in-phoneme]
+				name:  "meta.pitch-specification.tune.mac-tts"
+				match: "(?<!:|-)\\b(\\d*\\.\\d+|\\d+)((:))(\\d+)"
+				captures:
+					1: name: "meta.pitch-in-hertz.tune.mac-tts", patterns: [include: "#numbers"]
+					2: name: "punctuation.separator.arguments.colon.tune.mac-tts"
+					3: name: "sublimelinter.gutter-mark"
+					4: name: "meta.position-in-phenome.tune.mac-tts", patterns: [include: "#numbers"]
+			}]
+		}]

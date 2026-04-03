@@ -1,0 +1,27 @@
+[[inpt TEXT]]
+
+[[cmnt
+Multiple
+line
+comment]]
+
+[[char NORM]]
+[[nmbr LTRL]]
+[[ctxt WORD]]
+[[emph +; rate 165]]
+[[dlim $$ $$]]
+[[emph -]]
+[[pbas -30.25]]
+[[pmod +18.5]]
+[[rate +3000]]
+[[rset 0]]
+[[slnc 200]]
+[[sync 0x000000A1]]
+[[vers 10.5]]
+[[volm +1101]]
+[[xtnd Appl arg1 +200 -0.5 arg2 etc]]
+[[inpt PHON;]] [[slnc 500]] [[rate -30]]
++yUW _1tAOl=kIHn ~AX [[pbas +3]]+mIY?
+[[inpt TEXT]]
+
+My name is [[inpt PHON]] AY1yIY2SAX [[inpt TEXT]].
