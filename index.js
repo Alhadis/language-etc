@@ -34,11 +34,18 @@ module.exports = {
 	 * @api private
 	 */
 	activate(){
+		// Replace core “link:open” handler with a no-op to stop it firing twice
+		const {mainModule: linkPkg} = atom.packages.loadPackage("link");
+		const coreOpenLink = linkPkg.openLink;
+		linkPkg.openLink = () => {};
+		
+		const {CompositeDisposable, Disposable} = require("atom");
 		this.isUpdating = false;
-		this.disposables = new (require("atom").CompositeDisposable)(
+		this.disposables = new CompositeDisposable(
 			atom.config.observe(this.name + ".autoUpdate", value => value && this.update()),
 			atom.commands.add("atom-workspace", `${this.name}:update`, this.update.bind(this, true)),
-			atom.commands.add("atom-text-editor", "link:open", this.openLink.bind(this)),
+			atom.commands.add("atom-text-editor", "link:open", event => this.openLink(event) || coreOpenLink.call(linkPkg)),
+			new Disposable(() => linkPkg.openLink = coreOpenLink),
 		);
 	},
 	
@@ -72,6 +79,7 @@ module.exports = {
 				const {shell} = require("electron");
 				shell.openExternal("https://www.shellcheck.net/wiki/" + token.value.toUpperCase());
 				event.stopImmediatePropagation();
+				return true;
 			}
 			
 			// Well-formed URLs not scoped by `language-hyperlink`
@@ -92,6 +100,7 @@ module.exports = {
 						continue;
 				}
 				event.stopImmediatePropagation();
+				return true;
 			}
 		}
 	},
