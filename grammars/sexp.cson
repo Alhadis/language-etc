@@ -1,7 +1,7 @@
 # Generic highlighting for sexp-based formats
 name: "S-expressions"
 scopeName: "source.sexp"
-fileTypes: ["sexp"]
+fileTypes: ["sexp", "sb"]
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
 	# Emacs modeline
