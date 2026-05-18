@@ -146,7 +146,8 @@
 		tabLength: 8
 		tabType: "hard"
 
-".text.codeowners":
+".text.cachedir,
+ .text.codeowners":
 	editor:
 		commentStart: "# "
 

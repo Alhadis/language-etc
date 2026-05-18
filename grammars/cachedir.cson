@@ -1,0 +1,20 @@
+# Directory cache tag (https://bford.info/cachedir/)
+name: "Cache directory tag"
+scopeName: "text.cachedir"
+fileTypes: ["CACHEDIR.TAG"]
+patterns: [include: "#main"]
+repository:
+	main:
+		patterns: [
+			{include: "#signature"}
+			{include: "etc#comment"}
+		]
+
+	# Mandatory header required to unambiguously identify cache-directory tags
+	signature:
+		name: "meta.signature.cachedir"
+		match: "\\A(Signature(:)) (8a477f597d28d172789f06886806bc55)"
+		captures:
+			1: name: "keyword.operator.signature.cachedir"
+			2: name: "punctuation.separator.key-value.colon.cachedir"
+			3: name: "constant.numeric.integer.hexadecimal.checksum.md5.cachedir"
