@@ -21,5 +21,12 @@
 		"language-grammars",
 		"language-regexp"
 	],
-	"engines": {"atom": "*"}
+	"engines": {"atom": "*"},
+	"eslintConfig": {
+		"extends": "@alhadis/eslint-config/atom",
+		"overrides": [{
+			"files": "index.js",
+			"rules": {"prefer-object-has-own": 0}
+		}]
+	}
 }

@@ -47,6 +47,10 @@ module.exports = {
 			atom.commands.add("atom-text-editor", "link:open", event => this.openLink(event) || coreOpenLink.call(linkPkg)),
 			new Disposable(() => linkPkg.openLink = coreOpenLink),
 		);
+		
+		this.whenLoaded()
+			.then(() => this.patchGrammarPathMatching())
+			.catch(e => console.error(e));
 	},
 	
 	/**
@@ -176,5 +180,97 @@ module.exports = {
 		
 		this.isUpdating = false;
 		return alert;
+	},
+
+	/**
+	 * Patch Atom's logic for assigning grammars by pathname.
+	 * @api private
+	 */
+	patchGrammarPathMatching(){
+		if(this.hasPatchedPathMatching) return;
+		this.hasPatchedPathMatching = true;
+		const pkgMatch = new Map();
+		const matchers = new Map();
+		let Minimatch  = null;
+		
+		// Register globbing behaviour for a package's grammars
+		const checkPkgFileTypes = pkg => {
+			for(const grammar of pkg.grammars || []){
+				const {fileTypes} = grammar;
+				for(let i = fileTypes.length - 1; i >= 0; --i){
+					let type = fileTypes[i];
+					if(!type.includes("*")) continue;
+					if(!type.startsWith("/")) type = "**/" + type;
+					if(null === Minimatch){
+						const {resolve, dirname} = require("path");
+						const path = dirname(require.resolve("atom"));
+						({Minimatch} = require(resolve(path, "../node_modules/minimatch")));
+					}
+					const matcher = new Minimatch(type, {
+						dot: true,
+						noext: true,
+						nocase: true,
+						matchBase: false,
+					});
+					matchers.has(grammar)
+						? matchers.get(grammar).push(matcher)
+						: matchers.set(grammar, [matcher]);
+					pkgMatch.has(pkg)
+						? pkgMatch.get(pkg).push(grammar)
+						: pkgMatch.set(pkg, [grammar]);
+				}
+			}
+			if(pkgMatch.has(pkg)){
+				const disposable = pkg.onDidDeactivate(() => {
+					for(const grammar of pkgMatch.get(pkg) || [])
+						matchers.delete(grammar);
+					pkgMatch.delete(pkg);
+					disposable.dispose();
+				});
+				this.disposables.add(disposable);
+			}
+		};
+		
+		// Collect grammars whose `fileTypes` array contains a glob-like pattern
+		for(const pkg of Object.values(atom.packages.activePackages))
+			checkPkgFileTypes(pkg);
+		this.disposables.add(atom.packages.onDidActivatePackage(checkPkgFileTypes));
+		
+		// Monkey-patch the grammar-registry to support globbing
+		const {getGrammarPathScore} = atom.grammars;
+		const {name} = getGrammarPathScore;
+		if(!Object.prototype.hasOwnProperty.call(atom.grammars, name)){
+			const {Disposable} = require("atom");
+			this.disposables.add(new Disposable(() => delete atom.grammars[name]));
+			atom.grammars[name] = function(grammar, filePath){
+				const score = getGrammarPathScore.call(this, grammar, filePath);
+				if(score <= 0 && filePath && matchers.has(grammar))
+					for(const matcher of matchers.get(grammar))
+						if(matcher.match(filePath)) return 2;
+				return score;
+			};
+		}
+		
+		// Refresh the grammar of any opened files with an unrecognised filetype
+		for(const editor of atom.workspace.getTextEditors())
+			if(atom.grammars.nullGrammar === editor.getGrammar())
+				atom.grammars.autoAssignLanguageMode(editor.buffer);
+	},
+
+	/**
+	 * Return a {@link Promise} that resolves once the workspace has finished loading.
+	 * @return {Promise<void>}
+	 * @api private
+	 */
+	whenLoaded(){
+		return new Promise(resolve => {
+			if(atom.packages.initialPackagesActivated)
+				return resolve();
+			const disposable = atom.packages.onDidActivateInitialPackages(() => {
+				resolve();
+				disposable.dispose();
+			});
+			this.disposables.add(disposable);
+		});
 	},
 };
