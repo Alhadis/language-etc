@@ -1,0 +1,15 @@
+# This registers an interpreter name with a binary
+scm=/usr/local/bin/mit-scheme
+
+# Register an extension
+:Scheme-ext:E::scm::/usr/local/bin/mit-scheme:
+
+# Register a magic number
+:Scheme-magic:M::\x3B\x20GIMP Scheme::scm:
+
+
+# Source: https://gimpchat.com/viewtopic.php?p=255759#p255759
+python=C:\Users\Brian\Documents\Portable Software\GIMPPortable\App\gimp\bin\pythonw.exe
+python2=C:\Users\Brian\Documents\Portable Software\GIMPPortable\App\gimp\bin\pythonw.exe
+/usr/bin/python=C:\Users\Brian\Documents\Portable Software\GIMPPortable\App\gimp\bin\pythonw.exe
+:Python:E::py::python:

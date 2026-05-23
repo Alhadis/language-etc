@@ -1,0 +1,336 @@
+name: "GIMP Resource"
+scopeName: "source.gimpres"
+fileTypes: [
+	"fractalexplorer/*"         # Fractal Explorer: https://docs.gimp.org/3.2/en/plug-in-fractalexplorer.html
+	"gimpressionist/Presets/*"  # GIMPressionist:   https://docs.gimp.org/3.2/en/plug-in-gimpressionist.html
+	"ggr"                       # Gradient:         https://developer.gimp.org/core/standards/ggr/
+	"gpl"                       # Palette:          https://developer.gimp.org/core/standards/gpl/
+	"vbr"                       # Brush:            https://developer.gimp.org/core/standards/vbr/
+	"gfig"                      # GFIG:             https://docs.gimp.org/3.2/en/plug-in-gfig.html
+	"gflare"                    # GFlare:           https://docs.gimp.org/3.2/en/plug-in-gflare.html
+]
+firstLineMatch: """(?x)
+	\\A
+	(?: GIMP \\x20 (?:Gradient|Palette)
+	|   GIMP-VBR
+	|   GFIG \\x20 Version \\x20 \\d+(?:\\.\\d+)*
+	|   GIMP \\x20 GFlare  \\x20 \\d+(?:\\.\\d+)*
+	|   (?i-x:Fractal Explorer Plug-In Version \\d.*)
+	)$
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#brush"}
+			{include: "#gradient"}
+			{include: "#fractal"}
+			{include: "#palette"}
+			{include: "#gfig"}
+			{include: "#gflare"}
+			{include: "#gimpressionist"}
+		]
+
+
+	# “Generated” brush specification
+	brush:
+		name:  "meta.brush.gimpres"
+		begin: "\\A(?=GIMP-VBR$)"
+		end:   "(?=A)B"
+		patterns: [{
+			# Header
+			applyEndPatternLast: yes
+			name:  "meta.header.gimpres"
+			begin: "\\A(GIMP-VBR)$"
+			end:   "^\\s*(\\S+.*?)(?=\\s*$)"
+			beginCaptures:
+				1: name: "keyword.control.signature.gimpres"
+			endCaptures:
+				1: name: "entity.name.tag.resource.gimpres"
+			patterns: [{
+				# Second line: version number
+				begin: "\\G(?=$)|^(?=\\d+(?:\\.\\d+)?$)"
+				end:   "^(\\d+(?:\\.\\d+)?)$"
+				endCaptures:
+					1: name: "constant.numeric.version-number.gimpres"
+			}]
+		},{
+			# Brush shape, specified on line 4
+			name: "constant.language.brush-shape.$1.gimpres"
+			match: "^(circle|diamond|square)$"
+		}, include: "etc#comment", {include: "etc#num"}]
+
+
+	# Fractal Explorer plug-in preset
+	fractal:
+		name:  "meta.fractal.gimpres"
+		begin: "\\A(?=Fractal Explorer Plug-In Version \\d)"
+		end:   "(?=A)B"
+		patterns: [{
+			# Header
+			name:  "meta.header.gimpres"
+			begin: "(?i)\\A(Fractal Explorer Plug-In Version (\\d+(?:\\.\\d+)*))"
+			end:   "$"
+			beginCaptures:
+				1: name: "keyword.control.signature.gimpres"
+				2: name: "ignore-github.constant.numeric.format-version.gimpres"
+			patterns: [{
+				match: "\\s*(-)\\s*((?:\\([Cc]\\)|©))\\s+(\\d{4})\\s+(<[^<>]+>)"
+				captures:
+					1: name: "meta.separator.dash.gimpres"
+					2: name: "constant.character.copyright-symbol.gimpres"
+					3: name: "constant.numeric.copyright-year.gimpres"
+					4: patterns: [include: "etc#emailBracketed"]
+			}]
+		},{
+			# Body
+			begin: "(?!\\A)^"
+			end:   "$"
+			patterns: [
+				{include: "#gfigField"}
+				{include: "etc#comment"}
+				
+				# EOF marker
+				name: "keyword.control.directive.eof.gimpres"
+				match: "^(<)EOF(>)$"
+				captures:
+					1: name: "punctuation.definition.directive.begin.gimpres"
+					2: name: "punctuation.definition.directive.end.gimpres"
+			]
+		}]
+
+
+	# GFIG plug-in drawing
+	gfig:
+		name:  "meta.gfig-drawing.gimpres"
+		begin: "\\A(?=GFIG Version \\d+(?:\\.\\d+)*$)"
+		end:   "(?=A)B"
+		patterns: [
+			# Header
+			name:  "meta.header.gimpres"
+			match: "\\A(GFIG Version (\\d+(?:\\.\\d+)*)$)"
+			captures:
+				1: name: "keyword.control.signature.gimpres"
+				2: name: "ignore-github.constant.numeric.format-version.gimpres"
+
+			{include: "#gfigField"}
+			{include: "#gfigTag"}
+		]
+
+
+	# “NamedField: Value”
+	gfigField:
+		patterns: [{
+			# Resource name
+			name:  "meta.field.name.gimpres"
+			begin: "^(Name(:))[ \\t]*"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "variable.assignment.name.gimpres"
+				2: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.resource-name.gimpres"
+			patterns: [include: "#octalEscape"]
+		},{
+			# Anything else
+			name:  "meta.field.gimpres"
+			begin: "^(\\w+(:))[ \\t]*"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "variable.assignment.gimpres"
+				2: patterns: [include: "etc#kolon"]
+			patterns: [include: "etc#num", {
+				# Boolean keywords
+				name: "constant.language.boolean.${1:/downcase}.gimpres"
+				match: "(?:\\G|(?<=\\s))(TRUE|FALSE)(?=$|\\s)"
+			},{
+				# Bareword identifiers
+				name: "string.unquoted.bareword.gimpres"
+				match: "(?!\\d)[-\\w]+"
+			}]
+		}]
+
+
+	# Sections delimited by HTML-ish tags
+	gfigTag:
+		name:  "meta.section.${3:/downcase}.gimpres"
+		begin: "^((<))(\\w+)((>))$"
+		end:   "^((</))(\\3)((>))$"
+		captures:
+			0: name: "meta.tag.section.gimpres"
+			1: name: "punctuation.definition.tag.begin.gimpres"
+			2: name: "brackethighlighter.angle"
+			3: name: "entity.name.tag.section.gimpres"
+			4: name: "punctuation.definition.tag.end.gimpres"
+			5: name: "brackethighlighter.angle"
+		patterns: [
+			# <OPTIONS> blocks appear to be the only tags that contain non-numeric data
+			begin: "(?<=<OPTIONS>)\\G"
+			end:   "(?=^</OPTIONS>$)"
+			patterns: [include: "#gfigField"]
+
+			{include: "etc#num"}
+			{include: "#gfigTag"}
+		]
+
+
+	# Gradient flare
+	gflare:
+		name:  "meta.gradient-flare.gimpres"
+		begin: "\\A(?=GIMP GFlare \\d+(?:\\.\\d+)*$)"
+		end:   "(?=A)B"
+		patterns: [{
+			# Header
+			name:  "meta.header.gimpres"
+			match: "\\A(GIMP GFlare (\\d+(?:\\.\\d+)*)$)"
+			captures:
+				1: name: "keyword.control.signature.gimpres"
+				2: name: "ignore-github.constant.numeric.format-version.gimpres"
+		},{
+			# Paint options
+			name: "meta.paint-options.gimpres"
+			match: "^(\\d+(?:\\.\\d+)?) ([A-Z]+)$"
+			captures:
+				1: name: "constant.numeric.decimal.opacity.gimpres"
+				2: name: "storage.modifier.blending-mode.gimpres"
+		},{
+			# Numeric values
+			begin: "^(?=\\s*-?\\d+(?:\\.\\d+)?\\s+-?\\d)"
+			end:   "(?=\\s*$)"
+			patterns: [include: "etc#num"]
+		},{
+			# Shape of secondary flares
+			name:  "meta.secondary-flare-shape.gimpres"
+			match: "^(POLYGON|CIRCLE)\\s+(\\d+)(?:\\s+(\\d+))?[ \\t]*$"
+			captures:
+				1: name: "storage.type.shape.${1:/downcase}.gimpres"
+				2: name: "constant.numeric.decimal.number-of-sides.gimpres"
+				3: name: "constant.numeric.decimal.random-seed.gimpres"
+		},{
+			# Internal (editor-defined) gradient name
+			name:  "meta.gradient-specifier.gimpres"
+			match: "^(%)\\w+$"
+			captures:
+				0: name: "keyword.operator.built-in.gradient-name.gimpres"
+				1: name: "punctuation.definition.gradient-name.gimpres"
+		},{
+			# User-defined gradient name
+			name:  "meta.gradient-specifier.gimpres"
+			match: "^\\s*(\\S[^\\r\\n]*)"
+			captures:
+				0: name: "entity.name.gradient.user-defined.gimpres"
+				1: patterns: [include: "#octalEscape"]
+		}]
+
+
+	# GIMPressionist preset (basically just a bracket-phobic INI file)
+	gimpressionist:
+		name:  "meta.gimpressionist-preset.gimpres"
+		begin: "\\A(?=Preset$)"
+		end:   "(?=A)B"
+		patterns: [{
+			name:  "meta.header.gimpres"
+			match: "\\APreset$"
+			captures:
+				0: name: "keyword.control.signature.gimpres"
+		}, include: "source.ini"]
+
+
+	# Gradient specification
+	gradient:
+		name:  "meta.gradient.gimpres"
+		begin: "\\A(?=GIMP Gradient$)"
+		end:   "(?=A)B"
+		patterns: [{
+			# Header
+			applyEndPatternLast: yes
+			name:  "meta.header.gimpres"
+			begin: "\\A(GIMP Gradient)$[\\r\\n]*"
+			end:   "^"
+			beginCaptures:
+				1: name: "keyword.control.signature.gimpres"
+			patterns: [include: "#nameField", {
+				name:  "meta.number-of-segments.gimpres"
+				match: "^(\\d+)[ \\t]*$"
+				captures:
+					1: patterns: [include: "etc#intNoExp"]
+			}]
+		},{
+			# Gradient segment specification comprising 15 numbers
+			name:  "meta.segment.gimpres"
+			begin: "(?!\\A)^(?=\\s*-?\\d+(?:\\.\\d+)?\\s+\\d)"
+			end:   "(?=\\s*$)"
+			patterns: [include: "etc#num"]
+		}]
+
+
+	# Colour palette
+	palette:
+		name:  "meta.palette.gimpres"
+		begin: "\\A(?=GIMP Palette$)"
+		end:   "(?=A)B"
+		patterns: [
+			# Header
+			applyEndPatternLast: yes
+			name:  "meta.palette.gimpres"
+			begin: "\\A(GIMP Palette)$[\\r\\n]*"
+			end:   "^"
+			beginCaptures:
+				1: name: "keyword.control.signature.gimpres"
+			patterns: [
+				{include: "#nameField"}
+				{include: "#columnsField"}
+			]
+		
+			{include: "etc#comment"}
+			
+			# Colour description: “r g b [name of colour]”
+			name:  "meta.palette-colour.gimpres"
+			begin: "^\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)(?:$|[ \\t]*)"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "constant.numeric.integer.colour-component.red.gimpres"
+				2: name: "constant.numeric.integer.colour-component.green.gimpres"
+				3: name: "constant.numeric.integer.colour-component.blue.gimpres"
+			contentName: "entity.name.tag.colour.gimpres"
+		]
+
+
+	# Optional field specifying number of fields to display palette on: “Columns: [0–255]”
+	columnsField:
+		name:  "meta.field.columns.gimpres"
+		begin: "^(Columns(:))[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.columns.gimpres"
+			2: patterns: [include: "etc#kolon"]
+		patterns: [{
+			# Initial integer
+			match: "\\G\\d+"
+			captures:
+				0: patterns: [include: "etc#intNoExp"]
+		},{
+			# Highlight anything else as an error
+			name:  "invalid.illegal.syntax.gimpres"
+			begin: "(?=(?!\\G)\\d|[^\\s\\d])"
+			end:   "(?=\\s*$)"
+		}]
+
+
+	# Header field naming the resource in question: “Name: …”
+	nameField:
+		name:  "meta.field.name.gimpres"
+		begin: "^(Name(:))[ \\t]*"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.name.gimpres"
+			2: patterns: [include: "etc#kolon"]
+		contentName: "entity.name.resource.gimpres"
+
+
+	# Octal codepoint escape: \040
+	octalEscape:
+		name: "constant.character.escape.octal.gimpres"
+		match: "(\\\\)[0-7]{3}"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.gimpres"

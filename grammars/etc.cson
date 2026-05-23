@@ -52,6 +52,12 @@ repository:
 		beginCaptures:
 			0: name: "punctuation.definition.comment"
 
+	# Variations of `#comment…` patterns that match only at the start of a line
+	commentStart:      patterns: [include: "#commentStartHash"]
+	commentStartHash:  begin: "^(?=#)",  end: "(?!\\G)", patterns: [include: "#commentHash"]
+	commentStartSemi:  begin: "^(?=;)",  end: "(?!\\G)", patterns: [include: "#commentSemi"]
+	commentStartSlash: begin: "^(?=//)", end: "(?!\\G)", patterns: [include: "#commentSlash"]
+
 	# Unquoted string-like argument
 	bareword:
 		name: "string.unquoted.bareword"

@@ -1,0 +1,366 @@
+###=====================================================================
+Sexp-based file-format used by GIMP for storing configuration settings.
+- https://gitlab.gnome.org/GNOME/gimp/-/blob/2525b9a4473b/etc/gimprc.in
+- https://www.gimp.org/man/gimprc.html
+
+NB: Syntactically, GIMP's “Script-Fu” files are based on TinyScheme, and
+configuration files (while loaded and parsed independently of the former)
+are assumed to also be TinyScheme-based.
+- https://sourceforge.net/p/tinyscheme/code/HEAD/tree/trunk/Manual.txt
+- https://conservatory.scheme.org/schemers/Documents/Standards/R5RS/
+
+Since macOS's sandbox profiles are *also* based on TinyScheme, we should
+consider writing a grammar for both formats, which will potentially free
+up most of this file's pattern definitions.
+
+In other words, avoid depending too strongly on the pattern rules defined
+herein - something like “source.sexp.gimprc#interpolations” might break a
+grammar that references it. You've been warned.
+======================================================================###
+
+name: "GIMP Configuration"
+scopeName: "source.gimprc"
+limitLineLength: no
+maxTokensPerLine: 2048
+fileTypes: [
+	"filters/*.settings"
+	"plug-in-settings/*.last"
+	"tool-options/*-tool"
+	
+	"action-history"
+	"colorrc"
+	"contextrc"
+	"controllerrc"
+	"devicerc"
+	"dockrc"
+	"extensionrc"
+	"gdyn"
+	"gimprc"
+	"gimprc~"
+	"gimprc.in"
+	"gtp"
+	"modifiersrc"
+	"parasiterc"
+	"pluginrc"
+	"profilerc"
+	"sessionrc"
+	"shortcutsrc"
+	"templaterc"
+	"toolrc"
+	"unitrc"
+]
+firstLineMatch: """(?x)
+	\\A(?i-x:\\# GIMP (?:gimp(?=-).*-tool options|tool preset))
+	|
+	# Fictitious modelines; neither editor supports gimprc(5) files, apparently.
+	(?-im:
+		# Emacs
+		-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+			(?i:gimprc|gimp-?conf(?:ig)?)
+		(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+		|
+		# Vim
+		(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+		(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+		(?:filetype|ft|syntax)[ \\t]*=
+			(?i:gimprc|gimp-?conf(?:ig)?)
+		(?=$|\\s|:)
+	)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#expr"}
+		]
+
+
+	# ASCII arrow (->) matched as part of a tokenised identifier
+	arrow:
+		name: "punctuation.separator.arrow.gimprc"
+		match: "->"
+
+
+	# An unquoted “yes” or “no” denoting the value of a boolean-type property
+	boolean:
+		name: "constant.logical.bool.boolean.${1:/downcase}.gimprc"
+		match: '(?i)(?:^|(?<=[\\s()";]))\\b(yes|no)\\b(?=$|[\\s()";])'
+
+
+	# Character literal
+	char:
+		patterns: [{
+			# Codepoint escape: #\xFF
+			name: "constant.character.hex-literal.gimprc"
+			match: "(#\\\\)x[0-9A-Fa-f]{2}"
+			captures:
+				1: name: "punctuation.definition.escape.character.gimprc"
+		},{
+			# Named ASCII characters
+			name: "constant.character.named.${2:/downcase}.gimprc"
+			match: """(?xi)
+				(\\#\\\\)
+				(space|newline|return|tab|ack|bel|bs|can|cr|dc[1-4]
+				|del|dle|em|enq|eot|esc|etv|etx|ff|fs|gs|ht|lf|nak
+				|nul|rs|si|soh|so|stx|sub|syn|us|vt)
+			"""
+			captures:
+				1: name: "punctuation.definition.escape.character.gimprc"
+		},{
+			# Any other character
+			name: "constant.character.single.gimprc"
+			match: "(#\\\\)."
+			captures:
+				1: name: "punctuation.definition.escape.character.gimprc"
+		}]
+
+
+	# Comments, which must begin at the very start of a line
+	comment:
+		name:  "comment.line.number-sign.gimprc"
+		begin: "^#"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.gimprc"
+
+
+	# Keywords for Scheme's boolean constants
+	constants:
+		patterns: [{
+			# True: #t
+			name: "constant.language.boolean.true.gimprc"
+			match: "(#)t"
+			captures:
+				1: name: "punctuation.definition.boolean.gimprc"
+		},{
+			# False: #f
+			name: "constant.language.boolean.false.gimprc"
+			match: "(#)f"
+			captures:
+				1: name: "punctuation.definition.boolean.gimprc"
+		}]
+
+
+	# Symbolic expression representing a configuration property
+	expr:
+		patterns: [{
+			# Format string settings
+			name:  "meta.expression.${2:/downcase}.gimprc"
+			begin: "(\\()(image-(?:status|title)-format)(?=$|\\s)"
+			end:   "\\)"
+			beginCaptures:
+				1: patterns: [include: "#punct"]
+				2: name: "variable.property.gimprc"
+			endCaptures:
+				0: patterns: [include: "#punct"]
+			patterns: [{
+				# Double-quoted string, with highlighted placeholder tokens
+				name:  "string.quoted.double.format.gimprc"
+				begin: '"'
+				end:   '"'
+				beginCaptures: 0: name: "punctuation.definition.string.begin.gimprc"
+				endCaptures:   0: name: "punctuation.definition.string.end.gimprc"
+				patterns: [
+					{include: "#placeholders"}
+					{include: "#stringInnards"}
+				]
+			}]
+		},{
+			# Anything else
+			name:  "meta.expression.${2:/downcase}.gimprc"
+			begin: "(\\()([A-Za-z0-9][-A-Za-z0-9!$%&*+,./:<=>?@^_~]*(?=$|\\s|\\)))?"
+			end:   "\\)"
+			beginCaptures:
+				1: patterns: [include: "#punct"]
+				2: name: "variable.property.gimprc"
+			endCaptures:
+				0: patterns: [include: "#punct"]
+			patterns: [include: "#values"]
+		}]
+
+
+	# Special string sequences that expand to variables at runtime
+	interpolations:
+		patterns: [{
+			# “~” expands to the user's $HOME à la bash(1); “~other-user” not supported
+			name: "keyword.operator.tilde.homedir.gimprc"
+			match: "~"
+		},{
+			# “${VAR}” expands to the value of an environment variable
+			name:  "variable.other.bracket.environment.shell.gimprc"
+			begin: "(\\${)"
+			end:   '((}))|([^}"]*)(?="|$)'
+			contentName: "brackethighlighter.unmatched" # For GitHub
+			beginCaptures:
+				0: name: "punctuation.definition.variable.begin.shell.gimprc"
+				1: name: "brackethighlighter.curly"
+			endCaptures:
+				1: name: "punctuation.definition.variable.end.shell.gimprc"
+				2: name: "brackethighlighter.curly"
+				3: name: "invalid.illegal.syntax.unclosed-bracket.shell.gimprc"
+		}]
+
+
+	# Numeric literals and “flonums” (https://bit.ly/49OgTY3).
+	# NB: Unlike in Lisp, radices are case-sensitive (so “#XFF” is an error).
+	number:
+		patterns: [{
+			# Memory size (integral amounts only): 10B, 24K, 10M, 2G
+			name: "constant.numeric.integer.memsize.gimprc"
+			match: "(?i)(?<=[\\s()\\[]|^)\\d+([BKMG])\\b"
+			captures:
+				0: name: "constant.numeric.integer.decimal.filesize.gimprc"
+				1: name: "keyword.other.unit.filesize.gimprc"
+		},{
+			# #b10010110: Binary notation
+			name: "constant.numeric.integer.binary.gimprc"
+			match: "(?<=[\\s()\\[]|^)(#)b[01]+"
+			captures:
+				1: name: "punctuation.definition.binary.gimprc"
+		},{
+			# #o777: Octal notation
+			name: "constant.numeric.integer.octal.gimprc"
+			match: "(?<=[\\s()\\[]|^)(#)o[0-7]+"
+			captures:
+				1: name: "punctuation.definition.oct.gimprc"
+		},{
+			# #d255: Radix specifying decimal notation (the default??)
+			name: "constant.numeric.integer.decimal.gimprc"
+			match: "(?<=[\\s()\\[]|^)(#)d[0-9]+"
+			captures:
+				1: name: "punctuation.definition.decimal.gimprc"
+		},{
+			# #xFFFF: Hexadecimal notation
+			name: "constant.numeric.integer.hex.gimprc"
+			match: "(?<=[\\s()\\[]|^)(#)x[0-9A-Fa-f]+"
+			captures:
+				1: name: "punctuation.definition.hex.gimprc"
+
+		}, include: "etc#num"]
+
+
+	# printf(3)-style formatting placeholders
+	placeholders:
+		patterns: [
+			{match: "(%)%", name: "constant.character.escape.placeholder.gimprc",                  captures: 1: patterns: [include: "#punct"]}
+			{match: "%f", name: "constant.other.placeholder.bare-filename.gimprc",                 captures: 0: patterns: [include: "#punct"]}
+			{match: "%F", name: "constant.other.placeholder.file-path.gimprc",                     captures: 0: patterns: [include: "#punct"]}
+			{match: "%p", name: "constant.other.placeholder.pdb-image-id.gimprc",                  captures: 0: patterns: [include: "#punct"]}
+			{match: "%i", name: "constant.other.placeholder.view-instance-number.gimprc",          captures: 0: patterns: [include: "#punct"]}
+			{match: "%t", name: "constant.other.placeholder.image-type.gimprc",                    captures: 0: patterns: [include: "#punct"]}
+			{match: "%z", name: "constant.other.placeholder.zoom-factor.gimprc",                   captures: 0: patterns: [include: "#punct"]}
+			{match: "%s", name: "constant.other.placeholder.source-scale-factor.gimprc",           captures: 0: patterns: [include: "#punct"]}
+			{match: "%d", name: "constant.other.placeholder.destination-scale-factor.gimprc",      captures: 0: patterns: [include: "#punct"]}
+			{match: "%B", name: "constant.other.placeholder.conditional.if-modified.gimprc",       captures: 0: patterns: [include: "#punct"]}
+			{match: "%A", name: "constant.other.placeholder.conditional.if-clean.gimprc",          captures: 0: patterns: [include: "#punct"]}
+			{match: "%l", name: "constant.other.placeholder.layer-count.gimprc",                   captures: 0: patterns: [include: "#punct"]}
+			{match: "%L", name: "constant.other.placeholder.layer-count-long.gimprc",              captures: 0: patterns: [include: "#punct"]}
+			{match: "%m", name: "constant.other.placeholder.memory-usage.gimprc",                  captures: 0: patterns: [include: "#punct"]}
+			{match: "%n", name: "constant.other.placeholder.active-layer-name.gimprc",             captures: 0: patterns: [include: "#punct"]}
+			{match: "%P", name: "constant.other.placeholder.active-layer-pbd-id.gimprc",           captures: 0: patterns: [include: "#punct"]}
+			{match: "%w", name: "constant.other.placeholder.image-width-in-pixels.gimprc",         captures: 0: patterns: [include: "#punct"]}
+			{match: "%W", name: "constant.other.placeholder.image-width-in-units.gimprc",          captures: 0: patterns: [include: "#punct"]}
+			{match: "%h", name: "constant.other.placeholder.image-height-in-pixels.gimprc",        captures: 0: patterns: [include: "#punct"]}
+			{match: "%H", name: "constant.other.placeholder.image-height-in-units.gimprc",         captures: 0: patterns: [include: "#punct"]}
+			{match: "%M", name: "constant.other.placeholder.size-in-megapixels.gimprc",            captures: 0: patterns: [include: "#punct"]}
+			{match: "%u", name: "constant.other.placeholder.unit-symbol.gimprc",                   captures: 0: patterns: [include: "#punct"]}
+			{match: "%U", name: "constant.other.placeholder.unit-abbreviation.gimprc",             captures: 0: patterns: [include: "#punct"]}
+			{match: "%x", name: "constant.other.placeholder.active-layer-width-in-pixels.gimprc",  captures: 0: patterns: [include: "#punct"]}
+			{match: "%X", name: "constant.other.placeholder.active-layer-width-in-units.gimprc",   captures: 0: patterns: [include: "#punct"]}
+			{match: "%y", name: "constant.other.placeholder.active-layer-height-in-pixels.gimprc", captures: 0: patterns: [include: "#punct"]}
+			{match: "%Y", name: "constant.other.placeholder.active-layer-height-in-units.gimprc",  captures: 0: patterns: [include: "#punct"]}
+			{match: "%o", name: "constant.other.placeholder.colour-profile-name.gimprc",           captures: 0: patterns: [include: "#punct"]}
+			{
+				# %D… — Expands to character “…” if image is dirty, the empty string otherwise
+				name: "constant.other.placeholder.conditional.if-dirty.gimprc"
+				match: "(%)D(.)"
+				captures:
+					1: patterns: [include: "#punct"]
+					2: name: "constant.character.variable.placeholder.gimprc"
+			},{
+				# %C… — Expands to character “…” if image is clean, the empty string otherwise
+				name: "constant.other.placeholder.conditional.if-clean.gimprc"
+				match: "(%)C(.)"
+				captures:
+					1: patterns: [include: "#punct"]
+					2: name: "constant.character.variable.placeholder.gimprc"
+			},{
+				# %N… — Expands to character “…” if image is export-dirty, the empty string otherwise
+				name: "constant.other.placeholder.conditional.if-export-dirty.gimprc"
+				match: "(%)N(.)"
+				captures:
+					1: patterns: [include: "#punct"]
+					2: name: "constant.character.variable.placeholder.gimprc"
+			},{
+				# %E… — Expands to character “…” if image is export-clean, the empty string otherwise
+				name: "constant.other.placeholder.conditional.if-export-clean.gimprc"
+				match: "(%)E(.)"
+				captures:
+					1: patterns: [include: "#punct"]
+					2: name: "constant.character.variable.placeholder.gimprc"
+			}
+		]
+
+
+	# Punctuation matched inside a tokenised pattern
+	punct:
+		patterns: [
+			{match: "%",    name: "punctuation.definition.placeholder.gimprc",   captures: 0: name: "meta.separator"}
+			{match: "\\(",  name: "punctuation.section.expression.begin.gimprc", captures: 0: name: "brackethighlighter.round"}
+			{match: "\\)",  name: "punctuation.section.expression.end.gimprc",   captures: 0: name: "brackethighlighter.round"}
+			{match: "\\\\", name: "punctuation.definition.escape.gimprc",        captures: 0: name: "sublimelinter.gutter-mark"}
+		]
+
+
+	# Double-quoted string literals
+	string:
+		name:  "string.quoted.double.gimprc"
+		begin: '"'
+		end:   '"'
+		beginCaptures: 0: name: "punctuation.definition.string.begin.gimprc"
+		endCaptures:   0: name: "punctuation.definition.string.end.gimprc"
+		patterns: [include: "#stringInnards"]
+
+
+	# Stuff matched inside a double-quoted string
+	stringInnards:
+		patterns: [{
+			# Usual C-style escape sequences: \n, \t, \xA0, \033
+			name: "constant.character.escape.gimprc"
+			match: '(\\\\)(?:["nrt\\\\]|x[0-9A-Fa-f]{2}|[0-7]{1,3})'
+			captures:
+				1: patterns: [include: "#punct"]
+		}, include: "#interpolations"]
+
+
+	# Quoted identifier: 'foo
+	symbol:
+		name: "constant.other.symbol.gimprc"
+		match: "(')([A-Za-z0-9][-A-Za-z0-9!$%&*+,./:<=>?@^_~]*)"
+		captures:
+			1: name: "punctuation.section.quoted.symbol.gimprc"
+			2: patterns: [include: "#arrow"]
+
+
+	# Typed values assigned to a property
+	values:
+		patterns: [
+			{include: "#string"}
+			{include: "#expr"}
+			{include: "#char"}
+			{include: "#number"}
+			{include: "#symbol"}
+			{include: "#constants"}
+			{include: "#boolean"}
+			{include: "#variable"}
+		]
+
+
+	# Unquoted bareword
+	variable:
+		name: "constant.language.variable-name.gimprc"
+		match: "[A-Za-z0-9][-A-Za-z0-9!$%&*+,./:<=>?@^_~]*"
+		captures:
+			0: patterns: [include: "#arrow"]

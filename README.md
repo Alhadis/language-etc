@@ -63,6 +63,7 @@ Supported formats
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [Ecmarkup](https://tc39.es/ecmarkup/)
 * [x] [Futhark](https://futhark.readthedocs.io/en/latest/language-reference.html)
+* [x] [GIMP configuration files](https://www.gimp.org/man/gimprc.html)
 * [x] [LCOV tracefiles](https://linux.die.net/man/1/geninfo)
 * [ ] [LDAP schemas](https://ldap.com/understanding-ldap-schema/ "/etc/openldap/schema/*.schema")
 * [ ] [LDIF / LDAP Data Interchange Format](https://openldap.org/software/man.cgi?query=LDIF "/etc/openldap/schema/openldap.ldif")

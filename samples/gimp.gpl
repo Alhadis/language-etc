@@ -1,0 +1,28 @@
+GIMP Palette
+Name: Default
+Columns: 16
+
+# R   G   B Name
+255   0   0	Red
+255   0 255	Magenta
+  0   0 255	Blue
+  0 255 255	Cyan
+  0 255   0	Green
+255 255   0	Yellow
+127   0   0	Dark Red
+127   0 127	Dark Magenta
+  0   0 127	Dark Blue
+  0 127 127	Dark Cyan
+  0 127   0	Dark Green
+130 127   0	Dark Yellow
+  0   0   0	Black
+ 25  25  25	Grey 10%
+ 51  51  51	Grey 20%
+ 76  76  76	Grey 30%
+102 102 102	Grey 40%
+127 127 127	Grey 50%
+153 153 153	Grey 60%
+178 178 178	Grey 70%
+204 204 204	Grey 80%
+229 229 229	Grey 90%
+255 255 255	White

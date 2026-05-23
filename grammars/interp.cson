@@ -1,0 +1,91 @@
+name: "GIMP Interpreter Definition"
+scopeName: "source.interp"
+fileTypes: ["interp"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#commentStartHash"}
+			{include: "#execPath"}
+			{include: "#binfmt"}
+		]
+
+
+	# Syntax used by Linux's “binfmt_misc” utility
+	# Reference: https://docs.kernel.org/admin-guide/binfmt-misc.html
+	binfmt:
+		name: "meta.binfmt-spec.interp"
+		match: """(?x)^
+			(\\S) # Initial character specifies delimiter
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Name
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Type
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Offset
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Match
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Mask ANDed with match (only if magic number)
+			((?:(?!\\1)[^\\r\\n])*+) (\\1) # Interpreter
+			((?:(?!\\1)[^\\r\\n])*+)       # Flags
+		"""
+		captures:
+			1:  patterns: [include: "#delim"]
+			3:  patterns: [include: "#delim"]
+			5:  patterns: [include: "#delim"]
+			7:  patterns: [include: "#delim"]
+			9:  patterns: [include: "#delim"]
+			11: patterns: [include: "#delim"]
+			13: patterns: [include: "#delim"]
+
+			2: name: "entity.name.interpreter.interp"
+			4: name: "meta.association-type.interp", patterns: [
+				{match: "^(M)$", name: "storage.type.association.magic.interp"}
+				{match: "^(E)$", name: "storage.type.association.extension.interp"}
+
+				# Highlight anything that isn't “M” or “E” as an error
+				name: "invalid.illegal.argument.interp"
+				match: "^.*\\S.*$"
+			]
+			6: name: "meta.match-offset.interp", patterns: [
+				{include: "etc#intNoExp"}
+				{name: "invalid.illegal.argument.interp", match: "^.*\\D.*$"}
+			]
+			8:  name: "string.quoted.other.match.interp", patterns: [include: "#esc"]
+			10: name: "string.quoted.other.mask.interp", patterns: [include: "#esc"]
+			12: name: "string.quoted.other.filename.interp"
+			14: name: "meta.association-flags.interp", patterns: [
+				{match: "P", name: "storage.modifier.flag.preserve-argv.interp"}
+				{match: "O", name: "storage.modifier.flag.open-binary.interp"}
+				{match: "C", name: "storage.modifier.flag.credentials.interp"}
+				{match: "F", name: "storage.modifier.flag.fix-binary.interp"}
+
+				# Highlight unrecgonised flag characters as errrs
+				name: "invalid.illegal.argument.unrecognised-flag.interp"
+				match: "[^POCF\\s]"
+			]
+
+
+	# Delimiter character matched as part of a tokenised “#binfmt” pattern
+	delim:
+		name: "punctuation.delimiter.separator.field.interp"
+		match: "^\\S+"
+		captures:
+			0: name: "sublimelinter.gutter-mark"
+
+
+	# 2-digit hexadecimal escape sequence: “\xA0”
+	esc:
+		name: "constant.character.escape.codepoint.hexadecimal.interp"
+		match: "(\\\\)x[A-Fa-f0-9]{2}"
+		captures:
+			1: name: "punctuation.definition.escape.backslash.interp"
+
+
+	# Register an interpreter name with an executable file: “bin=/path/to/bin.exe”
+	execPath:
+		name:  "meta.exec-file.interp"
+		begin: "^(?:(\\w+)|((?:/[^/=]+)++))(=)"
+		end:   "(?=\\s*$)"
+		beginCaptures:
+			1: name: "variable.assignment.interpreter.name.interp"
+			2: name: "variable.assignment.interpreter.path.interp"
+			3: patterns: [include: "etc#eql"]
+		contentName: "string.unquoted.other.filename.interp"

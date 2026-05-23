@@ -48,9 +48,22 @@ module.exports = {
 			new Disposable(() => linkPkg.openLink = coreOpenLink),
 		);
 		
-		this.whenLoaded()
-			.then(() => this.patchGrammarPathMatching())
-			.catch(e => console.error(e));
+		this.whenLoaded().then(() => {
+			this.patchGrammarPathMatching();
+			
+			// Disambiguate conflicting file-extensions
+			this.disposables.add(atom.workspace.observeTextEditors(editor => {
+				const name = editor.getFileName();
+				if(name && /.\.gtp$/i.test(name)){
+					const gerber = atom.grammars.grammarForScopeName("source.gerber");
+					const gimpRC = atom.grammars.grammarForScopeName("source.gimprc");
+					if(!gerber) return;
+					const header = editor.lineTextForBufferRow(0);
+					const grammar = /^G\d{2}/.test(header) ? gerber : gimpRC;
+					atom.grammars.assignGrammar(editor.buffer, grammar);
+				}
+			}));
+		}).catch(e => console.error(e));
 	},
 	
 	/**
