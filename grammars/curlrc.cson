@@ -491,6 +491,7 @@ repository:
 					|	json
 					|	key-type
 					|	key
+					|	knownhosts
 					|	krb
 					|	libcurl
 					|	login-options

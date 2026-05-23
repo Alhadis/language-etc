@@ -102,6 +102,7 @@
 	--keepalive-time	seconds	# numeric
 	--key-type	type	# string
 	--key	key	# string
+	--knownhosts	file	# string
 	--krb	level	# string
 	--libcurl	file	# string
 	--limit-rate	speed	# numeric
