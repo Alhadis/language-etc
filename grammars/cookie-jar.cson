@@ -1,0 +1,91 @@
+# Simple database format used by fortune(1) for storing random quotes.
+name: "Cookie Jar"
+scopeName: "text.cookie-jar"
+injectionSelector: "text.embedded.cookie-jar"
+fileTypes: ["fortune", "fortunes/*", "fortunes/off/*"]
+patterns: [{
+	name:  "meta.database.cookie-jar"
+	begin: "\\A"
+	end:   "(?=A)B"
+	patterns: [include: "#main"]
+},{
+	# Use more restrictive patterns for embedded highlighting
+	name: "markup.quote.cookie-jar"
+	match: "^(\\s*\\S.*?)[ \\t]*$"
+	captures: 1: patterns: [
+		{include: "#separator"}
+		{include: "#author"}
+	]
+}]
+
+repository:
+	main:
+		patterns: [
+			{include: "#record"}
+			{include: "#separator"}
+		]
+
+
+	# Indented, bracketed annotation adding context to the quote
+	annotation:
+		name:  "string.quoted.other.annotation.cookie-jar"
+		begin: "^\\s*(\\[)(?![^\\[\\]]*\\]\\s*\\w)"
+		end:   "(\\])|^(?=%)"
+		beginCaptures: 1: name: "punctuation.definition.annotation.begin.cookie-jar"
+		endCaptures:   1: name: "punctuation.definition.annotation.end.cookie-jar"
+
+
+	# Quotation source
+	author:
+		name:  "meta.quote-source.cookie-jar"
+		begin: '^((?:\\t+|\\x20{4,}))((--+|–|—|⸻))\\s+(?=[\\w"])'
+		end:   "^(?=%)|^(?!\\1\\s*\\S)"
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.indent.cookie-jar"
+			2: name: "punctuation.definition.quotation.dash.cookie-jar"
+			3: name: "sublimelinter.gutter-mark"
+		contentName: "entity.name.author.cookie-jar"
+		patterns: [{
+			# Quoted segments are assumed to be names of cited works
+			name:  "markup.italic.citation.cookie-jar"
+			begin: '(")(?=\\S)'
+			end:   '(")|(?=^(?:%|\\s*$))'
+			contentName: "entity.name.citation.cookie-jar"
+			beginCaptures:
+				1: name: "entity.name.citation.cookie-jar"
+				0: name: "punctuation.definition.citation.begin.cookie-jar"
+			endCaptures:
+				1: name: "entity.name.citation.cookie-jar"
+				0: name: "punctuation.definition.citation.end.cookie-jar"
+		}]
+
+
+	# Quote text
+	quote:
+		name:  "meta.paragraph.text.cookie-jar"
+		begin: '^(?!\\s+(?:--+|–|—|⸻)\\s+[\\w"])(\\s*)(?=\\S)'
+		end:   '^(?:(?=%)|(?=\\s*$)|(?=\\s+(?:(?:--+|–|—|⸻)\\s+[\\w"])|\\[(?![^\\[\\]]*\\]\\s*\\w)))'
+		beginCaptures:
+			1: name: "punctuation.whitespace.leading.indent.cookie-jar"
+		contentName: "markup.quote.cookie-jar"
+		patterns: [include: "#annotation"]
+
+
+	# Quote section
+	record:
+		name:  "meta.record.cookie-jar"
+		begin: "^(?!%)(?=\\s*\\S)"
+		end:   "^(?=%+)(?!\\G)"
+		patterns: [
+			{include: "#annotation"}
+			{include: "#quote"}
+			{include: "#author"}
+		]
+
+
+	# Record separator
+	separator:
+		match: "(?:^|\\G)(%+)(?:\\s*(\\S.*?))?[ \\t]*$"
+		captures:
+			1: name: "meta.separator.cookie-jar"
+			2: name: "comment.line.ignored.cookie-jar"

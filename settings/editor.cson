@@ -154,6 +154,11 @@
 	editor:
 		commentStart: "# "
 
+".text.cookie-jar":
+	editor:
+		commentStart: "% "
+		tabLength: 8
+
 ".text.xml.svg":
 	editor:
 		commentStart: "<!--"

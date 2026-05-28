@@ -62,6 +62,7 @@ Supported formats
 * [x] [DirectX 3D File](https://bit.ly/2VVCfff)
 * [x] [`dosbox.conf`](https://www.dosbox.com/wiki/Dosbox.conf)
 * [x] [Ecmarkup](https://tc39.es/ecmarkup/)
+* [x] [Fortune cookie jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2902164)
 * [x] [Futhark](https://futhark.readthedocs.io/en/latest/language-reference.html)
 * [x] [GIMP configuration files](https://www.gimp.org/man/gimprc.html)
 * [x] [LCOV tracefiles](https://linux.die.net/man/1/geninfo)
