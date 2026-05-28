@@ -1,5 +1,9 @@
+# Format references:
+# - http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2906931
+# - https://github.com/Alhadis/Record-Jar#readme
 name: "Record Jar"
 scopeName: "source.record-jar"
+injectionSelector: "source.embedded.record-jar"
 fileTypes: [
 	"language-subtag-registry"
 	"language-subtag-registry.txt"
@@ -24,11 +28,22 @@ firstLineMatch: """(?x)
 		(?i:record-?jar)
 	(?=$|\\s|:)
 """
-patterns: [include: "#main"]
+patterns: [
+	name:  "meta.database.record-jar"
+	begin: "\\A"
+	end:   "(?=A)B"
+	patterns: [include: "#main"]
+
+	# Avoid using “#record” pattern in embedded highlighting
+	{include: "#separator"}
+	{include: "#field"}
+	{include: "etc#commentHash"}
+]
 
 repository:
 	main:
 		patterns: [
+			{include: "#separator"}
 			{include: "#record"}
 			{include: "etc#commentHash"}
 		]
@@ -52,11 +67,8 @@ repository:
 	# Multiline record blocks
 	record:
 		name:  "meta.record.record-jar"
-		begin: "\\A|(?:^|\\G)(%%)(?:\\s*(\\S.*?))?[ \\t]*$"
-		end:   "(?=^%%)(?!\\G)"
-		beginCaptures:
-			1: name: "meta.separator.record-jar"
-			2: name: "comment.line.ignored.record-jar"
+		begin: "^(?!%%)(?=\\s*\\S)"
+		end:   "^(?=%%)(?!\\G)"
 		patterns: [
 			{include: "#field"}
 			{include: "etc#commentHash"}
@@ -99,6 +111,14 @@ repository:
 			contentName: "string.unquoted.record-jar"
 			patterns: [include: "#escape"]
 		}, include: "etc#commentHash"]
+
+
+	# Record separator
+	separator:
+		match: "(?:^|\\G)(%%+)(?:\\s*(\\S.*?))?[ \\t]*$"
+		captures:
+			1: name: "meta.separator.record-jar"
+			2: name: "comment.line.ignored.record-jar"
 
 
 	# "Double-quoted" or 'single-quoted' string
