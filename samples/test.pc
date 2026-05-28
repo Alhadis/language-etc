@@ -1,0 +1,19 @@
+# This is a comment
+prefix=/home/kaniini/pkg   # This defines a variable
+exec_prefix=${prefix}      # Defining another variable with a substitution
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libfoo                                  # Human-readable name
+Description: an example library called libfoo # Human-readable description
+Copyright: Copyright (c) 2022 pkgconf project authors
+License: Apache-2.0
+Maintainer: the pkgconf project <http://www.pkgconf.org>
+Version: 1.0
+URL: http://www.pkgconf.org
+Requires: libbar > 2.0.0
+Requires.private: foo >= 0.7
+Conflicts: libbaz <= 3.0.0
+Libs: -L${libdir} -lfoo
+Libs.private: -lm
+Cflags: -I${includedir}/libfoo

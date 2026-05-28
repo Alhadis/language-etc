@@ -11,6 +11,7 @@
  .source.nanorc,
  .source.neon,
  .source.opts,
+ .source.pkgconf,
  .source.record-jar,
  .source.gimprc,
  .source.gimpres,

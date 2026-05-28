@@ -1,0 +1,271 @@
+# pkg-config(1) manifests: https://people.freedesktop.org/~dbn/pkg-config-guide.html
+name: "Package Config"
+scopeName: "source.pkgconf"
+fileTypes: ["pc", "pc.in"]
+firstLineMatch: """(?x)
+
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:pkg[-_]?conf(?:ig)?)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+	
+	|
+	
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:pkg[-_]?conf(?:ig)?)
+	(?=$|\\s|:)
+"""
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comments"}
+			{include: "#variable"}
+			{include: "#keyword"}
+		]
+
+
+	# Comments
+	comments:
+		patterns: [{
+			# C-style comment block, a non-standard yet tolerated syntax
+			name:  "comment.block.c.pkgconf"
+			begin: "^\\s*(/\\*)"
+			end:   "\\*/"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.begin.c.pkgconf"
+			endCaptures:
+				0: name: "punctuation.definition.comment.end.c.pkgconf"
+		}, include: "etc#comment"]
+
+
+	# Escape sequences
+	escape:
+		patterns: [{
+			# Escaped backslash
+			name: "constant.character.escape.backslash.pkgconf"
+			match: "(\\\\)\\\\"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.pkgconf"
+		},{
+			# Escaped comment character
+			name: "constant.character.escape.comment.pkgconf"
+			match: "(\\\\)#"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.pkgconf"
+		},{
+			# Escaped whitespace
+			name: "constant.character.escape.whitespace.pkgconf"
+			match: "(\\\\)[ \\t]"
+			captures:
+				1: name: "punctuation.definition.escape.backslash.pkgconf"
+		},{
+			# Line continuation (escaped line-break)
+			name:  "meta.line-continuation.pkgconf"
+			begin: "(\\\\)$\\s*"
+			end:   "^[ \\t]*"
+			beginCaptures:
+				0: name: "constant.character.escape.newline.pkgconf"
+				1: name: "punctuation.definition.escape.backslash.pkgconf"
+		}]
+
+
+	# Variable interpolation
+	interpolation:
+		patterns: [{
+			# Escaped interpolation: $${…}
+			name: "constant.character.escape.interpolation.pkgconf"
+			match: "\\$\\${?"
+		},{
+			# ${name}
+			name: "variable.other.bracket.shell.pkgconf"
+			match: "((\\$\\{))[^}]+((\\}))"
+			captures:
+				1: name: "punctuation.definition.variable.shell.begin.pkgconf"
+				3: name: "punctuation.definition.variable.shell.end.pkgconf"
+				2: name: "brackethighlighter.curly"
+				4: name: "brackethighlighter.curly"
+		}]
+
+
+	# RFC 822-style fields
+	keyword:
+		patterns: [{
+			# Freeform, human-readable text
+			name:  "meta.field.${2:/downcase}.pkgconf"
+			begin: "(?i)^(\\s*)(Name|Description)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.pkgconf"
+			patterns: [include: "#keywordInnards"]
+		},{
+			# URL pointing to additional information about the package
+			name:  "meta.field.${2:/downcase}.pkgconf"
+			begin: "(?i)^(\\s*)(URL|Source|Licen[cs]e\\.file)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			contentName: "constant.other.reference.link"
+			patterns: [include: "#keywordInnards"]
+		},{
+			# Author/maintainer contact: “name <mail@to>”
+			name:  "meta.field.maintainer.pkgconf"
+			begin: "(?i)^(\\s*)(Maintainer)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [{
+				applyEndPatternLast: yes
+				begin: "\\G([^\\s<>][^<>]*)\\s+(?=<)"
+				end:   "(?!\\G)"
+				beginCaptures:
+					1: name: "entity.name.author.pkgconf", patterns: [
+						{include: "#escape"}
+						{include: "#interpolation"}
+					]
+				patterns: [{
+					# <mail@to>
+					match: "\\G((<))([^@>]+@[^@>]+)((>))"
+					captures:
+						1: name: "punctuation.definition.bracket.angle.ascii.begin.pkgconf"
+						2: name: "brackethighlighter.angle"
+						3: patterns: [include: "etc#emailUnquoted"]
+						4: name: "punctuation.definition.bracket.angle.ascii.end.pkgconf"
+						5: name: "brackethighlighter.angle"
+				},{
+					# <http://url.to/>
+					match: "\\G((<))([^<>]+)((>))"
+					captures:
+						1: name: "punctuation.definition.bracket.angle.ascii.begin.pkgconf"
+						2: name: "brackethighlighter.angle"
+						3: name: "constant.other.reference.link"
+						4: name: "punctuation.definition.bracket.angle.ascii.end.pkgconf"
+						5: name: "brackethighlighter.angle"
+				}]
+			}]
+		},{
+			# Package version
+			name:  "meta.field.version.pkgconf"
+			begin: "(?i)^(\\s*)(Version)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			contentName: "constant.other.version-string.pkgconf"
+			patterns: [include: "#keywordInnards"]
+		},{
+			# Comma-separated list of package specifications
+			name:  "meta.field.${2:/downcase}.pkgconf"
+			begin: "(?i)^(\\s*)(Conflicts|Provides|Requires(?:\\.(?:internal|shared|private))?)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [
+				# Package name with optional version requirement: “foo >= 1.0”
+				name:  "meta.package-spec.pkgconf"
+				match: "\\s*([-\\w+./]+)(?:\\s*(>=|<=|==?|!=|<|>)\\s*(\\d+(?:\\.\\d+)*[-\\w]*))?"
+				captures:
+					1: name: "entity.name.package.pkgconf"
+					3: name: "constant.other.version-string.pkgconf"
+					2: patterns: [include: "etc#opCmp", {
+						name: "keyword.operator.logical.comparison.equal-to.equals.pkgconf"
+						match: "(?:^|\\G)=$"
+					}]
+				
+				{include: "etc#comma"}
+				{include: "#keywordInnards"}
+			]
+		},{
+			# Compiler and linker flags
+			name:  "meta.field.${2:/downcase}.pkgconf"
+			begin: "(?i)^(\\s*)((?:Cflags|Libs)(?:\\.(?:internal|shared|private))?)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			patterns: [{
+				# Comma-separated argument list passed to assembler/linker/preprocessor
+				name: "meta.flag.pkgconf"
+				match: "((-)W)\\s*(a|l|p)(?=,)((?:[^#\\s\\\\]|\\\\.)++)"
+				captures:
+					1: name: "storage.type.flag.pkgconf"
+					2: name: "punctuation.definition.option.name.dash.pkgconf"
+					3: name: "constant.other.bareword.pkgconf"
+					4: patterns: [include: "etc#comma", {
+						name: "storage.type.flag.pkgconf"
+						match: "(?:^|(?<=,))(--?)((?:[^#,\\s\\\\]|\\\\.)++)"
+						captures:
+							1: name: "punctuation.definition.option.name.dash.pkgconf"
+							2: patterns: [{include: "#escape"}, {include: "#interpolation"}]
+					}]
+			},{
+				# Clang(1) switch and argument
+				name: "meta.flag.pkgconf"
+				match: "((-)(?:framework(?=\\s)|no(?=(?:\\s*|-)\\w)|\\w))\\s*((?:[^#\\s\\\\]|\\\\.)++)?"
+				captures:
+					1: name: "storage.type.flag.pkgconf"
+					2: name: "punctuation.definition.option.name.dash.pkgconf"
+					3: name: "constant.other.bareword.pkgconf", patterns: [
+						{include: "#escape"}
+						{include: "#interpolation"}
+					]
+			},{
+				# Argument not paired with a flag
+				name: "constant.other.bareword.pkgconf"
+				match: "(?:[^#\\s\\\\]|\\\\.)++"
+				captures:
+					0: patterns: [
+						{include: "#escape"}
+						{include: "#interpolation"}
+					]
+			}, include: "#escape"]
+		},{
+			# Anything else
+			name:  "meta.field.other.pkgconf"
+			begin: "^(\\s*)([^\\s:]+)(:)[ \\t]*"
+			end:   "^(?!\\1\\s+\\S)|(?=\\s*#)"
+			beginCaptures:
+				1: name: "punctuation.whitespace.leading.indent.pkgconf"
+				2: name: "variable.keyword.field-name.pkgconf"
+				3: patterns: [include: "etc#kolon"]
+			contentName: "string.unquoted.field.pkgconf"
+			patterns: [include: "#keywordInnards"]
+		}]
+
+
+	# Stuff matched inside the value of a “#keyword” rule
+	keywordInnards:
+		patterns: [
+			{include: "#escape"}
+			{include: "#interpolation"}
+		]
+
+
+	# variable=/path/to/something
+	variable:
+		name:  "meta.variable.pkgconf"
+		begin: "^(?!\\d)(\\w+)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#))"
+		beginCaptures:
+			1: name: "variable.assignment.pkgconf"
+			2: patterns: [include: "etc#eql"]
+		contentName: "string.unquoted.pkgconf"
+		patterns: [
+			{include: "#escape"}
+			{include: "#interpolation"}
+		]
