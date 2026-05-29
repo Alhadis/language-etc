@@ -4,6 +4,7 @@
  .source.dotenv,
  .source.gitignore,
  .source.gitattributes,
+ .source.gtkrc,
  .source.hgignore,
  .source.inputrc,
  .source.interp,

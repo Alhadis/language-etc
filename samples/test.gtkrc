@@ -1,0 +1,129 @@
+class "GtkButton" style "my-style"
+class "pattern" binding :rc "name"
+widget "mywindow.*.GtkEntry" style "my-entry-class"
+widget_class "*<GtkMenuItem>.GtkLabel" style "my-style"
+
+binding "name" {
+	bind "<control>c" {
+		copy ("text", 1, 2.0, bareword)
+	}
+}
+
+style "text" {
+	font = "Fixed Medium Regular 14"
+	fontset = "-misc-fixed-medium-r-normal--14-*-*-*-*-*-*-*"
+}
+
+include "apps/xfce-panel.rc"
+module_path "C:/Program Files/gnubg/themes/engines"
+pixmap_path "themes/gray_textured"
+
+color["taupe"] = "#483C32"
+color["example-1"] = mix(0.5, "red", "blue")
+color["example-2"] = mix(1.5, mix(0.3, "#0abbc0", {0.3, 0.5, 0.9}))
+color["example-3"] = lighter(@foreground)
+
+
+style "foo" = "default" {
+	bg[NORMAL] = "red"
+	bg_pixmap[NORMAL] = "xfsmlogout.png"
+	
+	# Valid font descriptors
+	font      = '"Menlo" Regular 14'
+	fontset   = "Menlo's Regular 14"
+	font_name = "Menlo Regular 14"
+	
+	# Malformed/partial font descriptors
+	font = "14"
+	font = "Menlo"
+	
+	class::property = "value"
+	class :: property = 1.25
+	class :: colour = {255, 0, 0}
+	
+	stock["my-stock-item"] =
+	{
+		{ "itemltr.png", LTR, *, * },
+		{ "itemrtl.png", RTL, *, * }
+	}
+	stock["2264483565"] = {
+		{ "itemmenusize.png", *, *, "gtk-menu" },
+		{ "itemtoolbarsize.png", *, *, "gtk-large-toolbar" }
+		{ "itemgeneric.png" } # implicit *, *, * as a fallback
+	}
+	
+	GtkEntry::inner-border = {
+		0, 0,
+		4, 3,
+	}
+	
+	engine "mgicchikn" {
+		shadow[ALL][ALL]                		= NONE
+		shadow-width[PRELIGHT][ALL]				= 0
+		shadow-width[INSENSITIVE][ALL]			= 2
+		stock-image-transparency[INSENSITIVE]	= 0.33
+	}
+	
+	engine "pixmap"	{
+		image {
+			function        = RESIZE_GRIP
+			recolorable     = FALSE
+			detail          = "statusbar"
+			overlay_file    = "resize_grip.png"
+			overlay_border  = {0,0,0,0 }
+			overlay_stretch = FALSE
+		}
+	}
+	
+	engine "murrine"
+	{
+		animation             = FALSE
+		arrowstyle            = 2                 # 0 = normal arrows, 1 = filled arrows
+		border_shades         = { 1.2, 1.0 }      # gradient to draw on border
+		cellstyle             = 0
+		colorize_scrollbar    = TRUE
+		comboboxstyle         = 0                 # 0 = normal combobox, 1 = colorized combobox below arrow
+		contrast              = 0.4               # 0.8 for less contrast, more than 1.0 for more contrast on borders
+		default_button_color  = mix (0.2, shade(0.9,@base_color), shade (0.9, @selected_bg_color))
+		expanderstyle         = 0
+		focus_color           = mix (0.1, @bg_color, shade (0.7, @selected_bg_color))
+		focusstyle            = 3
+		glazestyle            = 1                 # 0 = flat highlight, 1 = curved highlight, 2 = concave style, 3 = top curved highlight, 4 = beryl highlight
+		gradient_shades       = {1.2,1.0,1.0,0.9} #{1.1,1.0,1.0,0.87}
+		glowstyle             = 4                 # 0,1,2,3,4
+		glow_shade            = 1.1
+		handlestyle           = 1
+		highlight_shade       = 1.0               # set highlight amount for buttons or widgets
+		lightborder_shade     = 1.1               # sets lightborder amount for buttons or widgets
+		lightborderstyle      = 0                 # 0 = lightborder on top side, 1 = lightborder on all sides
+		listviewheaderstyle   = 1                 # 0 = flat, 1 = glassy, 2 = raised
+		listviewstyle         = 2                 # 0 = nothing, 1 = dotted, 2 = solid
+		menubaritemstyle      = 0                 # 0 = menuitem look, 1 = button look
+		menubarstyle          = 2                 # 0 = flat, 1 = glassy, 2 = gradient, 3 = striped
+		menuitemstyle         = 0                 # 0 = flat, 1 = glassy, 2 = striped
+		menustyle             = 0                 # 0 = no vertical menu stripe, 1 = display vertical menu stripe
+		prelight_shade        = .9                # shade level for scrollbar's slider, comboboxstyle(1), and prelight state with gradient_colors
+		progressbarstyle      = 0                 # 0 = nothing, 1 = stripes, 2 = lines
+		reliefstyle           = 3                 # 0 = flat, 1 = inset, 2 = shadow
+		rgba                  = FALSE             # FALSE = disabled, TRUE = enabled
+		roundness             = 2                 # 0 = squared, 1 = old default, more will increase roundness
+		scrollbarstyle        = 0                 # 0 = nothing, 1 = circles, 2 = handles, 3 = diagonal stripes, 4 = diagonal stripes and handles, 5 = horizontal stripes, 6 = horizontal stripes and handles
+		separatorstyle        = 0                 # 0 = Hard seperators 1 = Smooth seperators
+		sliderstyle           = 0                 # 0 = nothing added, 1 = handles
+		stepperstyle          = 1                 # 0 = standard, 1 = integrated stepper handles, 2 = unknown
+		shadow_shades         = { 1.0, 1.0 }      # gradient for shadows.
+		textstyle             = 0                 # 0 = normal text, 1 = inset
+		toolbarstyle          = 1                 # 0 = flat, 1 = glassy, 2 = gradient
+		trough_shades         = { 0.75, 0.9 }	  # draw gradient on trough of GtkScrollbar and GtkProgressbar
+		trough_border_shades  = { 0.9, 0.7 }
+	}
+}
+
+
+binding "gtk-mac-expand-collapse-cursor-row"
+{
+	unbind "Left"
+	unbind "Right"
+	bind "<shift>Left"  { "expand-collapse-cursor-row" (0, 0, 0) }
+	bind "Right"        { "expand-collapse-cursor-row" (0, 1, 0) }
+}

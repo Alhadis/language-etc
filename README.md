@@ -65,6 +65,7 @@ Supported formats
 * [x] [Fortune cookie jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2902164)
 * [x] [Futhark](https://futhark.readthedocs.io/en/latest/language-reference.html)
 * [x] [GIMP configuration files](https://www.gimp.org/man/gimprc.html)
+* [x] [GtkRC](https://web.archive.org/web/20141228182027if_/https://developer.gnome.org/gtk2/2.24/gtk2-Resource-Files.html)
 * [x] [LCOV tracefiles](https://linux.die.net/man/1/geninfo)
 * [ ] [LDAP schemas](https://ldap.com/understanding-ldap-schema/ "/etc/openldap/schema/*.schema")
 * [ ] [LDIF / LDAP Data Interchange Format](https://openldap.org/software/man.cgi?query=LDIF "/etc/openldap/schema/openldap.ldif")

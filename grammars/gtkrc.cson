@@ -1,0 +1,682 @@
+# (Legacy) GTK v2 Theme files.
+name: "GtkRC"
+scopeName: "source.gtkrc"
+mimeType: "text/x-gtkrc"
+fileTypes: ["gtkrc", "gtkrc-1.0", "gtkrc-2.0", "themerc"]
+patterns: [include: "#main"]
+firstLineMatch: """(?x)
+	# Emacs modeline
+	-\\*-(?i:[ \\t]*(?=[^:;\\s]+[ \\t]*-\\*-)|(?:.*?[ \\t;]|(?<=-\\*-))[ \\t]*mode[ \\t]*:[ \\t]*)
+		(?i:gtkrc)
+	(?=[ \\t;]|(?<![-*])-\\*-).*?-\\*-
+		
+	|
+		
+	# Vim modeline
+	(?:(?:^|[ \\t])(?:vi|Vi(?=m))(?:m[<=>]?[0-9]+|m)?|[ \\t]ex)(?=:(?=[ \\t]*set?[ \\t][^\\r\\n:]+:)|:(?![ \\t]*set?[ \\t]))
+	(?:(?:[ \\t]*:[ \\t]*|[ \\t])\\w*(?:[ \\t]*=(?:[^\\\\\\s]|\\\\.)*)?)*[ \\t:]
+	(?:filetype|ft|syntax)[ \\t]*=
+		(?i:gtkrc)
+	(?=$|\\s|:)
+"""
+
+repository:
+	main:
+		patterns: [
+			{include: "etc#comment"}
+			{include: "#attachment"}
+			{include: "#include"}
+			{include: "#paths"}
+			{include: "#bindingBlock"}
+			{include: "#styleBlock"}
+			{include: "#setting"}
+			{include: "#colourDef"}
+			{include: "#stock"}
+			{include: "#engine"}
+		]
+
+
+	# Style or binding attachment
+	attachment:
+		name:  "meta.attachment.gtkrc"
+		begin: "^\\s*(class|widget_class|widget)(?=$|\\s)"
+		end:   "$"
+		beginCaptures:
+			1: name: "storage.type.subject.gtkrc"
+		patterns: [{
+			begin: "\\G\\s+(?=\"|')"
+			end:   "(?!\\G)"
+			patterns: [include: "#widgetPath"]
+		},{
+			begin: "(?<=\\s|^)(style|binding)(?=$|\\s)"
+			end:   "(\"[^\"]*\"|'[^']*')|(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: name: "keyword.operator.$1.gtkrc"
+			endCaptures:
+				1: patterns: [include: "#styleName"]
+			patterns: [{
+				name:  "meta.priority.gtkrc"
+				match: "\\G\\s*(:)\\s*(application|gtk|highest|lowest|rc|theme)(?=$|\\s)"
+				captures:
+					1: patterns: [include: "etc#kolon"]
+					2: name: "storage.modifier.priority.gtkrc"
+			}]
+		}]
+
+
+	# Key binding and unbinding
+	binding:
+		patterns: [{
+			# “bind "<shift>c" { … }”
+			name:  "meta.binding.gtkrc"
+			begin: "(?<=\\s|^|\\G)(bind)(?=$|\\s)"
+			end:   "(?<=})"
+			beginCaptures:
+				1: name: "storage.type.bind.gtkrc"
+			patterns: [{
+				begin: "\\G\\s*(?=\"|')"
+				end:   "(?!\\G)"
+				patterns: [include: "#bindingKey"]
+			},{
+				# Actions performed on key-activation
+				name:  "meta.block.gtkrc"
+				begin: "{"
+				end:   "}"
+				captures:
+					0: patterns: [include: "#brackets"]
+				patterns: [
+					{include: "#bindingAction"}
+					{include: "etc#comment"}
+				]
+			}]
+		},{
+			# unbind "<keys>"
+			name:  "meta.unbinding.gtkrc"
+			begin: "(?<=\\s|^|\\G)(unbind)(?=$|\\s)"
+			end:   "\\s*(\"[^\"]*\"|'[^']*')|(?=\\s*(?:$|#))"
+			beginCaptures:
+				1: name: "storage.type.unbind.gtkrc"
+			endCaptures:
+				1: patterns: [include: "#bindingKey"]
+		}]
+
+
+	# Signal name followed by a parenthesised list of arguments: “action (param1, param2, …)”
+	bindingAction:
+		name:  "meta.action.signal.gtkrc"
+		begin: "(\"|')(?!\\d)\\w+(?:[-_]\\w+)*(\\1)(?=$|\\s)"
+		end:   "(?<=\\))|(?=\\s*})"
+		beginCaptures:
+			0: name: "entity.name.signal.gtkrc"
+			1: name: "punctuation.definition.signal.begin.gtkrc"
+			2: name: "punctuation.definition.signal.end.gtkrc"
+		patterns: [{
+			name:  "meta.parameters.gtkrc"
+			begin: "(\\()"
+			end:   "(\\))"
+			beginCaptures:
+				0: name: "punctuation.definition.list.begin.bracket.round.gtkrc"
+				1: name: "brackethighlighter.round"
+			endCaptures:
+				0: name: "punctuation.definition.list.end.bracket.round.gtkrc"
+				1: name: "brackethighlighter.round"
+			patterns: [include: "#miscValues"]
+		}]
+
+
+	# Binding set declaration: “binding name { … }”
+	bindingBlock:
+		name:  "meta.binding-set.gtkrc"
+		begin: "^\\s*(binding)(?=$|\\s)"
+		end:   "(?<=})"
+		beginCaptures:
+			1: name: "storage.type.subject.gtkrc"
+		patterns: [{
+			begin: "\\G\\s*(?=\"|')"
+			end:   "(?!\\G)"
+			patterns: [include: "#styleName"]
+		},{
+			name:  "meta.block.gtkrc"
+			begin: "{"
+			end:   "}"
+			captures:
+				0: patterns: [include: "#brackets"]
+			patterns: [
+				{include: "#binding"}
+				{include: "etc#comment"}
+			]
+		}]
+
+
+	# Key name, preceded by one or more modifiers: e.g, “<ctrl><alt>del”
+	bindingKey:
+		name:  "constant.other.keybinding.gtkrc"
+		begin: "(\"|')"
+		end:   "\\1"
+		beginCaptures: 0: name: "punctuation.definition.keybinding.begin.gtkrc"
+		endCaptures:   0: name: "punctuation.definition.keybinding.end.gtkrc"
+		patterns: [{
+			name:  "keyword.operator.modifier.${2:/downcase}.gtkrc"
+			match: "(?i)(<)(alt|control|ctl|hyper|meta|mod[1-5]|release|shi?ft|super)(>)"
+			captures:
+				1: name: "punctuation.definition.begin.modifier.gtkrc"
+				3: name: "punctuation.definition.end.modifier.gtkrc"
+		}]
+
+
+	# Assignment to class's property: “class::property = value”
+	classProperty:
+		name:  "meta.property.gtkrc"
+		begin: "(?<=\\s|^|\\G)\\s*((?!\\d)[-\\w]+)\\s*((::))\\s*((?!\\d)[-\\w]+)\\s*(=)[ \\t]*"
+		end:   "$|(?=\\s*#)"
+		beginCaptures:
+			1: name: "entity.name.tag.class.gtkrc"
+			2: name: "punctuation.separator.double-colon.gtkrc"
+			3: name: "meta.separator.gtkrc"
+			4: name: "support.variable.property.gtkrc"
+			5: patterns: [include: "etc#eql"]
+		patterns: [include: "#miscValues"]
+
+
+	# Colour definition: “color["name"] = "value"”
+	colourDef:
+		name:  "meta.definition.colour.gtkrc"
+		begin: "(?<=\\s|^|\\G)(color)((\\[))\\s*(\"[^\"]*\"|'[^']*')\\s*((\\]))\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#))"
+		beginCaptures:
+			1: name: "storage.type.colour.gtkrc"
+			2: name: "punctuation.definition.colour.begin.gtkrc"
+			3: name: "brackethighlighter.square"
+			4: patterns: [include: "#styleName"]
+			5: name: "punctuation.definition.colour.end.gtkrc"
+			6: name: "brackethighlighter.square"
+			7: patterns: [include: "etc#eql"]
+		patterns: [include: "#colourValue"]
+
+
+	# @colour_name
+	colourRef:
+		name: "variable.colour-name.gtkrc"
+		match: "(?:\\G|(?<=,)\\s*)(@)\\w+"
+		captures:
+			1: name: "punctuation.definition.colour-name.gtkrc"
+
+
+	# Stuff matched wherever an actual colour value is expected
+	colourValue:
+		patterns: [{
+			include: "#colourRef"
+		},{
+			# Hexadecimal RGB value: “#rrrrggggbbbb”, “#rrrgggbbb”, “#rrggbb”, “#rgb”
+			match: "(?i)(?:\\G|(?<=,)\\s*)((\"|')(#)([0-9A-F]{12}|[0-9A-F]{9}|[0-9A-F]{6}|[0-9A-F]{3})(\\2))"
+			captures:
+				1: name: "string.quoted.colour-value.gtkrc"
+				2: name: "punctuation.definition.colour-value.begin.gtkrc"
+				3: name: "punctuation.definition.constant.gtkrc"
+				4: name: "constant.other.colour.rgb-value.hex.gtkrc"
+				5: name: "punctuation.definition.colour-value.end.gtkrc"
+		},{
+			# Numeric triplet: “{255, 0, 0}”
+			name:  "meta.triplet.colour-value.gtkrc"
+			begin: "(?:\\G|(?<=,)\\s*)({)"
+			end:   "(})"
+			captures:
+				1: patterns: [include: "#brackets"]
+			patterns: [
+				{include: "etc#num"}
+				{include: "etc#comma"}
+			]
+		},{
+			# Functional expressions
+			name:  "meta.function.colour.$1.gtkrc"
+			begin: "(?:\\G|(?<=,)\\s*)(mix|shade|lighter|darker)\\s*(?=\\()"
+			end:   "(?!\\G)"
+			beginCaptures:
+				1: name: "keyword.other.function.expression.gtkrc"
+			patterns: [{
+				name:  "meta.parameters.gtkrc"
+				begin: "\\G(\\()"
+				end:   "(\\))"
+				beginCaptures:
+					0: name: "punctuation.definition.list.begin.bracket.round.gtkrc"
+					1: name: "brackethighlighter.round"
+				endCaptures:
+					0: name: "punctuation.definition.list.end.bracket.round.gtkrc"
+					1: name: "brackethighlighter.round"
+				patterns: [
+					{include: "etc#num"}
+					{include: "etc#comma"}
+					{include: "#colourValue"}
+				]
+			}]
+		}]
+
+
+	# Defines the "engine" to be used when drawing this style
+	engine:
+		name:  "meta.definition.engine.${4:/downcase}.gtkrc"
+		begin: "(?<=\\s|^|\\G)(engine)\\s*((\"|')((?:(?!\\3).)++)(\\3))"
+		end:   "(?<=})"
+		beginCaptures:
+			1: name: "storage.type.colour.gtkrc"
+			2: name: "entity.name.engine.gtkrc"
+			3: name: "punctuation.definition.engine.begin.gtkrc"
+			5: name: "punctuation.definition.engine.end.gtkrc"
+		patterns: [{
+			# NB: The exact contents of this block vary based on GTK engine
+			name:  "meta.block.engine-config.gtkrc"
+			begin: "{"
+			end:   "}"
+			captures:
+				0: patterns: [include: "#brackets"]
+			patterns: [include: "#engineInnards"]
+		}, include: "etc#comment"]
+
+
+	# GTK engines encountered in GtkRC files across GitHub
+	engineKnown:
+		name: "entity.name.engine.known.gtkrc"
+		match: "(?xi)(?<!-)\\b
+			(adwaita|anachron|aurora|bluecurve|blueprint|candido|carbon-gtk|cleanice
+			|clean|clearlooks|crux-engine|crux|default-theme|dwerg|dyndyn|engradient
+			|equinox|excelsior|experience|galaxy|gflat|glide|hcengine|hc|ia_ora|industrial
+			|lighthouseblue|lua|macstyle|maigre|metal|mgicchikn|mist|moblin-netbook-engine
+			|moblin|moko-engine|murrine|nimbus|nodoka|notif|oxygen-gtk|pixbuf|pixmap
+			|qt4engine|qtcurve|quartz|raleigh|redmond95|redmond|rezlooks|sapwood|smooth
+			|step|sugar|svg|thinice|ubuntulooks|uebergau|vyatta|whistler|wimp|wonderland
+			|xamarin|xeno|xfce)\\b(?!-)"
+
+
+	# Stuff matched inside an engine's {block}
+	engineInnards:
+		patterns: [
+			{include: "#engineNestedBlock"}
+			{include: "#style"}
+			{include: "#styleCustom"}
+			{include: "#setting"}
+			{include: "etc#comment"}
+			
+			# A lone block-label keyword on its own line
+			match: "^\\s*(image|boxfill)(?=\\s*(?:$|#))"
+			captures:
+				1: name: "storage.type.block.label.gtkrc"
+		]
+		
+
+	# A nested { block }, possibly preceded by a label
+	engineNestedBlock:
+		name:  "meta.block.${1:/downcase}.gtkrc"
+		begin: "(?<=\\s|^|\\G)(?:((?!\\d)\\w+(?:[-_]\\w+)*+))?\\s*({)"
+		end:   "}"
+		beginCaptures:
+			1: name: "storage.type.block.label.gtkrc"
+			2: patterns: [include: "#brackets"]
+		endCaptures:
+			0: patterns: [include: "#brackets"]
+		patterns: [include: "#engineInnards"]
+			
+
+	# Tokenised brackets matched as part of block-type rule
+	brackets:
+		patterns: [{
+			# Curly bracket, opening
+			name: "punctuation.section.block.begin.bracket.curly.gtkrc"
+			match: "{"
+			captures:
+				0: name: "brackethighlighter.curly"
+		},{
+			# Curly bracket, closing
+			name: "punctuation.section.block.end.bracket.curly.gtkrc"
+			match: "}"
+			captures:
+				0: name: "brackethighlighter.curly"
+		}]
+
+
+	# Import another GtkRC file
+	include:
+		begin: "(?<=\\s|^|\\G)(include)(?=$|\\s|\"|')"
+		end:   "\\s*(?:(\"[^\"]*\")|('[^']*'))|(?=\\s*#)"
+		beginCaptures:
+			1: name: "keyword.control.directive.include.gtkrc"
+		endCaptures:
+			1: patterns: [include: "etc#strDouble"]
+			2: patterns: [include: "etc#strSingle"]
+
+
+	# Best-guess highlighting for patterns that're essentially grab-bags of values
+	miscValues:
+		patterns: [
+			{include: "#colourValue"}
+			{include: "#stateDefinedOnly"}
+			{include: "etc#comma"}
+			{include: "etc#num"}
+			{include: "etc#str"}
+			{include: "etc#comment"}
+			{
+				# Boolean keyword
+				match: "(?:(?<==|\\G|^|,)\\s*)(true|false|TRUE|FALSE)(?=\\s*(?:$|#))"
+				captures:
+					1: patterns: [include: "etc#bool"]
+			}
+			name: "string.unquoted.bareword.gtkrc"
+			match: "(?!\\d)[^\"'\\s\\(\\),]"
+		]
+
+	# Path-related declarations
+	paths:
+		patterns: [{
+			# Colon-delimited list of directories to search
+			begin: "(?<=\\s|^|\\G)((module|pixmap)_path)(?=$|\\s)"
+			end:   "\\s+(\"[^\"]*\"|'[^']*')|(?=\\s*#)"
+			beginCaptures:
+				1: name: "keyword.operator.set-path.$2.gtkrc"
+			endCaptures:
+				1: patterns: [{
+					name:  "string.quoted.path-list.gtkrc"
+					begin: "(\"|')"
+					end:   "\\1"
+					beginCaptures: 0: name: "punctuation.definition.string.begin.gtkrc"
+					endCaptures:   0: name: "punctuation.definition.string.end.gtkrc"
+					patterns: [{
+						name: "punctuation.delimiter.separator.path.colon.gtkrc"
+						match: ":"
+					}]
+				}]
+		},{
+			# Singular pathname
+			begin: "(?<=\\s|^|\\G)(im_module_path)(?=$|\\s)"
+			end:   "\\s+(?:(\"[^\"]*\")|('[^']*'))|(?=\\s*#)"
+			beginCaptures:
+				1: name: "keyword.operator.set-path.im-module.gtkrc"
+			endCaptures:
+				1: patterns: [include: "etc#strDouble"]
+				2: patterns: [include: "etc#strSingle"]
+		}]
+
+
+	# “name = value” assignment
+	setting:
+		name:  "meta.setting.gtkrc"
+		begin: "^\\s*(?!\\d)([-\\w]+)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#))"
+		beginCaptures:
+			1: name: "variable.assignment.setting.gtkrc"
+			2: patterns: [include: "etc#eql"]
+		patterns: [include: "#miscValues"]
+
+
+	# Bareword matched where a widget-state is expected
+	state:
+		patterns: [
+			{include: "#stateDefinedOnly"}
+			
+			# Anything else: error
+			name: "invalid.unimplemented.state.gtkrc"
+			match: "\\w+"
+		]
+
+
+	# Pre-defined states
+	stateDefinedOnly:
+		name: "constant.language.state.gtkrc"
+		match: "\\b(NORMAL|ACTIVE|PRELIGHT|SELECTED|INSENSITIVE)\\b"
+
+
+	# Definition for a stock icon: “stock["icon-name"] = { … }”
+	stock:
+		name:  "meta.definition.stock-icon.gtkrc"
+		begin: "(?<=\\s|^|\\G)(stock)((\\[))\\s*(\"[^\"]*\"|'[^']*')\\s*((\\]))\\s*(=)[ \\t]*"
+		end:   "(?<=})"
+		beginCaptures:
+			1: name: "storage.type.icon.gtkrc"
+			2: name: "punctuation.definition.icon.begin.gtkrc"
+			3: name: "brackethighlighter.square"
+			4: patterns: [include: "#styleName"]
+			5: name: "punctuation.definition.icon.end.gtkrc"
+			6: name: "brackethighlighter.square"
+			7: patterns: [include: "etc#eql"]
+		patterns: [{
+			begin: "\\G(?=\\s*$)"
+			end:   "\\s*(?=\\S)"
+		},{
+			name:  "meta.block.icon-sources.gtkrc"
+			begin: "{"
+			end:   "}"
+			captures:
+				0: patterns: [include: "#brackets"]
+			patterns: [{
+				name:  "meta.block.icon-source.gtkrc"
+				begin: "{"
+				end:   "}"
+				captures:
+					0: patterns: [include: "#brackets"]
+				patterns: [include: "etc#comma", {
+					# First argument: "filename" or @"icon name"
+					begin: "\\G\\s*(?=@?[\"'])"
+					end:   '(?!\\G)'
+					patterns: [{
+						# "/path/to/icon.ext"
+						name:  "string.quoted.filename.gtkrc"
+						begin: "\\G(\"|')"
+						end:   '\\1'
+						beginCaptures: 0: name: "punctuation.definition.string.begin.gtkrc"
+						endCaptures:   0: name: "punctuation.definition.string.end.gtkrc"
+					},{
+						# @"Icon name"
+						name:  "variable.icon-name.gtkrc"
+						begin: "\\G(@(\"|'))"
+						end:   '\\2'
+						beginCaptures: 1: name: "punctuation.definition.icon-name.begin.gtkrc"
+						endCaptures:   0: name: "punctuation.definition.icon-name.end.gtkrc"
+					}]
+				},{
+					# Writing direction
+					match: "(?:(?:^|(?<=,))\\s*)(LTR|RTL)(?=\\s*(?:$|[,}#]))"
+					captures:
+						1: name: "constant.language.text-direction.$1.gtkrc"
+				},{
+					# Wildcard: match anything
+					match: "(?:(?:^|(?<=,))\\s*)(\\*)(?=\\s*(?:$|[,}#]))"
+					captures:
+						1: patterns: [include: "etc#globSimple"]
+				},{
+					# Named icon-sizes
+					match: "(?:(?:^|(?<=,))\\s*)((\"|')(?:(?!\\2).)*+(\\2))"
+					captures:
+						1: name: "constant.language.icon-size.gtkrc"
+						2: name: "punctuation.definition.icon-size.begin.gtkrc"
+						3: name: "punctuation.definition.icon-size.end.gtkrc"
+				}, include: "etc#comment"]
+			}, include: "etc#comma", {include: "etc#comment"}]
+		}]
+
+
+	# Style properties matched inside a “#styleBlock”
+	style:
+		patterns: [
+			{include: "#colourDef"}
+			{include: "#stock"}
+			{
+				# Colour-type properties
+				name:  "meta.property.$1.gtkrc"
+				begin: "(?<=\\s|^|\\G)\\s*([fb]g|(?:fore|back)ground|base|text)(((\\[))\\s*(\\w+)\\s*((\\])))\\s*(=)[ \\t]*"
+				end:   "$|(?=\\s*#)"
+				beginCaptures:
+					1: name: "support.type.property-name.gtkrc"
+					2: name: "meta.state.gtkrc"
+					3: name: "punctuation.definition.state.begin.gtkrc"
+					4: name: "brackethighlighter.square"
+					5: patterns: [include: "#state"]
+					6: name: "punctuation.definition.state.end.gtkrc"
+					7: name: "brackethighlighter.square"
+					8: patterns: [include: "etc#eql"]
+				patterns: [include: "#colourValue"]
+			},{
+				# Numeric properties
+				name:  "meta.property.$1.gtkrc"
+				begin: "(?<=\\s|^|\\G)\\s*([xy]thickness)\\s*(=)[ \\t]*"
+				end:   "$|(?=\\s*#)"
+				beginCaptures:
+					1: name: "support.type.property-name.gtkrc"
+					2: patterns: [include: "etc#eql"]
+				patterns: [include: "etc#num"]
+			},{
+				# Font-type properties
+				name:  "meta.property.$1.gtkrc"
+				begin: '(?<=\\s|^|\\G)\\s*(font(?:set|_name)?)\\s*(=)[ \\t]*'
+				end:   "$|(?=\\s*#)"
+				beginCaptures:
+					1: name: "support.type.property-name.gtkrc"
+					2: patterns: [include: "etc#eql"]
+				patterns: [{
+					name:  "meta.pango-font.gtkrc"
+					begin: "\\G(\"|')"
+					end:   '\\1|(?=\\s*$)'
+					beginCaptures: 0: name: "punctuation.definition.font.begin.gtkrc"
+					endCaptures:   0: name: "punctuation.definition.font.end.gtkrc"
+					patterns: [include: "source.xlfd", {
+						# Pango-style font name: “Helvetica Bold 10”
+						match: "\\G(?:(?<=(\"|'))((?!\\1)\\S(?:(?!\\1).)*))\\s+(\\d+(?:\\.\\d+)?)(?=\\1)"
+						captures:
+							2: name: "constant.other.font-family.gtkrc"
+							3: name: "constant.numeric.font-size.gtkrc"
+					},{
+						# Single-token name too short to be an XLFD
+						match: "\\G(?<=(\"|'))(?:(?=(?:\\d+(?:\\.\\d+)?|\\.\\d+)\\1)([.\\d+]{1,27})|((?:(?!\\1)\\S){1,27}))(?=\\1)"
+						captures:
+							2: name: "constant.numeric.font-size.gtkrc"
+							3: name: "constant.other.font-name.gtkrc"
+					}, include: "etc#comma"]
+				}]
+			},{
+				# Background pixmap
+				name:  "meta.property.$1.gtkrc"
+				begin: '(?<=\\s|^|\\G)\\s*(bg_pixmap)(((\\[))\\s*(\\w+)\\s*((\\])))\\s*(=)[ \\t]*'
+				end:   "$|(?=\\s*#)"
+				beginCaptures:
+					1: name: "support.type.property-name.gtkrc"
+					2: name: "meta.state.gtkrc"
+					3: name: "punctuation.definition.state.begin.gtkrc"
+					4: name: "brackethighlighter.square"
+					5: patterns: [include: "#state"]
+					6: name: "punctuation.definition.state.end.gtkrc"
+					7: name: "brackethighlighter.square"
+					8: patterns: [include: "etc#eql"]
+				patterns: [{
+					begin: "\\G\\s*(?=\"|')"
+					end:   "(?!\\G)"
+					patterns: [{
+						# Special keywords (akin to CSS's “inherit” and “unset”)
+						name:  "string.quoted.pixmap.gtkrc"
+						match: "\\G(\"|')((<)(parent|none)(>))(\\1)"
+						captures:
+							1: name: "punctuation.definition.string.begin.gtkrc"
+							6: name: "punctuation.definition.string.end.gtkrc"
+							2: name: "keyword.other.pixmap-spec.$4.gtkrc"
+							3: name: "punctuation.definition.keyword.begin.gtkrc"
+							5: name: "punctuation.definition.keyword.end.gtkrc"
+					},{
+						# Path to a pixmap file
+						name:  "string.quoted.pixmap.gtkrc"
+						begin: "(\"|')"
+						end:   "\\1"
+						beginCaptures: 0: name: "punctuation.definition.string.begin.gtkrc"
+						endCaptures:   0: name: "punctuation.definition.string.end.gtkrc"
+					}]
+				}]
+			}, include: "#classProperty"]
+		
+
+	# Style block: “style name { … }”
+	styleBlock:
+		name:  "meta.style.gtkrc"
+		begin: "(?<=\\s|^|\\G)style(?=$|\\s)"
+		end:   "(?<=})"
+		beginCaptures:
+			0: name: "storage.type.style.gtkrc"
+		patterns: [{
+			begin: "\\G\\s*(?=[\"'])"
+			end:   "(?!\\G)"
+			patterns: [include: "#styleName"]
+		},{
+			name:  "meta.parent-style.gtkrc"
+			begin: "="
+			end:   "\\s*(\"[^\"]*\"|'[^']*')|(?=\\s*{)"
+			beginCaptures:
+				0: name: "keyword.operator.assignment.parent.gtkrc"
+			endCaptures:
+				1: patterns: [include: "#styleName"]
+		},{
+			name:  "meta.block.gtkrc"
+			begin: "{"
+			end:   "}"
+			captures:
+				0: patterns: [include: "#brackets"]
+			patterns: [
+				{include: "#style"}
+				{include: "#engine"}
+				{include: "etc#comment"}
+			]
+		}]
+
+
+	# Custom (engine-specific) property with array-like accessor: “grippy-style[INSENSITIVE][ALL] = …”
+	styleCustom:
+		name:  "meta.property.custom.gtkrc"
+		begin: "(?<=\\s|^|\\G)\\s*((?!\\d)[-\\w]+)(?=\\[\\s*[^\\s\\[\\]]+\\s*\\])"
+		end:   "$|(?=\\s*#)"
+		beginCaptures:
+			1: name: "support.type.property-name.gtkrc"
+		patterns: [{
+			name:  "meta.item-access.gtkrc"
+			begin: "(?:\\G|(?<=\\]))((\\[))\\s*"
+			end:   "\\s*((\\]))"
+			beginCaptures:
+				1: name: "punctuation.definition.accessor.begin.bracket.square.gtkrc"
+				2: name: "brackethighlighter.square"
+			endCaptures:
+				1: name: "punctuation.definition.accessor.begin.bracket.square.gtkrc"
+				2: name: "brackethighlighter.square"
+			patterns: [
+				{include: "#stateDefinedOnly"}
+				{include: "etc#num"}
+				{include: "etc#bool"}
+				{match: "\\w+", name: "constant.other.qualifier.gtkrc"}
+			]
+		},{
+			begin: "(?<=\\])\\s*(=)[ \\t]*"
+			end:   "$|(?=\\s*#)"
+			beginCaptures:
+				1: patterns: [include: "etc#eql"]
+			patterns: [include: "#miscValues"]
+		}]	
+
+	# Style name
+	styleName:
+		name:  "entity.name.style.gtkrc"
+		begin: "(\"|')"
+		end:   '\\1'
+		beginCaptures: 0: name: "punctuation.definition.style.begin.gtkrc"
+		endCaptures:   0: name: "punctuation.definition.style.end.gtkrc"
+
+
+	widgetPath:
+		name:  "constant.other.selector.widget.gtkrc"
+		begin: "(\"|')"
+		end:   '\\1'
+		beginCaptures: 0: name: "punctuation.definition.selector.begin.gtkrc"
+		endCaptures:   0: name: "punctuation.definition.selector.end.gtkrc"
+		patterns: [{
+			name:  "meta.separator.gtkrc"
+			match: "\\."
+			captures:
+				0: name: "punctuation.separator.parent.selector.gtkrc"
+		},{
+			# <ClassName>
+			name: "entity.name.class.gtkrc"
+			match: "(<)\\w+(>)"
+			captures:
+				1: name: "punctuation.definition.class.begin.gtkrc"
+				2: name: "punctuation.definition.class.end.gtkrc"
+		}, include: "etc#globSimple"]
