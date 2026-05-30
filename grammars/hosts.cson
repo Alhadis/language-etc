@@ -7,8 +7,13 @@ fileTypes: [
 	"HSTMIT.1115"
 	"SYSHST; HSTLCL 560"
 ]
+foldingStartMarker: "^#<(?!-)[-\\w]+>"
+foldingStopMarker:  "^#</(?!-)[-\\w]+>"
 firstLineMatch: "^;\\s+(?:DoD Internet|MIT/Stanford) Host Table(?:$|\\s)"
-patterns: [include: "#main"]
+patterns: [
+	{include: "#swc"}
+	{include: "#main"}
+]
 
 repository:
 	main:
@@ -204,3 +209,131 @@ repository:
 			captures:
 				0: name: "brackethighlighter.square"
 		}]
+
+
+	# Hosts files downloaded from http://someonewhocares.org/hosts/,
+	# richly-commented and divided in demarcated sections using comments.
+	swc:
+		name:  "meta.swc.hosts"
+		begin: "\\A(?=# This hosts file is brought to you by Dan Pollock)"
+		end:   "(?=A)B"
+		patterns: [
+			name:  "meta.prologue.hosts"
+			begin: "\\G"
+			end:   "(?=^(?:#<(?!-)[-\\w]+>$|\\s*[^#\\s]))"
+			patterns: [include: "#swc-prologue"]
+
+			{include: "#swc-section"}
+			{include: "#swc-comment"}
+			{include: "#modern"}
+		]
+
+	# Override regular comment-matching in SWC
+	"swc-comment":
+		name:  "comment.line.number-sign.hosts"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.hosts"
+		patterns: [include: "#swc-comment-additions"]
+
+
+	# Additional stuff matched in SWC hosts file comments; shared with “#swc-prologue”
+	"swc-comment-additions":
+		patterns: [
+			{include: "etc#url"}
+			{include: "etc#emailUnquoted"}
+
+			# URLs without a protocol:// component
+			name: "constant.other.reference.link.underline.http.url.hosts"
+			match: "(?<=\\s)(?:adguard\\.com|\\w+\\.wiki[mp]edia\\.org(?:/[^/\\s]+)*+)\\b"
+		]
+
+
+	# Comment line in the SWC hosts file's preamble
+	"swc-prologue":
+		name:  "comment.line.number-sign.hosts"
+		begin: "^#"
+		end:   "$"
+		beginCaptures:
+			0: name: "comment.line.number-sign.hosts"
+		patterns: [{
+			contentName: "constant.numeric.date.last-updated.hosts"
+			begin: "\\G\\s+(Last updated(:))[ \\t]*"
+			end:   "(?=\\s*$)"
+			beginCaptures:
+				1: name: "variable.timestamp.last-updated.hosts"
+				2: patterns: [include: "etc#kolon"]
+		},{
+			# Highlight the lead-in for OS-specific installation instructions
+			name: "markup.bold.emphasis.strong.md.hosts"
+			match: """(?x)\\G\\s+For\\s+(?:
+				(?-x:Windows 9x and ME|NT, Win2K and XP|Windows \\d+ and (?:Vista|Windows \\d+)) |
+				(?-x:Linux, Unix, or OS X|OS/2|Android|BeOS|Netware|Macintosh \\(pre OS X\\))
+			)"""
+		},{
+			# Hosts file installation path
+			match: """(?x)
+				(?<=")(?:(~?(?:/[^/"]+)++)|((?:((%)(ETC|systemroot)(%))|C:\\\\)[^"]+))(?=") |
+				(?<="|\\s)(?:(System\\\\etc\\\\hosts)|((?-x)HD:System Folder:Preferences:Hosts))
+			"""
+			captures:
+				1: name: "constant.other.reference.link.pathname.posix.hosts"
+				2: name: "constant.other.reference.link.pathname.windows.hosts" # Or OS/2
+				3: name: "variable.other.readwrite.batchfile.${5:/downcase}.hosts"
+				4: name: "punctuation.definition.variable.begin.hosts"
+				6: name: "punctuation.definition.variable.end.hosts"
+				7: name: "constant.other.reference.link.pathname.netware.hosts"
+				8: name: "constant.other.reference.link.pathname.macos.hosts"
+		},{
+			# Quoted sh(1) command
+			name: "source.embedded.shell"
+			match: '(?<=")sudo [^"]+?(?=")'
+			captures:
+				0: patterns: [include: "source.shell"]
+		},{
+			# OS/S CONFIG.SYS command
+			name: "source.embedded.batchfile"
+			match: '(?<=")(SET)\\s+(USE_HOSTS_FIRST)(=)(\\d+)(?=")'
+			captures:
+				1: name: "keyword.command.batchfile"
+				2: name: "variable.other.readwrite.batchfile"
+				3: name: "keyword.operator.assignment.batchfile"
+				4: name: "constant.numeric.batchfile"
+		},{
+			name: "constant.other.reference.link.os2.hosts"
+			match: "\\bCONFIG\\.SYS\\b"
+		},{
+			# Hosts filename reminders
+			name:  "string.quoted.double.filename.hosts"
+			match: '(")(?:hosts(?:\\.txt)?|\\.txt)(")'
+			captures:
+				1: name: "punctuation.definition.string.begin.hosts"
+				2: name: "punctuation.definition.string.end.hosts"
+		}, include: "#swc-comment-additions"]
+
+
+	# <section>…</section> pairs demarcating regions of Hosts files
+	"swc-section":
+		name:  "meta.section.$4.hosts"
+		begin: "^(#)((<)((?!-)[-\\w]+)(>))[ \\t]*$"
+		end:   "^(#)((</)(\\4)(>))[ \\t]*$"
+		beginCaptures:
+			0: name: "comment.line.number-sign.hosts"
+			1: name: "punctuation.definition.comment.hosts"
+			2: name: "meta.tag.other.section.begin.hosts"
+			3: name: "punctuation.definition.tag.begin.hosts"
+			4: name: "entity.name.tag.section.hosts"
+			5: name: "punctuation.definition.tag.end.hosts"
+		endCaptures:
+			0: name: "comment.line.number-sign.hosts"
+			1: name: "punctuation.definition.comment.hosts"
+			2: name: "meta.tag.other.section.end.hosts"
+			3: name: "punctuation.definition.tag.begin.hosts"
+			4: name: "entity.name.tag.section.hosts"
+			5: name: "punctuation.definition.tag.end.hosts"
+		patterns: [
+			{include: "#swc-section"}
+			{include: "#swc-comment"}
+			{include: "#modern"}
+		]
