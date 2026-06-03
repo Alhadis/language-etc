@@ -2,7 +2,13 @@
 name: "Cookie Jar"
 scopeName: "text.cookie-jar"
 injectionSelector: "text.embedded.cookie-jar"
-fileTypes: ["fortune", "fortunes/*", "fortunes/off/*"]
+fileTypes: [
+	"fortune"
+	"fortune.txt"
+	"fortunes.txt"
+	"fortunes/*"
+	"fortunes/off/*"
+]
 patterns: [{
 	name:  "meta.database.cookie-jar"
 	begin: "\\A"
