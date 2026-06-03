@@ -130,6 +130,28 @@ repository:
 				{include: "etc#num"}
 			]
 		},{
+			# VLC option
+			name:  "comment.line.number-sign.directive.vlc-option.${4:/downcase}.m3u"
+			begin: "\\G(#)(EXTVLCOPT)(:)[ \\t]*([-\\w]+)(=)"
+			end:   "$"
+			beginCaptures:
+				1: name: "punctuation.definition.comment.m3u"
+				2: name: "keyword.operator.field.vlc-option.m3u"
+				3: patterns: [include: "etc#kolon"]
+				4: name: "variable.assignment.option.m3u"
+				5: patterns: [include: "etc#eql"]
+			patterns: [{
+				match: """(?xi) \\G\\s* (?:
+					([-+]?(?:\\d+(?:\\.\\d+)?|\\.\\d+)) |
+					(true|false|yes|no|on|off) |
+					(\\S.*?)
+				)(?=\\s*$)"""
+				captures:
+					1: patterns: [include: "etc#num"]
+					2: patterns: [include: "etc#boolish"]
+					3: name: "string.unquoted.vlc-option.m3u"
+			}]
+		},{
 			# Other non-HLS directives assumed to be freeform text
 			name:  "comment.line.number-sign.directive.${2:/downcase}.m3u"
 			begin: "\\G(#)(PLAYLIST|EXT(?:[A-Z]+))(?:(:)|(?=\\s*$))"
