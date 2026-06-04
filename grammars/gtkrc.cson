@@ -61,7 +61,7 @@ repository:
 					1: patterns: [include: "etc#kolon"]
 					2: name: "storage.modifier.priority.gtkrc"
 			}]
-		}]
+		}, include: "etc#comment"]
 
 
 	# Key binding and unbinding
@@ -88,7 +88,7 @@ repository:
 					{include: "#bindingAction"}
 					{include: "etc#comment"}
 				]
-			}]
+			}, include: "etc#comment"]
 		},{
 			# unbind "<keys>"
 			name:  "meta.unbinding.gtkrc"

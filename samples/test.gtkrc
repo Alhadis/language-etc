@@ -5,7 +5,11 @@ widget_class "*<GtkMenuItem>.GtkLabel" style "my-style"
 
 binding "name" {
 	bind "<control>c" {
-		copy ("text", 1, 2.0, bareword)
+		"copy" ("text", 1, 2.0, bareword) # Comment
+	}
+	bind "<control>c" # Comment
+	{
+		"copy" ("text", 1, 2.0, bareword)
 	}
 }
 
