@@ -171,7 +171,7 @@ repository:
 					|	proxy-basic
 					|	proxy-ca-native
 					|	proxy-digest
-					|	proxy-http2
+					|	proxy-http[23]
 					|	proxy-insecure
 					|	proxy-negotiate
 					|	proxy-ntlm

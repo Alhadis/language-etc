@@ -167,6 +167,7 @@
 	--proxy-digest		# no_parameter
 	--proxy-header	header/@file	# headers
 	--proxy-http2		# no_parameter
+	--proxy-http3		# no_parameter
 	--proxy-insecure		# no_parameter
 	--proxy-key-type	type	# string
 	--proxy-key	key	# string
