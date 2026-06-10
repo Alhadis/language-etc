@@ -49,6 +49,10 @@ module.exports = {
 		);
 		
 		this.whenLoaded().then(() => {
+			// Deactivate conflicting grammars from other package(s) to avoid user confusion
+			const oldGrammar = atom.grammars.grammarForId("source.git-config");
+			oldGrammar && oldGrammar.deactivate();
+			
 			this.patchGrammarPathMatching();
 			
 			// Disambiguate conflicting file-extensions
