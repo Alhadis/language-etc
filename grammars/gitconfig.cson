@@ -6,7 +6,10 @@ fileTypes: [
 	"gitconfig"
 	"gitmodules"
 	"lfsconfig"
+	"tgitconfig"
 ]
+limitLineLength: no
+maxTokensPerLine: 2048
 patterns: [include: "#main"]
 firstLineMatch: """(?x)
 
@@ -25,6 +28,13 @@ firstLineMatch: """(?x)
 	(?=$|\\s|:)
 """
 injections:
+	"L:meta.bug-matcher.gitconfig string.regexp":
+		patterns: [{
+			name: "punctuation.definition.escape.backslash.gitconfig"
+			match: "\\\\(?=\\\\)"
+			captures:
+				0: name: "sublimelinter.gutter-mark"
+		}]
 	"L:meta.alias.gitconfig source.embedded.shell,
 	 L:meta.command.gitconfig - string.quoted":
 		patterns: [include: "#escapedNewline"]
@@ -41,9 +51,11 @@ repository:
 	main:
 		patterns: [
 			{include: "#comments"}
+			{include: "#bugtraqSection"}
 			{include: "#includeSection"}
 			{include: "#aliasSection"}
 			{include: "#diffSection"}
+			{include: "#hookSection"}
 			{include: "#urlSection"}
 			{include: "#section"}
 		]
@@ -160,6 +172,116 @@ repository:
 			{include: "#comments"}
 			{include: "#variables"}
 		]
+
+
+	# TortoiseGit-specific “[bugtraq]” sections
+	bugtraqSection:
+		name:  "meta.bugtraq.section.gitconfig"
+		begin: "(?:^|\\G)\\s*(?:(\\\[)\\s*(bugtraq)\\s*(\\]))"
+		end:   "(?!\\G)(?=^\\s*\\[)"
+		beginCaptures:
+			0: name: "meta.section.header.gitconfig"
+			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
+			2: name: "entity.section.name.gitconfig"
+			3: name: "punctuation.definition.bracket.square.end.gitconfig"
+		patterns: [
+			{include: "#bugtraqLog"}
+			{include: "#bugtraqUUID"}
+			{include: "#bugtraqMessage"}
+			{include: "#bugtraqURL"}
+			{include: "#comments"}
+			{include: "#variables"}
+		]
+
+	# Quoted regular expression string: logregex = "…"
+	bugtraqLog:
+		name:  "meta.bug-matcher.gitconfig"
+		begin: "(?i)\\b(logregex)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#|;))"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			name:  "string.regexp.gitconfig"
+			begin: "\\G(\"|')"
+			end:   "\\1"
+			beginCaptures: 0: name: "punctuation.definition.regexp.begin.gitconfig"
+			endCaptures:   0: name: "punctuation.definition.regexp.end.gitconfig"
+			patterns: [
+				{include: "source.regexp"}
+				{include: "#escapes"}
+			]
+		}, include: "#variableInnards"]
+
+	# bugtraqMessage = "Issue: %BUGID%"
+	bugtraqMessage:
+		name:  "meta.log-message.gitconfig"
+		begin: "(?i)\\b(message)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#|;))"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			# Double-quoted message string
+			name:  "string.quoted.double.message.gitconfig"
+			begin: '\\G"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.gitconfig"
+			endCaptures:   0: name: "punctuation.definition.string.end.gitconfig"
+			patterns: [
+				{include: "#bugtraqPlaceholder"}
+				{include: "#escapes"}
+			]
+		},{
+			# Single-quoted message string
+			name:  "string.quoted.single.message.gitconfig"
+			begin: "\\G'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.gitconfig"
+			endCaptures:   0: name: "punctuation.definition.string.end.gitconfig"
+			patterns: [
+				{include: "#bugtraqPlaceholder"}
+				{include: "#escapes"}
+			]
+		}, include: "#variableInnards"]
+
+	# The literal token “%BUGID%” that gets replaced with an bug-tracker issue number
+	bugtraqPlaceholder:
+		name: "constant.other.placeholder.bugid.gitconfig"
+		match: "%BUGID%"
+
+	# URL of bug-tracker tool: https://tortoisegit.org/issue/%BUGID%
+	bugtraqURL:
+		name:  "meta.bug-tracker.gitconfig"
+		begin: "(?i)\\b(url)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#|;))"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			# Lazily assume every value assigned to “bugtraq.url” is URL-ish
+			name: "string.other.link.gitconfig"
+			match: "\\G\\S+"
+			captures:
+				0: patterns: [include: "#bugtraqPlaceholder"]
+		}]
+
+	# provideruuid = {UUID}
+	bugtraqUUID:
+		name:  "meta.provider-uuid.gitconfig"
+		begin: "(?i)\\b(provideruuid(?:64)?)\\s*(=)[ \\t]*"
+		end:   "(?=\\s*(?:$|#|;))"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			name:  "meta.uuid.gitconfig"
+			match: "(?i)\\G({)([0-9A-F](?:-?[0-9A-F]){31})(})"
+			captures:
+				1: patterns: [include: "etc#bracket"]
+				2: patterns: [include: "etc#dash", {include: "etc#hexNoSign"}]
+				3: patterns: [include: "etc#bracket"]
+		}, include: "#variableInnards"]
 	
 	
 	# Variable containing an external command
@@ -317,6 +439,58 @@ repository:
 		match: "(\\\\)$\\s*"
 		captures:
 			1: name: "punctuation.definition.escape.backslash.gitconfig"
+
+	# CMD.EXE command executed as a hook
+	hookCmd:
+		name:  "meta.command.hook.gitconfig"
+		begin: "(?:^|(?<=\\])\\G)\\s*(cmdline)\\s*(=)"
+		end:   "(?<!\\\\)$|(?=#|;)"
+		beginCaptures:
+			1: name: "variable.parameter.assignment.gitconfig"
+			2: name: "keyword.operator.assignment.key-value.gitconfig"
+		patterns: [{
+			# Skip past blank lines
+			begin: "\\G\\s*(?=\\\\$)"
+			end:   "(?=\\s*(?!\\\\$)(?=\\S))"
+			patterns: [include: "#escapedNewline"]
+		},{
+			# Beginning of command body
+			begin: "\\s*(?!\\\\$)(?=\\S)"
+			end:   "(?!\\G)"
+			contentName: "source.embedded.batchfile"
+			patterns: [include: "source.batchfile"]
+		}]
+
+	# [hook "<name>"] — Block which (presumably) defines githooks(5) in TortoiseGit
+	hookSection:
+		name:  "meta.hook.section.gitconfig"
+		begin: """(?xi)
+			(?:^|\\G)
+			\\s* (\\\[) #1
+			\\s* (hook) #2
+			(?:
+				\\s+ (") ((?:[^\\\\"\\r\\n]|\\\\.)*+) (") #3-5
+				|
+				(\\.) ([-A-Za-z0-9]+) #6-7
+			)
+			\\s* (\\]) #8
+		"""
+		end: "(?!\\G)(?=^\\s*\\[)"
+		beginCaptures:
+			0: name: "meta.section.header.gitconfig"
+			1: name: "punctuation.definition.bracket.square.begin.gitconfig"
+			2: name: "entity.section.name.gitconfig"
+			3: name: "punctuation.definition.subsection.begin.gitconfig"
+			4: name: "entity.subsection.name.gitconfig", patterns: [include: "#sectionEscapes"]
+			5: name: "punctuation.definition.subsection.end.gitconfig"
+			6: patterns: [include: "#dot"]
+			7: name: "entity.subsection.name.deprecated-syntax.gitconfig"
+			8: name: "punctuation.definition.bracket.square.end.gitconfig"
+		patterns: [
+			{include: "#hookCmd"}
+			{include: "#comments"}
+			{include: "#variables"}
+		]
 
 	# [include] and [includeIf "…"] blocks
 	includeSection:
@@ -540,7 +714,7 @@ repository:
 			(?:^|\\G) \\s*
 			(\\\[) #1
 			\\s*
-			(url|https?|core\.(?:git)?proxy) #2
+			(url|https?|core\\.(?:git)?proxy) #2
 			(?:
 				\\s*
 				(") #3
