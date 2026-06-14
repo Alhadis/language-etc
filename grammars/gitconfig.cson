@@ -3,6 +3,7 @@ scopeName: "source.gitconfig"
 fileTypes: [
 	".git/config"
 	".config/git/config"
+	"config.worktree"
 	"gitconfig"
 	"gitmodules"
 	"lfsconfig"
