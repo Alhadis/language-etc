@@ -99,6 +99,7 @@
 		commentStart: "; "
 
 ".source.ini.npmrc,
+ .source.rarlist,
  .source.sexp":
 	editor:
 		commentStart: "; "

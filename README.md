@@ -84,6 +84,7 @@ Supported formats
 * [x] [`pkg-config` manifests](https://freedesktop.org/wiki/Software/pkg-config/)
 * [x] [Public Suffix List](https://publicsuffix.org/)
 * [ ] [`pf.os`](http://man.openbsd.org/pf.os)
+* [x] [RAR files list](https://documentation.help/WinRAR/HELPRARFILESLST.htm)
 * [x] [recfiles](https://www.gnu.org/software/recutils/manual/recutils.html#The-Rec-Format)
 * [x] [Record jars](http://www.catb.org/esr/writings/taoup/html/ch05s02.html#id2906931)
 * [ ] [Sandbox profiles](https://github.com/malus-security/sandblaster "/usr/share/sandbox/*.sb")

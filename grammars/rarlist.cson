@@ -1,0 +1,27 @@
+name: "RAR Solid Archives Ordering"
+scopeName: "source.rarlist"
+fileTypes: ["rarfiles.lst"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [
+			{include: "#comment"}
+			{include: "#variable"}
+			{include: "source.gitignore#pattern"}
+		]
+
+	# Semicolon-prefixed comments
+	comment:
+		name:  "comment.line.semicolon.rarlist"
+		begin: "^;"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.rarlist"
+
+	# “Special entries” (currently only $default)
+	variable:
+		name: "keyword.control.default-position.rarlist"
+		match: "^(\\$)default(?=\\s*$)"
+		captures:
+			1: name: "punctuation.definition.keyword.rarlist"
