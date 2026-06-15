@@ -1,0 +1,78 @@
+%rec: Text
+%rec: FSD_Entry /path/to/file.rec
+%rec: Department http://www.myorg.com/Org.rec
+%doc: Documentation string goes here.
+%type: Year int
+%mandatory: Author Year
+%typedef: Interrupt_t range -0777 MAX
+%typedef: Interrupt_t range 15
+%typedef: Address_t range 0x0000 -0xFFFF
+%typedef: Address_t size 25
+%typedef: Address_t size 0x18
+%typedef: Id_t regexp /[0-9]{9}[a-zA-Z]/
+%typedef: Path_t regexp |(/[^/]/?)+|
+%typedef: Status_t enum NEW STARTED DONE CLOSED
+%typedef: Day_t enum Monday Tuesday Wednesday Thursday Friday
++                    Saturday Sunday
+%typedef: TaskStatus_t enum
++ NEW         (The task was just created)
++ IN_PROGRESS (Task started)
++ CLOSED      (Task closed)
+
+Author: Doug
++ McIlroy
+Year: 1964
+Note: The Origin of Unix Pipes
+
+Title: Unix Text Processing
+Author: Dale Dougherty
+Author: Tim O'Reilly
+Year: 1987
+Publisher: Hayden Books
+LongLine: This is a quite long value \
+comprising a single unique logical line \
+split in several physical lines.
+
+Author: William Shakespeare
+Title: Hamlet
+Year: 1599
+Year: 1600
+Year: 1601
+
+
+%rec: Person
+%type: Dob date
+%type: Abode rec Residence
+%typedef: Maintainer_t rec Hacker
+%type: PIN regexp /^[0-9]{4}$/
+%confidential: PIN
+
+Name: Alfred Nebel
+Dob: 20 April 2010
+Email: alf@example.com
+Abode: 42AbbeterWay
+PIN: encrypted-F00BAR123\
+789BAZ
+
+%rec: Day
+%size: 7
+%type: Name enum
++ Monday Tuesday Wednesday Thursday Friday
++ Saturday Sunday
+%doc: There should be exactly 7 days.
+
+%rec: Item
+%key: Id
+%size: <= 100
+%doc: We have at most 100 different articles.
+
+%rec: Task
+%type: Start,End date
+%constraint: Start << End
+%constraint: ((Email ~ "foomail\.com") || (Age <= 18)) && !#Fixed
+%constraint: Email[0] ~ "\\.org"
+%constraint: Status = 'CLOSED' => #End
+%constraint: ternary ? "Yes" : "No"
+%constraint: ternary
++	? "Yes"
++	: "No"

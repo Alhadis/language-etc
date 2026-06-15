@@ -152,7 +152,8 @@
 		tabType: "hard"
 
 ".text.cachedir,
- .text.codeowners":
+ .text.codeowners,
+ .text.recfile":
 	editor:
 		commentStart: "# "
 
