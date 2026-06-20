@@ -6,7 +6,6 @@ fileTypes: [
 	"config.worktree"
 	"gitconfig"
 	"gitmodules"
-	"gitreview"
 	"lfsconfig"
 	"tgitconfig"
 ]
