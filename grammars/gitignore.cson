@@ -21,6 +21,8 @@ fileTypes: [
 	"eleventyignore"
 	"eslint-ignore"
 	"eslintignore"
+	"fd/ignore"
+	"fdignore"
 	"ignore"
 	"markdownlintignore"
 	"nodemonignore"
