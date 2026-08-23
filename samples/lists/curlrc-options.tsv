@@ -88,6 +88,10 @@
 	--http2		# no_parameter
 	--http3-only		# no_parameter
 	--http3		# no_parameter
+	--httpsig-algo	algorithm	# string
+	--httpsig-headers	components	# string
+	--httpsig-key	@key/file	# string
+	--httpsig-keyid	id	# string
 	--ignore-content-length		# no_parameter
 -i 	--include		# no_parameter
 -k 	--insecure		# no_parameter

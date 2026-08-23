@@ -83,6 +83,25 @@ repository:
 			4: name: "punctuation.terminator.statement.semicolon.curlrc"
 
 
+	# HTTP signature key
+	hexKey:
+		patterns: [{
+			# @unquoted.filename
+			match: '(?:^|\\G)\\s*(@)((?:[^"\\s\\\\]|\\\\.)++)'
+			captures:
+				1: name: "keyword.operator.source-modifier.curlrc"
+				2: name: "string.unquoted.filename.curlrc"
+		},{
+			# "@quoted.filename"
+			match: '(?:^|\\G)\\s*(")(@)((?:[^\\\\"]|\\\\.)++)(")'
+			captures:
+				1: name: "punctuation.definition.string.begin.curlrc"
+				2: name: "keyword.operator.source-modifier.curlrc"
+				3: name: "string.quoted.double.filename.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+		}, include: "etc#hexNoSign"]
+
+
 	# --long-options
 	longOptions:
 		patterns: [{
@@ -287,6 +306,29 @@ repository:
 				3: patterns: [{include: "#header"}, {include: "etc#bareword"}]
 				5: patterns: [{include: "#header"}, {include: "etc#bareword"}]
 		},{
+			# HTTP message signature key
+			name:  "meta.option.long.curlrc"
+			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
+				(?!\\s*--\\w[-\\w]*\\s*[=:]) \\s*
+				(
+					(--)?
+					(?<optlist_hexkey>
+						httpsig-key
+					)
+				)
+				(?:\\s*(=|:)|(?=\\s|$))"""
+			end: '$|(?:((")((?:[^"\\\\]|\\\\.)*)(?:(")|(?=$)))|([^\\s]+))'
+			beginCaptures:
+				1: name: "entity.long.option.name.curlrc"
+				2: name: "punctuation.definition.dash.long.option.curlrc"
+				4: patterns: [include: "#separators"]
+			endCaptures:
+				1: name: "string.quoted.double.curlrc"
+				2: name: "punctuation.definition.string.begin.curlrc"
+				4: name: "punctuation.definition.string.end.curlrc"
+				3: patterns: [include: "#hexKey"]
+				5: patterns: [include: "#hexKey"]
+		},{
 			# Form-data
 			name:  "meta.option.long.curlrc"
 			begin: """(?x) (?:\\G|^|(?<=[ \\t]))
@@ -487,6 +529,9 @@ repository:
 					|	help
 					|	hostpubsha256
 					|	hsts
+					|	httpsig-algo
+					|	httpsig-headers
+					|	httpsig-keyid
 					|	interface
 					|	json
 					|	key-type
