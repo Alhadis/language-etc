@@ -11,9 +11,11 @@ fileTypes: [
 	"removed-files"
 	
 	# Mutually-compatible formats
+	"agignore"
 	"alexignore"
 	"atomignore"
 	"babelignore"
+	"bazelignore"
 	"ckignore"
 	"coffeelintignore"
 	"dockerignore"
