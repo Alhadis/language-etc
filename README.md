@@ -81,6 +81,7 @@ Supported formats
 * [x] [NWScript](https://en.wikipedia.org/wiki/NWScript)
 * [x] [Object Data Instance Notation](https://git.io/JvetL)
 * [x] [OpenBSD package manifests](https://man.openbsd.org/package.5)
+* [x] [Paper-size specifications](https://github.com/rrthomas/libpaper)
 * [x] [`pkg-config` manifests](https://freedesktop.org/wiki/Software/pkg-config/)
 * [x] [Public Suffix List](https://publicsuffix.org/)
 * [ ] [`pf.os`](http://man.openbsd.org/pf.os)

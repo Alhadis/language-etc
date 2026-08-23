@@ -1,0 +1,141 @@
+# Headerless CSV containing paper-size definitions used by `libpaper`,
+# or a file containing a named papersize to use as libpaper's default.
+# See papersize(5) and paperspecs(5) for format details.
+name: "Paper Sizes"
+scopeName: "source.paperspecs"
+fileTypes: ["paperspecs", "papersize"]
+patterns: [include: "#main"]
+
+repository:
+	main:
+		patterns: [{
+			# The paperspecs(5) format doesn't support comments or blank lines, so treat
+			# any initial, non-blank line as either a paper-size name, or a comment line
+			# followed by such (to support `/etc/papersize` configs).
+			name:  "meta.config.size-name.paperspecs"
+			begin: """(?x)\\A(?!
+				# Ignore leading whitespace
+				\\s*
+
+				# Ignore comments
+				(?!\\#)
+
+				(?:
+					# Modern CSV-based paperspecs(5) format
+					(?:(?=\\S)[^,]+)?,
+					|
+
+					# Legacy paperspecs(5) format
+					[^\\s,]+
+					(?:\\s+(?:\\d+(?:\\.\\d+)?|\\.\\d+)){2}
+					\\s+ [A-Za-z]+
+					[ \\t]* $
+				)
+			)"""
+			end: "^\\s*(?:([^#\\s,][^,]*)|([^\\s#].*?))(?<!\\s)[ \\t]*$"
+			endCaptures:
+				1: name: "entity.name.tag.paper-size.paperspecs"
+				2: name: "invalid.illegal.syntax.paperspecs"
+			patterns: [include: "etc#comment"]
+		},{
+			# For anything else, assume the file contains paper-size specifications,
+			# even if the first line isn't valid.
+			name:  "meta.config.size-list.paperspecs"
+			begin: "\\A"
+			end:   "(?=A)B"
+			patterns: [include: "#spec"]
+		}]
+
+
+	# Field separator in page-size specifications
+	comma:
+		name: "keyword.operator.separator.comma.paperspecs"
+		match: "(,)"
+		captures:
+			0: name: "punctuation.separator.delimiter.comma.paperspecs"
+			1: name: "sublimelinter.gutter-mark"
+
+
+	# Vertical paper length
+	pageHeight:
+		patterns: [{
+			name: "constant.numeric.page-height.paperspecs"
+			match: "(?:^|\\G)(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?=\\s*(?:$|,))"
+		},{
+			# Invalid number
+			name: "invalid.illegal.syntax.bad-number.page-height.paperspecs"
+			match: "(?:^|\\G)[^\\s,][^,]*(?=\\s*(?:$|,))"
+		}]
+
+
+	# Horizontal paper length
+	pageWidth:
+		patterns: [{
+			name: "constant.numeric.page-width.paperspecs"
+			match: "(?:^|\\G)(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?=\\s*(?:$|,))"
+		},{
+			# Invalid number
+			name: "invalid.illegal.syntax.bad-number.page-width.paperspecs"
+			match: "(?:^|\\G)[^\\s,][^,]*(?=\\s*(?:$|,))"
+		}]
+
+
+	# Individual paper-size specifications
+	spec:
+		patterns: [
+			{include: "#specCSV"}
+			{include: "#specLegacy"}
+		]
+
+
+	# Comma-separated values that uses a restrictive subset of RFC 4180
+	specCSV:
+		name: "meta.table.record.paperspecs"
+		match: """(?x)^
+			\\s* ([^\\s,][^,]*) (?<!\\s) \\s*    (,) # Name
+			\\s* ([^\\s,]+)     (?<!\\s) \\s*    (,) # Page width
+			\\s* ([^\\s,]+)     (?<!\\s) \\s*    (,) # Page height
+			\\s* ([^\\s,]+)     (?<!\\s) [ \\t]*  $  # Unit
+		"""
+		captures:
+			1: name: "entity.name.tag.paper-size.paperspecs"
+			2: patterns: [include: "#comma"]
+			3: patterns: [include: "#pageWidth"]
+			4: patterns: [include: "#comma"]
+			5: patterns: [include: "#pageHeight"]
+			6: patterns: [include: "#comma"]
+			7: patterns: [include: "#units"]
+
+
+	# Space-separated paperspecs(5) format removed in rrthomas/libpaper@32b0fd1
+	specLegacy:
+		name: "meta.table.record.legacy.paperspecs"
+		match: """(?ix)^
+			\\s* (\\S+)                     # Name
+			\\s+ (\\d+(?:\\.\\d+)?|\\.\\d+) # Page width
+			\\s+ (\\d+(?:\\.\\d+)?|\\.\\d+) # Page height
+			\\s+ ([a-z]+)                   # Unit
+			(?=\\s*$)
+		"""
+		captures:
+			1: name: "entity.name.tag.paper-size.paperspecs"
+			2: patterns: [include: "#pageWidth"]
+			3: patterns: [include: "#pageHeight"]
+			4: patterns: [include: "#units"]
+
+
+	# Unit of measurement that a paper-size's dimensions are expressed in
+	units:
+		patterns: [{
+			# Supported measurement units
+			name: "keyword.other.unit.${1:/downcase}.paperspecs"
+			match: "(?i)(?:^|\\G)(pt|mm|in)(?=\\s*(?:$|,))"
+		},{
+			# Units formerly supported until rrthomas/libpaper@6fed55e
+			name: "invalid.deprecated.unit.legacy.${1:/downcase}.paperspecs"
+			match: "(?i)(?:^|\\G)(cm|ft|m)(?=\\s*(?:$|,))"
+		},{
+			# Unrecognised unit
+			name: "invalid.illegal.syntax.unknown-unit.paperspecs"
+			match: "[^\\s].*?"
+		}]

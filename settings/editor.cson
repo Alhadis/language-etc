@@ -104,6 +104,13 @@
 	editor:
 		commentStart: "; "
 
+".source.paperspecs":
+	core:
+		fileEncoding: "iso88591"
+	editor:
+		commentStart: "# "
+		nonWordCharacters: ","
+
 ".source.sfv":
 	editor:
 		commentStart: "; "

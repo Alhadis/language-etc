@@ -12,6 +12,10 @@ trim_trailing_whitespace = false
 [samples/mime.types*]
 tab_width = 8
 
+[paper{specs,size}]
+charset = latin-1
+trim_trailing_whitespace = true
+
 [public_suffix_list.dat]
 trim_trailing_whitespace = true
 
