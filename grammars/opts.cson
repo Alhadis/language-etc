@@ -3,6 +3,7 @@ scopeName: "source.opts"
 fileTypes: [
 	"ackrc"
 	"opts"
+	"ert-runner"
 	"youtube-dl.conf",       "yt-dlp.conf"
 	"youtube-dl/config",     "yt-dlp/config"
 	"youtube-dl/config.txt", "yt-dlp/config.txt"
