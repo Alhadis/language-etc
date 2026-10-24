@@ -17,6 +17,7 @@ fileTypes: [
 	"babelignore"
 	"bazelignore"
 	"ckignore"
+	"clang-format-ignore"
 	"coffeelintignore"
 	"dockerignore"
 	"easignore"
